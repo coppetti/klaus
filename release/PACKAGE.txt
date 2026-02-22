@@ -1,0 +1,20 @@
+IDE AGENT WIZARD v1.0.0-RC1
+===========================
+Release Candidate 1
+
+CONTENTS:
+- setup.sh / reset.sh (launchers)
+- bot/ (Telegram bot)
+- cli/ (CLI tools)  
+- core/ (main code)
+- docker/ (Docker config)
+- docs/ (documentation)
+- scripts/ (setup wizard)
+- templates/ (7 templates)
+
+INSTALL:
+1. Extract
+2. ./setup.sh
+3. Done!
+
+DOCS: docs/README.md
