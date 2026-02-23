@@ -494,7 +494,7 @@ async def get_chat_page():
                     <!-- Provider -->
                     <div class="mb-3">
                         <label class="block text-xs text-gray-500 mb-1">Provider</label>
-                        <select id="setting-provider" class="input-field text-sm" onchange="updateSettings()">
+                        <select id="setting-provider" class="input-field text-sm">
                             <option value="kimi">Kimi (Moonshot)</option>
                             <option value="openrouter">OpenRouter</option>
                             <option value="anthropic">Anthropic (Claude)</option>
@@ -505,7 +505,7 @@ async def get_chat_page():
                     <!-- Model -->
                     <div class="mb-3">
                         <label class="block text-xs text-gray-500 mb-1">Model</label>
-                        <select id="setting-model" class="input-field text-sm" onchange="updateSettings()">
+                        <select id="setting-model" class="input-field text-sm">
                             <!-- Models populated by JS -->
                         </select>
                     </div>
@@ -892,7 +892,45 @@ async def get_chat_page():
             const modelSelect = document.getElementById('setting-model');
             const models = providerModels[provider] || [];
             
+            if (models.length === 0) {{
+                modelSelect.innerHTML = '<option value="">No models available</option>';
+                return;
+            }}
+            
             modelSelect.innerHTML = models.map(m => `<option value="${{m}}">${{m}}</option>`).join('');
+            
+            // Select first model as default if current not in list
+            const currentModel = currentSettings.model;
+            if (models.includes(currentModel)) {{
+                modelSelect.value = currentModel;
+            }} else {{
+                modelSelect.value = models[0];
+                // Update settings with new default model
+                currentSettings.model = models[0];
+            }}
+        }}
+        
+        // Handle provider change - update models and save
+        function setupProviderListener() {{
+            const providerSelect = document.getElementById('setting-provider');
+            if (providerSelect) {{
+                providerSelect.addEventListener('change', () => {{
+                    console.log('Provider changed to:', providerSelect.value);
+                    updateModelOptions();
+                    updateSettings();
+                }});
+            }}
+        }}
+        
+        // Handle model change - save settings
+        function setupModelListener() {{
+            const modelSelect = document.getElementById('setting-model');
+            if (modelSelect) {{
+                modelSelect.addEventListener('change', () => {{
+                    console.log('Model changed to:', modelSelect.value);
+                    updateSettings();
+                }});
+            }}
         }}
         
         function updateTempDisplay() {{
@@ -1089,6 +1127,9 @@ async def get_chat_page():
         
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {{
+            console.log('DOM loaded, initializing...');
+            setupProviderListener();
+            setupModelListener();
             loadSettings();
             loadSessions();
         }});
