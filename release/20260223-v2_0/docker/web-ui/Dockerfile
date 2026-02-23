@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir \
     pyyaml \
     anthropic \
     openai \
-    pydantic
+    pydantic \
+    python-multipart
 
 # Try to install kuzu (graph database) - optional
 RUN pip install --no-cache-dir kuzu || echo "Kuzu installation skipped (optional)"
