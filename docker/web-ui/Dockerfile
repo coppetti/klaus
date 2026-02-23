@@ -8,7 +8,10 @@ RUN pip install --no-cache-dir \
     fastapi \
     uvicorn \
     httpx \
-    pyyaml
+    pyyaml \
+    anthropic \
+    openai \
+    pydantic
 
 # Copy app
 COPY app.py /app/

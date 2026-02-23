@@ -1101,7 +1101,9 @@ async def get_chat_page():
 
 @app.post("/api/chat")
 async def chat(request: Request):
-    """Proxy chat request to Kimi Agent."""
+    """Process chat request using the configured provider."""
+    global web_messages, current_session, settings
+    
     try:
         body = await request.json()
         user_message = body.get("message", "")
@@ -1109,32 +1111,76 @@ async def chat(request: Request):
         if not user_message:
             return JSONResponse({"error": "Empty message"}, status_code=400)
         
-        # Forward to Kimi Agent (endpoint /chat)
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(
-                f"{KIMI_AGENT_URL}/chat",
-                json={
-                    "user_id": "web_user",
-                    "message": user_message,
-                    "context": {}
-                }
+        # Add user message to session
+        web_messages.append({"sender": "user", "text": user_message, "timestamp": datetime.now().isoformat()})
+        
+        # Build messages for the provider
+        messages = []
+        
+        # Add system context if available
+        config = load_config()
+        agent_name = config.get("agent", {}).get("name", "Assistant")
+        system_msg = f"You are {agent_name}, a helpful AI assistant."
+        
+        # Try to load SOUL.md for personality
+        soul_path = Path("/app/workspace/SOUL.md")
+        if not soul_path.exists():
+            soul_path = Path("./workspace/SOUL.md")
+        if soul_path.exists():
+            try:
+                soul_content = soul_path.read_text()
+                system_msg = f"{soul_content}\n\nYou are {agent_name}."
+            except:
+                pass
+        
+        messages.append({"role": "system", "content": system_msg})
+        
+        # Add conversation history (last 10 messages)
+        for msg in web_messages[-10:]:
+            role = "user" if msg["sender"] == "user" else "assistant"
+            messages.append({"role": role, "content": msg["text"]})
+        
+        # Get response from the configured provider
+        try:
+            assistant_message = await chat_with_provider(
+                provider=settings.provider,
+                model=settings.model,
+                messages=messages,
+                temperature=settings.temperature,
+                max_tokens=settings.max_tokens
             )
-            
-            if response.status_code == 200:
-                data = response.json()
-                assistant_message = data.get("response", "")
-                return JSONResponse({"response": assistant_message})
-            else:
-                return JSONResponse(
-                    {"error": f"Kimi Agent error: {response.status_code}"},
-                    status_code=502
-                )
+        except Exception as provider_error:
+            # Fallback to Kimi Agent if direct provider fails
+            try:
+                async with httpx.AsyncClient(timeout=60.0) as client:
+                    response = await client.post(
+                        f"{KIMI_AGENT_URL}/chat",
+                        json={
+                            "user_id": "web_user",
+                            "message": user_message,
+                            "context": {}
+                        }
+                    )
+                    if response.status_code == 200:
+                        data = response.json()
+                        assistant_message = data.get("response", "")
+                    else:
+                        raise Exception(f"Kimi Agent error: {response.status_code}")
+            except:
+                raise provider_error
+        
+        # Add assistant message to session
+        web_messages.append({"sender": "assistant", "text": assistant_message, "timestamp": datetime.now().isoformat()})
+        
+        # Auto-save session if enabled
+        if settings.auto_save and current_session:
+            current_session.messages = web_messages
+            current_session.message_count = len(web_messages)
+            current_session.updated_at = datetime.now().isoformat()
+            save_session(current_session)
+        
+        return JSONResponse({"response": assistant_message})
                 
-    except httpx.ConnectError:
-        return JSONResponse(
-            {"error": "Cannot connect to Kimi Agent. Is it running?"},
-            status_code=503
-        )
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
@@ -1380,6 +1426,118 @@ def extract_important_facts(messages):
 
 
 # ============================================================================
+# PROVIDERS SETUP
+# ============================================================================
+
+# Provider clients
+provider_clients = {}
+
+def get_kimi_client():
+    """Initialize Kimi client."""
+    api_key = os.getenv("KIMI_API_KEY", "")
+    if not api_key:
+        return None
+    try:
+        from anthropic import Anthropic
+        return Anthropic(api_key=api_key, base_url="https://api.kimi.com/coding")
+    except:
+        return None
+
+def get_anthropic_client():
+    """Initialize Anthropic client."""
+    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return None
+    try:
+        from anthropic import Anthropic
+        return Anthropic(api_key=api_key)
+    except:
+        return None
+
+def get_openai_client():
+    """Initialize OpenAI client."""
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    if not api_key:
+        return None
+    try:
+        from openai import OpenAI
+        return OpenAI(api_key=api_key)
+    except:
+        return None
+
+def get_openrouter_client():
+    """Initialize OpenRouter client."""
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+    if not api_key:
+        return None
+    try:
+        from openai import OpenAI
+        return OpenAI(
+            api_key=api_key,
+            base_url="https://openrouter.ai/api/v1"
+        )
+    except:
+        return None
+
+async def chat_with_provider(provider: str, model: str, messages: list, temperature: float, max_tokens: int):
+    """Send chat completion request to the selected provider."""
+    
+    if provider == "kimi":
+        client = get_kimi_client()
+        if not client:
+            raise Exception("Kimi API key not configured")
+        
+        response = client.messages.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        return response.content[0].text
+    
+    elif provider == "anthropic":
+        client = get_anthropic_client()
+        if not client:
+            raise Exception("Anthropic API key not configured")
+        
+        response = client.messages.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        return response.content[0].text
+    
+    elif provider == "openai":
+        client = get_openai_client()
+        if not client:
+            raise Exception("OpenAI API key not configured")
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        return response.choices[0].message.content
+    
+    elif provider == "openrouter":
+        client = get_openrouter_client()
+        if not client:
+            raise Exception("OpenRouter API key not configured")
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        return response.choices[0].message.content
+    
+    else:
+        raise Exception(f"Unknown provider: {provider}")
+
+# ============================================================================
 # SETTINGS & SESSIONS API
 # ============================================================================
 
@@ -1525,6 +1683,16 @@ async def get_current_session():
 # HEALTH CHECK
 # ============================================================================
 
+@app.get("/api/providers/status")
+async def providers_status():
+    """Check which providers are configured."""
+    return {
+        "kimi": {"available": os.getenv("KIMI_API_KEY") is not None, "configured_model": settings.model if settings.provider == "kimi" else None},
+        "anthropic": {"available": os.getenv("ANTHROPIC_API_KEY") is not None},
+        "openai": {"available": os.getenv("OPENAI_API_KEY") is not None},
+        "openrouter": {"available": os.getenv("OPENROUTER_API_KEY") is not None}
+    }
+
 @app.get("/health")
 async def health():
     """Health check endpoint."""
@@ -1539,12 +1707,18 @@ async def health():
     except:
         kimi_status = "offline"
     
+    # Check providers
+    providers = await providers_status()
+    
     return {
         "status": "healthy",
         "kimi_agent_url": KIMI_AGENT_URL,
         "kimi_agent_status": kimi_status,
         "web_ui_version": "2.1.0",
-        "features": ["settings", "sessions", "hybrid_memory"]
+        "features": ["settings", "sessions", "hybrid_memory", "multi_provider"],
+        "current_provider": settings.provider,
+        "current_model": settings.model,
+        "providers_available": {k: v["available"] for k, v in providers.items()}
     }
 
 
