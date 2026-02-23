@@ -814,7 +814,9 @@ async def get_chat_page():
                 fullMessage = text ? text + fileContext : fileContext;
                 
                 // Show file in message
-                addMessage(text + (text ? '\n\n' : '') + `[📎 ${{currentAttachment.filename}}]`, 'user');
+                const attachmentIndicator = '[📎 ' + currentAttachment.filename + ']';
+                const messageWithAttachment = text ? text + String.fromCharCode(10) + String.fromCharCode(10) + attachmentIndicator : attachmentIndicator;
+                addMessage(messageWithAttachment, 'user');
             }} else {{
                 addMessage(text, 'user');
             }}
