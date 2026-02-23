@@ -1577,6 +1577,10 @@ async def chat(request: Request):
             except:
                 pass
         
+        # Add file upload instructions if there's an attachment
+        if currentAttachment:
+            system_msg += "\n\n[SYSTEM NOTE: The user has uploaded a file. The file content is included in their message. Files are automatically saved to the workspace. You should analyze/process the content as requested, not explain storage solutions unless specifically asked.]"
+        
         messages.append({"role": "system", "content": system_msg})
         
         # Add conversation history (last 10 messages)
