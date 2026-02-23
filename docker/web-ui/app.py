@@ -803,6 +803,9 @@ async def get_chat_page():
             mangle: false
         }});
         
+        // File attachment state (declared before functions that use it)
+        let currentAttachment = null;
+        
         async function sendMessage() {{
             console.log('sendMessage called');
             const text = messageInput.value.trim();
@@ -900,9 +903,6 @@ async def get_chat_page():
         let sessionMessages = [];
         const USER_NAME = "{user_name}";
         const AGENT_NAME = "{agent_name}";
-        
-        // File attachment state
-        let currentAttachment = null;
         
         async function handleFileSelect(event) {{
             const file = event.target.files[0];
