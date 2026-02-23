@@ -14,11 +14,13 @@ import pickle
 import uuid
 from datetime import datetime
 from typing import Dict, List, Optional
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.responses import HTMLResponse, JSONResponse
 from pathlib import Path
 import yaml
 from pydantic import BaseModel
+import shutil
+import tempfile
 
 # Add core to path for hybrid memory
 # Path: docker/web-ui/app.py -> core/
@@ -509,6 +511,21 @@ async def get_chat_page():
             
             <!-- Input Area -->
             <div class="p-4 bg-white border-t border-gray-200">
+                <!-- File Attachment Preview -->
+                <div id="file-attachment" class="hidden mb-3 p-2 bg-violet-50 border border-violet-200 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-sm text-violet-700">
+                            <i class="fas fa-file"></i>
+                            <span id="file-name" class="font-medium"></span>
+                            <span id="file-size" class="text-xs text-violet-500"></span>
+                        </div>
+                        <button onclick="clearFileAttachment()" class="text-violet-400 hover:text-violet-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="file-preview" class="mt-2 text-xs text-gray-600 max-h-20 overflow-y-auto bg-white p-2 rounded"></div>
+                </div>
+                
                 <div class="flex gap-3">
                     <input 
                         type="text" 
@@ -517,9 +534,16 @@ async def get_chat_page():
                         placeholder="Type your message..."
                         autocomplete="off"
                     >
+                    <input type="file" id="file-input" class="hidden" accept=".txt,.md,.py,.js,.json,.yaml,.yml,.csv,.pdf" onchange="handleFileSelect(event)">
+                    <button onclick="document.getElementById('file-input').click()" class="btn btn-secondary px-3" title="Attach file">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
                     <button id="send-btn" class="btn btn-primary px-4">
                         <i class="fas fa-paper-plane"></i>
                     </button>
+                </div>
+                <div class="mt-2 text-xs text-gray-400">
+                    Allowed: .txt, .md, .py, .js, .json, .yaml, .csv, .pdf (max 10MB)
                 </div>
             </div>
         </div>
@@ -774,18 +798,39 @@ async def get_chat_page():
             console.log('sendMessage called');
             const text = messageInput.value.trim();
             console.log('Text:', text);
-            if (!text) return;
             
-            addMessage(text, 'user');
+            // Allow sending if there's text OR file attachment
+            if (!text && !currentAttachment) return;
+            
+            // Build message content
+            let fullMessage = text;
+            if (currentAttachment) {{
+                const fileContext = String.fromCharCode(10) + String.fromCharCode(10) + 
+                    '[Attached file: ' + currentAttachment.filename + ']' + 
+                    String.fromCharCode(10) + '```' + 
+                    String.fromCharCode(10) + 
+                    currentAttachment.content.substring(0, 8000) + 
+                    String.fromCharCode(10) + '```';
+                fullMessage = text ? text + fileContext : fileContext;
+                
+                // Show file in message
+                addMessage(text + (text ? '\n\n' : '') + `[📎 ${{currentAttachment.filename}}]`, 'user');
+            }} else {{
+                addMessage(text, 'user');
+            }}
+            
             messageInput.value = '';
             sendBtn.disabled = true;
             typingIndicator.classList.remove('hidden');
+            
+            // Clear attachment after sending
+            clearFileAttachment();
             
             try {{
                 const response = await fetch('/api/chat', {{
                     method: 'POST',
                     headers: {{ 'Content-Type': 'application/json' }},
-                    body: JSON.stringify({{ message: text }})
+                    body: JSON.stringify({{ message: fullMessage }})
                 }});
                 
                 typingIndicator.classList.add('hidden');
@@ -844,6 +889,62 @@ async def get_chat_page():
         let sessionMessages = [];
         const USER_NAME = "{user_name}";
         const AGENT_NAME = "{agent_name}";
+        
+        // File attachment state
+        let currentAttachment = null;
+        
+        async function handleFileSelect(event) {{
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Check file size (10MB max)
+            if (file.size > 10 * 1024 * 1024) {{
+                alert('File too large. Max size: 10MB');
+                return;
+            }}
+            
+            // Upload file
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {{
+                const response = await fetch('/api/upload', {{
+                    method: 'POST',
+                    body: formData
+                }});
+                
+                const data = await response.json();
+                
+                if (data.error) {{
+                    alert('Upload error: ' + data.error);
+                    return;
+                }}
+                
+                // Store attachment
+                currentAttachment = {{
+                    filename: data.filename,
+                    content: data.content,
+                    preview: data.preview,
+                    type: data.type
+                }};
+                
+                // Show attachment preview
+                document.getElementById('file-attachment').classList.remove('hidden');
+                document.getElementById('file-name').textContent = data.filename;
+                document.getElementById('file-size').textContent = `(${{Math.round(data.size / 1024)}}KB)`;
+                document.getElementById('file-preview').textContent = data.preview;
+                
+            }} catch (error) {{
+                console.error('Upload error:', error);
+                alert('Failed to upload file');
+            }}
+        }}
+        
+        function clearFileAttachment() {{
+            currentAttachment = null;
+            document.getElementById('file-attachment').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+        }}
         
         async function compactContext() {{
             console.log('compactContext called');
@@ -2196,6 +2297,128 @@ async def search_memories(request: Request):
         })
     except Exception as e:
         return JSONResponse({"memories": [], "message": str(e)}, status_code=500)
+
+# ============================================================================
+# FILE UPLOAD API
+# ============================================================================
+
+# Allowed file types and max size
+ALLOWED_EXTENSIONS = {'.txt', '.md', '.py', '.js', '.json', '.yaml', '.yml', '.csv', '.pdf'}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+UPLOAD_DIR = Path("/app/workspace/uploads")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+def extract_text_from_file(file_path: Path, extension: str) -> str:
+    """Extract text content from various file types."""
+    try:
+        if extension in {'.txt', '.md', '.py', '.js', '.json', '.yaml', '.yml', '.csv'}:
+            # Text files - read directly
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                return f.read()
+        
+        elif extension == '.pdf':
+            # PDF - try to extract text
+            try:
+                import PyPDF2
+                text = []
+                with open(file_path, 'rb') as f:
+                    reader = PyPDF2.PdfReader(f)
+                    for page in reader.pages:
+                        text.append(page.extract_text())
+                return '\n'.join(text)
+            except ImportError:
+                return "[PDF content - PyPDF2 not installed]"
+        
+        else:
+            return f"[Unsupported file type: {extension}]"
+    
+    except Exception as e:
+        return f"[Error reading file: {str(e)}]"
+
+@app.post("/api/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """Upload a file and extract its content."""
+    try:
+        # Check file extension
+        file_ext = Path(file.filename).suffix.lower()
+        if file_ext not in ALLOWED_EXTENSIONS:
+            return JSONResponse({
+                "error": f"File type not allowed. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
+            }, status_code=400)
+        
+        # Save file temporarily
+        temp_path = UPLOAD_DIR / f"temp_{datetime.now().timestamp()}_{file.filename}"
+        
+        with open(temp_path, 'wb') as f:
+            content = await file.read()
+            if len(content) > MAX_FILE_SIZE:
+                return JSONResponse({
+                    "error": f"File too large. Max size: {MAX_FILE_SIZE / 1024 / 1024}MB"
+                }, status_code=400)
+            f.write(content)
+        
+        # Extract text
+        text_content = extract_text_from_file(temp_path, file_ext)
+        
+        # Move to permanent location
+        final_path = UPLOAD_DIR / f"{datetime.now().timestamp()}_{file.filename}"
+        shutil.move(str(temp_path), str(final_path))
+        
+        # Truncate if too long
+        preview = text_content[:500] + "..." if len(text_content) > 500 else text_content
+        
+        return JSONResponse({
+            "status": "ok",
+            "filename": file.filename,
+            "saved_as": str(final_path.name),
+            "size": len(content),
+            "content": text_content,
+            "preview": preview,
+            "type": file_ext
+        })
+    
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.get("/api/upload/list")
+async def list_uploaded_files():
+    """List all uploaded files."""
+    try:
+        files = []
+        for file_path in UPLOAD_DIR.glob("*"):
+            if file_path.is_file():
+                stat = file_path.stat()
+                files.append({
+                    "name": file_path.name,
+                    "size": stat.st_size,
+                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat()
+                })
+        
+        # Sort by modified date (newest first)
+        files.sort(key=lambda x: x["modified"], reverse=True)
+        return JSONResponse({"files": files})
+    
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.delete("/api/upload/{filename}")
+async def delete_uploaded_file(filename: str):
+    """Delete an uploaded file."""
+    try:
+        file_path = UPLOAD_DIR / filename
+        # Security check - ensure file is in upload dir
+        if not str(file_path.resolve()).startswith(str(UPLOAD_DIR.resolve())):
+            return JSONResponse({"error": "Invalid filename"}, status_code=400)
+        
+        if file_path.exists():
+            file_path.unlink()
+            return JSONResponse({"status": "ok", "message": f"Deleted {filename}"})
+        else:
+            return JSONResponse({"error": "File not found"}, status_code=404)
+    
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.get("/api/session/current")
 async def get_current_session():
