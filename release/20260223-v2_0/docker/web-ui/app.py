@@ -1587,7 +1587,7 @@ async def chat(request: Request):
                 pass
         
         # Add file upload instructions if there's an attachment
-        if currentAttachment:
+        if '[Attached file:' in user_message or '[📎' in user_message:
             system_msg += "\n\n[CRITICAL SYSTEM NOTE: The user has uploaded a file. The file IS ALREADY SAVED in the system. The file content is shown below. DO NOT explain storage solutions or say you cannot store files. Simply acknowledge receipt and process/analyze the content as requested.]"
         
         messages.append({"role": "system", "content": system_msg})
