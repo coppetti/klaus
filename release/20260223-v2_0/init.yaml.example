@@ -1,0 +1,55 @@
+# IDE Agent Wizard - Configuration Example
+# =========================================
+# Copy this file to init.yaml and fill in your values
+# DO NOT commit init.yaml to git (it's in .gitignore)
+
+agent:
+  name: "Your Agent Name"
+  template: "general"  # Options: general, architect, developer, finance, legal, marketing, ui
+  personality:
+    tone: "professional"  # professional, casual, enthusiastic, direct
+    style: "balanced"     # balanced, brief, detailed
+    language: "en"
+
+user:
+  name: "Your Name"
+  role: "Your Role"
+  experience_level: "intermediate"  # beginner, intermediate, advanced, expert
+  preferences:
+    communication: "concise"  # concise, detailed, bullet_points
+    code_style: "clean"
+
+mode:
+  primary: "ide"  # Options: ide, telegram, hybrid
+  ide:
+    enabled: true
+  telegram:
+    enabled: false
+    bot_token: ""  # From @BotFather (e.g., 1234567890:ABCdef...)
+    user_id: ""    # Optional: restrict to specific Telegram user ID
+    webhook_url: ""  # Optional: for webhook mode instead of polling
+
+# Note: When using 'hybrid' mode, both IDE and Telegram work simultaneously
+# with shared memory and file access via Docker containers
+
+provider:
+  name: "kimi"  # kimi, anthropic, openai, openrouter
+  api_key: ""   # Set via environment variable
+  model:
+    kimi: "kimi-k2-5"
+  parameters:
+    temperature: 0.7
+    max_tokens: 4096
+    top_p: 0.9
+
+memory:
+  enabled: true
+  backend: "sqlite"
+  sqlite:
+    path: "./workspace/memory/agent_memory.db"
+
+# Workspace folders (auto-created):
+# - workspace/SOUL.md       : Agent identity and personality
+# - workspace/USER.md       : Your profile and preferences  
+# - workspace/memory/       : SQLite database for persistent memory
+# - workspace/projects/     : Your projects (accessible in both IDE and Telegram)

@@ -1,0 +1,81 @@
+IDE AGENT WIZARD v2.0.0
+========================
+Release Date: 2026-02-23
+Version: v2.0.0
+
+WHAT'S NEW IN v2.0.0:
+====================
+
+🌐 WEB UI (BROWSER INTERFACE)
+- Modern chat interface at http://localhost:8082
+- Clean 2/3 + 1/3 professional layout
+- Markdown rendering with syntax highlighting
+- Compact Context: Extract and save important facts to memory
+- Reset Session: Clear conversation while preserving context
+- Real-time status monitoring (Kimi Agent, Web UI, Telegram)
+
+🧙 SMART SETUP WIZARD
+- Configuration management: Add/remove interfaces anytime
+- 4 setup modes: IDE only / + Telegram / + Web UI / All
+- Edit settings without recreating config
+- Detects existing setup and adapts options
+
+🧠 ENHANCED MEMORY SYSTEM
+- SQLite-based persistent memory
+- Automatic context retrieval
+- Shared across IDE, Telegram, and Web UI
+- Memory synchronization via Docker volumes
+
+🎨 UI/UX IMPROVEMENTS
+- User and agent names from config (no more generic "USER")
+- Professional Shadcn-inspired design
+- Status badges and health checks
+- Action buttons (Compact Context, Reset Session, Health Check)
+
+📦 CONTENTS:
+===========
+- setup.sh / reset.sh (launchers)
+- bot/ (Telegram bot)
+- cli/ (CLI tools)
+- core/ (main code)
+- docker/ (Docker configs + NEW web-ui/)
+- docs/ (documentation)
+- scripts/ (setup wizard)
+- templates/ (7 agent personalities)
+- examples/ (example projects)
+- fun-snippets/ (dev jokes)
+
+INTERFACES:
+==========
+💻 IDE Mode: Direct integration with Kimi Code, Claude Code, Cursor
+📱 Telegram: Bot interface with shared memory
+🌐 Web UI: Browser chat interface
+
+INSTALL:
+========
+1. Extract this package
+2. cd ide-agent-wizard/
+3. ./setup.sh
+4. Choose your setup mode
+
+DOCKER COMMANDS:
+================
+# IDE + Telegram
+docker compose up -d
+
+# IDE + Web UI
+docker compose --profile web up -d
+
+# All interfaces
+docker compose --profile web up -d
+
+REQUIREMENTS:
+=============
+- Python 3.11+
+- Docker (for Telegram/Web modes)
+- API key (for Docker modes)
+
+DOCS: docs/README.md
+WEB UI: http://localhost:8082 (when enabled)
+
+Happy coding! 🚀
