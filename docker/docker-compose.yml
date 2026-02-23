@@ -82,8 +82,8 @@ services:
     ports:
       - "8082:8082"
     volumes:
-      # Mount workspace for init.yaml access
-      - ../workspace:/app/workspace:ro
+      # Mount workspace for data persistence (sessions, settings)
+      - ../workspace:/app/workspace:rw
       - ../init.yaml:/app/init.yaml:ro
     env_file:
       - ../.env
