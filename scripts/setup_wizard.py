@@ -88,11 +88,35 @@ class SetupWizard:
         elif action == "remove_telegram":
             print("\n✅ Telegram removed!")
             print("   IDE mode active.")
+        elif action == "add_web":
+            print("\n✅ Web UI added!")
+            print("   Start: docker-compose --profile web up -d")
+            print("   Access: http://localhost:8082")
+        elif action == "remove_web":
+            print("\n✅ Web UI removed!")
+            print("   IDE mode active.")
         elif action == "edit_settings":
             print("\n✅ Settings updated!")
         else:
-            print("\n✅ Setup complete! Start chatting with:")
-            print("   python agent-cli.py chat")
+            mode = self.answers.get('mode', 'ide_only')
+            if mode == 'ide_only':
+                print("\n✅ Setup complete! Start chatting with:")
+                print("   python agent-cli.py chat")
+            elif mode == 'ide_telegram':
+                print("\n✅ Setup complete!")
+                print("   IDE: python agent-cli.py chat")
+                print("   Telegram: docker-compose up -d")
+            elif mode == 'ide_web':
+                print("\n✅ Setup complete!")
+                print("   IDE: python agent-cli.py chat")
+                print("   Web UI: docker-compose --profile web up -d")
+                print("   Access: http://localhost:8082")
+            elif mode == 'ide_full':
+                print("\n✅ Setup complete!")
+                print("   IDE: python agent-cli.py chat")
+                print("   Telegram: docker-compose up -d")
+                print("   Web UI: docker-compose --profile web up -d")
+                print("   Access: http://localhost:8082")
     
     def _edit_settings_menu(self):
         """Menu for editing specific settings."""
@@ -209,17 +233,32 @@ class SetupWizard:
             
             current_mode = existing_config.get("mode", {}).get("primary", "ide")
             telegram_enabled = existing_config.get("mode", {}).get("telegram", {}).get("enabled", False)
+            web_enabled = existing_config.get("mode", {}).get("web", {}).get("enabled", False)
             
-            print(f"Current setup: {'IDE + Telegram' if telegram_enabled else 'IDE only'}\n")
+            interfaces = []
+            if telegram_enabled:
+                interfaces.append("Telegram")
+            if web_enabled:
+                interfaces.append("Web UI")
+            
+            if interfaces:
+                print(f"Current setup: IDE + {', '.join(interfaces)}\n")
+            else:
+                print(f"Current setup: IDE only\n")
             
             options = []
             if not telegram_enabled:
                 options.append(("1", "Add Telegram", "Add Telegram bot to existing IDE setup", "📱"))
             else:
-                options.append(("1", "Remove Telegram", "Remove Telegram, keep IDE only", "💻"))
+                options.append(("1", "Remove Telegram", "Remove Telegram bot", "💻"))
             
-            options.append(("2", "Edit Settings", "Change profile, template, or other settings", "⚙️"))
-            options.append(("3", "Start Fresh", "Delete existing and create new configuration", "🔄"))
+            if not web_enabled:
+                options.append(("2", "Add Web UI", "Add Web interface (browser)", "🌐"))
+            else:
+                options.append(("2", "Remove Web UI", "Remove Web interface", "🌐"))
+            
+            options.append(("3", "Edit Settings", "Change profile, template, or other settings", "⚙️"))
+            options.append(("4", "Start Fresh", "Delete existing and create new configuration", "🔄"))
             
             for num, name, desc, emoji in options:
                 print(f"  [{num}] {emoji} {name}")
@@ -237,9 +276,17 @@ class SetupWizard:
                     self.answers["existing_config"] = existing_config
                     self._configure_telegram()
             elif choice == "2":
+                if web_enabled:
+                    self.answers["action"] = "remove_web"
+                    self.answers["existing_config"] = existing_config
+                else:
+                    self.answers["action"] = "add_web"
+                    self.answers["existing_config"] = existing_config
+                    self._configure_web()
+            elif choice == "3":
                 self.answers["action"] = "edit_settings"
                 self.answers["existing_config"] = existing_config
-            elif choice == "3":
+            elif choice == "4":
                 confirm = input("⚠️  This will DELETE your current init.yaml. Continue? [y/N]: ").strip().lower()
                 if confirm == "y":
                     self._new_setup_flow()
@@ -260,6 +307,8 @@ class SetupWizard:
         modes = [
             ("ide_only", "IDE only - Works with Kimi Code, Claude Code, Cursor, etc.", "💻"),
             ("ide_telegram", "IDE + Telegram - Both IDE and Telegram bot", "⭐"),
+            ("ide_web", "IDE + Web UI - Browser interface (port 8082)", "🌐"),
+            ("ide_full", "IDE + Telegram + Web - All interfaces", "🚀"),
         ]
         
         for i, (key, desc, emoji) in enumerate(modes, 1):
@@ -267,8 +316,8 @@ class SetupWizard:
             print(f"      {desc}")
             print()
         
-        choice = input("Select [1-2]: ").strip()
-        mode_map = {"1": "ide_only", "2": "ide_telegram"}
+        choice = input("Select [1-4]: ").strip()
+        mode_map = {"1": "ide_only", "2": "ide_telegram", "3": "ide_web", "4": "ide_full"}
         selected = mode_map.get(choice, "ide_only")
         
         self.answers["action"] = "new_setup"
@@ -344,6 +393,41 @@ class SetupWizard:
             print(f"   Webhook: {webhook}")
         else:
             print("   Mode: Polling (default)")
+    
+    def _configure_web(self):
+        """Configure Web UI settings."""
+        print("\n🌐 Web UI Configuration\n")
+        
+        print("The Web UI provides a browser interface to chat with your agent.")
+        print("Features:")
+        print("  - Chat interface in your browser")
+        print("  - Same memory as IDE and Telegram")
+        print("  - No Telegram account needed")
+        print("  - Accessible at: http://localhost:8082")
+        
+        # Docker / Kimi Agent Configuration
+        print("\n🐳 Docker Configuration")
+        print("The Web UI uses TWO containers:")
+        print("  1. Kimi Agent (port 8081) - Has your API key, processes LLM")
+        print("  2. Web UI (port 8082) - Browser interface\n")
+        
+        print("You need a Kimi API key for the Docker agent.")
+        print("Get it at: https://platform.moonshot.cn\n")
+        
+        while True:
+            api_key = input("Kimi API Key: ").strip()
+            if api_key:
+                self.answers["kimi_api_key"] = api_key
+                break
+            print("❌ API key is required for Kimi Agent")
+        
+        print("\n✅ Docker will be configured with:")
+        print(f"   Kimi Agent: http://localhost:8081")
+        print(f"   Web UI: http://localhost:8082")
+        print(f"   Shared Memory: ./workspace/memory/")
+        
+        print("\n✅ Web UI configured!")
+        print("   Access: http://localhost:8082 after starting Docker")
     
     def _select_template(self):
         """Select agent template."""
@@ -478,21 +562,35 @@ class SetupWizard:
                 print(f"Webhook: {self.answers['telegram_webhook']}")
         elif action == "remove_telegram":
             print("Action: REMOVE Telegram (keep IDE)")
+        elif action == "add_web":
+            print("Action: ADD Web UI to existing setup")
+            print("Web UI Port: 8082")
+        elif action == "remove_web":
+            print("Action: REMOVE Web UI (keep IDE)")
         elif action == "edit_settings":
             print("Action: EDIT existing settings")
             print(f"Template: {self.answers.get('template', 'unchanged')}")
             print(f"Agent Name: {self.answers.get('agent_name', 'unchanged')}")
         else:
             # New setup
-            mode_display = "IDE only" if self.answers.get('mode') == 'ide' else "IDE + Telegram"
-            print(f"Mode: {mode_display}")
+            mode = self.answers.get('mode', 'ide_only')
+            mode_map = {
+                'ide_only': 'IDE only',
+                'ide_telegram': 'IDE + Telegram',
+                'ide_web': 'IDE + Web UI',
+                'ide_full': 'IDE + Telegram + Web'
+            }
+            print(f"Mode: {mode_map.get(mode, mode)}")
             
-            if self.answers.get('mode') == 'hybrid':
+            if mode in ['ide_telegram', 'ide_full']:
                 token = self.answers.get('telegram_token', '')
                 masked_token = f"{token[:15]}...{token[-10:]}" if len(token) > 25 else "***"
                 print(f"Telegram Token: {masked_token}")
                 if 'telegram_user_id' in self.answers:
                     print(f"Authorized User: {self.answers['telegram_user_id']}")
+            
+            if mode in ['ide_web', 'ide_full']:
+                print("Web UI: http://localhost:8082")
             
             print(f"Template: {self.answers['template']}")
             print(f"Agent Name: {self.answers['agent_name']}")
@@ -599,6 +697,53 @@ KIMI_AGENT_URL=http://localhost:8081
         print("\n✅ Telegram removed!")
         print("   IDE mode is still active.")
         print("   To completely stop the bot: docker-compose down")
+    
+    def _update_add_web(self):
+        """Add Web UI to existing config."""
+        print("\n📝 Adding Web UI to existing config...")
+        
+        config = self.answers["existing_config"]
+        
+        # Update mode
+        config["mode"]["web"]["enabled"] = True
+        config["mode"]["web"]["port"] = 8082
+        
+        # Save init.yaml
+        with open("./init.yaml", "w") as f:
+            yaml.dump(config, f, default_flow_style=False)
+        print("  ✓ init.yaml updated with Web UI")
+        
+        # Update or create .env
+        if self.answers.get("kimi_api_key"):
+            env_lines = Path("./.env").read_text().split("\n") if Path("./.env").exists() else []
+            env_content = "\n".join([l for l in env_lines if "KIMI_API_KEY" not in l and "KIMI_AGENT_URL" not in l])
+            env_content += f"\nKIMI_API_KEY={self.answers.get('kimi_api_key', '')}\n"
+            env_content += "KIMI_AGENT_URL=http://localhost:8081\n"
+            Path("./.env").write_text(env_content.strip())
+            print("  ✓ .env updated")
+        
+        print("\n✅ Web UI added!")
+        print("   Access: http://localhost:8082")
+        print("   Start with: docker-compose --profile web up -d")
+    
+    def _update_remove_web(self):
+        """Remove Web UI from existing config."""
+        print("\n📝 Removing Web UI from config...")
+        
+        config = self.answers["existing_config"]
+        
+        # Update mode
+        config["mode"]["web"]["enabled"] = False
+        # Keep web settings but disable
+        
+        # Save init.yaml
+        with open("./init.yaml", "w") as f:
+            yaml.dump(config, f, default_flow_style=False)
+        print("  ✓ init.yaml updated (Web UI disabled)")
+        
+        print("\n✅ Web UI removed!")
+        print("   IDE mode is still active.")
+        print("   To stop Web container: docker-compose --profile web down")
     
     def _update_edit_settings(self):
         """Edit settings in existing config."""
@@ -724,10 +869,14 @@ KIMI_AGENT_URL=http://localhost:8081
                 "primary": self.answers["mode"],
                 "ide": {"enabled": True},
                 "telegram": {
-                    "enabled": self.answers["mode"] in ["telegram", "hybrid"],
+                    "enabled": self.answers["mode"] in ["ide_telegram", "ide_full"],
                     "bot_token": self.answers.get("telegram_token", ""),
                     "user_id": self.answers.get("telegram_user_id", ""),
                     "webhook_url": self.answers.get("telegram_webhook", "")
+                },
+                "web": {
+                    "enabled": self.answers["mode"] in ["ide_web", "ide_full"],
+                    "port": 8082
                 }
             },
             "provider": {

@@ -14,9 +14,9 @@
 ```
 
 That's it! The smart wizard detects your setup and guides you through:
-- **New setup**: Choose IDE only or IDE + Telegram
-- **Existing setup**: Add/remove Telegram, edit settings
-- Auto-starts Docker when Telegram is enabled
+- **New setup**: Choose IDE only, IDE + Telegram, IDE + Web UI, or all three
+- **Existing setup**: Add/remove Telegram or Web UI, edit settings
+- Auto-starts Docker when Telegram/Web is enabled
 
 ### Configuration Management
 
@@ -24,9 +24,9 @@ The wizard automatically adapts based on existing configuration:
 
 | Scenario | Options |
 |----------|---------|
-| No `init.yaml` | Create IDE only OR IDE + Telegram |
-| Has `init.yaml` + IDE only | Add Telegram / Edit settings / Start fresh |
-| Has `init.yaml` + Telegram | Remove Telegram / Edit settings / Start fresh |
+| No `init.yaml` | Create IDE only / IDE + Telegram / IDE + Web UI / All |
+| Has `init.yaml` + IDE only | Add Telegram / Add Web UI / Edit / Start fresh |
+| Has `init.yaml` + Interfaces | Remove interfaces / Edit / Start fresh |
 
 ---
 

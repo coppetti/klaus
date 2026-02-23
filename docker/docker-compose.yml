@@ -73,6 +73,29 @@ services:
       retries: 3
       start_period: 10s
 
+  # Web UI Service (Browser interface)
+  web-ui:
+    build:
+      context: ./web-ui
+      dockerfile: Dockerfile
+    container_name: ide-agent-web
+    ports:
+      - "8082:8082"
+    volumes:
+      # Mount workspace for init.yaml access
+      - ../workspace:/app/workspace:ro
+      - ../init.yaml:/app/init.yaml:ro
+    env_file:
+      - ../.env
+    environment:
+      - KIMI_AGENT_URL=http://kimi-agent:8080
+      - WEB_UI_PORT=8082
+    restart: unless-stopped
+    depends_on:
+      - kimi-agent
+    profiles:
+      - web  # Only starts with --profile web
+
 # Networks
 networks:
   default:

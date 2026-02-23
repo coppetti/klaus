@@ -31,7 +31,7 @@ This will:
 1. Create virtual environment
 2. Install dependencies
 3. Run interactive wizard with **smart configuration management**:
-   - **New setup**: IDE only OR IDE + Telegram
+   - **New setup**: IDE only / IDE + Telegram / IDE + Web UI / All
    - **Existing config**: Add/remove Telegram, edit settings
 4. Initialize agent with full context
 5. **Auto-start Docker** (if Telegram mode enabled)
@@ -173,6 +173,8 @@ The setup wizard automatically detects existing configurations and offers contex
     Works with Kimi Code, Claude Code, Cursor, etc.
 
 [2] ⭐ IDE + Telegram
+    [3] 🌐 IDE + Web UI
+    [4] 🚀 IDE + Telegram + Web UI
     Both IDE and Telegram bot with shared memory
 ```
 
@@ -182,7 +184,7 @@ The setup wizard automatically detects existing configurations and offers contex
 🎯 Configuration Management
 Existing init.yaml detected!
 
-Current setup: IDE only  (or: IDE + Telegram)
+Current setup: IDE only  (or: IDE + Interfaces)
 
 [1] 📱 Add Telegram              (shown if no Telegram)
 [1] 💻 Remove Telegram           (shown if has Telegram)
