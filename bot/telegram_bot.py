@@ -30,6 +30,7 @@ from telegram.ext import (
 )
 
 from core.memory import MemoryStore
+from core.hybrid_memory import HybridMemoryStore, MemoryQuery
 
 # Setup logging
 logging.basicConfig(
@@ -107,32 +108,52 @@ class TelegramBot:
             return yaml.safe_load(f)
     
     def _init_memory(self):
-        """Initialize memory store."""
+        """Initialize hybrid memory store (SQLite + Graph)."""
         memory_config = self.config.get('memory', {})
         if not memory_config.get('enabled', True):
             return
         
-        backend = memory_config.get('backend', 'sqlite')
         db_path = memory_config.get('sqlite', {}).get('path', './workspace/memory/agent_memory.db')
         
         # Ensure directory exists
         Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         
-        self.memory = MemoryStore(db_path)
-        logger.info("✅ Memory Store conectado")
+        # Use hybrid memory (auto-fallback to SQLite if Graph unavailable)
+        try:
+            self.memory = HybridMemoryStore(db_path)
+            if self.memory.graph_available:
+                logger.info("✅ Hybrid Memory (SQLite + Graph) conectado")
+            else:
+                logger.info("✅ Memory Store (SQLite) conectado - Graph unavailable")
+        except Exception as e:
+            logger.warning(f"⚠️ Hybrid memory failed: {e}, using SQLite fallback")
+            self.memory = MemoryStore(db_path)
+            logger.info("✅ Memory Store (SQLite fallback) conectado")
     
     def _get_memories(self, user_id: str, query: str, top_k: int = 3) -> List[Dict]:
-        """Recupera memórias relevantes."""
+        """Recupera memórias relevantes usando Hybrid Memory."""
         if not self.memory:
             return []
         
         try:
-            memories = self.memory.recall(query, limit=top_k)
+            # Use hybrid/contextual recall if available
+            if isinstance(self.memory, HybridMemoryStore):
+                memory_query = MemoryQuery(
+                    query_type="context",  # Use graph relationships
+                    text=query,
+                    limit=top_k,
+                    context_depth=2
+                )
+                memories = self.memory.recall(memory_query)
+            else:
+                # Fallback to simple SQLite recall
+                memories = self.memory.recall(query, limit=top_k)
+            
             return [
                 {
-                    "id": m['id'],
+                    "id": m.get('id', 0),
                     "content": m['content'],
-                    "category": m['category']
+                    "category": m.get('category', 'general')
                 }
                 for m in memories
             ]
