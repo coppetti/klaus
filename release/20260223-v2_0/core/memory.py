@@ -67,6 +67,45 @@ class MemoryStore:
         
         return memory_id
     
+    def get_all_memories(self, limit: int = 100, offset: int = 0) -> List[Dict]:
+        """Get all memories with pagination."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            """SELECT id, content, category, importance, metadata, created_at, access_count 
+               FROM memories 
+               ORDER BY created_at DESC 
+               LIMIT ? OFFSET ?""",
+            (limit, offset)
+        )
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        return [{
+            "id": row[0],
+            "content": row[1],
+            "category": row[2],
+            "importance": row[3],
+            "metadata": json.loads(row[4]) if row[4] else {},
+            "created_at": row[5],
+            "access_count": row[6]
+        } for row in rows]
+    
+    def delete_memory(self, memory_id: int) -> bool:
+        """Delete a specific memory."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
+        deleted = cursor.rowcount > 0
+        
+        conn.commit()
+        conn.close()
+        
+        return deleted
+    
     def recall(self, query: str, limit: int = 5) -> List[Dict]:
         """Recall memories matching query."""
         conn = sqlite3.connect(self.db_path)
