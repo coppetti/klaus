@@ -1,0 +1,59 @@
+%% IDE Agent Wizard - System Architecture
+%% Use with Mermaid: https://mermaid.live
+
+flowchart TB
+    subgraph UserInterfaces["User Interfaces"]
+        direction LR
+        IDEs["IDEs<br/>• Kimi Code<br/>• Claude Code<br/>• Cursor<br/>• VS Code"]
+        Telegram["Telegram App<br/>(Mobile/Desktop)"]
+    end
+    
+    subgraph Core["Core System"]
+        direction TB
+        Agent["Agent Core"]
+        Memory[("SQLite Memory<br/>workspace/memory/")]
+        Connector["IDE Connector"]
+    end
+    
+    subgraph Context["Context Files"]
+        direction TB
+        SOUL["SOUL.md<br/>(Agent Identity)"]
+        USER["USER.md<br/>(User Profile)"]
+        Config["init.yaml<br/>(Configuration)"]
+    end
+    
+    subgraph DockerServices["Docker Services (Telegram Mode)"]
+        direction TB
+        Bot["Telegram Bot<br/>(Container)"]
+        KimiAgent["Kimi Agent<br/>(Port 8081)"]
+    end
+    
+    subgraph Providers["LLM Providers"]
+        direction LR
+        Kimi["Kimi AI"]
+        Anthropic["Anthropic<br/>Claude"]
+        OpenAI["OpenAI<br/>GPT"]
+        OpenRouter["OpenRouter<br/>(Multi-model)"]
+    end
+    
+    IDEs -->|"Read/Write"| Context
+    IDEs -->|"API Calls"| Connector
+    Telegram -->|"Messages"| Bot
+    Bot -->|"HTTP"| KimiAgent
+    KimiAgent -->|"Read"| Context
+    
+    Connector -->|"Store/Recall"| Memory
+    Connector -->|"Get Context"| Context
+    Agent -->|"Generate"| Providers
+    
+    Bot -->|"Sync"| Memory
+    KimiAgent -->|"Sync"| Memory
+    
+    Memory -.->|"Shared Volume"| Bot
+    Memory -.->|"Shared Volume"| KimiAgent
+    
+    style UserInterfaces fill:#E3F2FD
+    style Core fill:#E8F5E9
+    style Context fill:#FFF3E0
+    style DockerServices fill:#F3E5F5
+    style Providers fill:#FFEBEE

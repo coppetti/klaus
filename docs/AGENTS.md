@@ -23,18 +23,25 @@ After `initialize.py` runs, you have access to:
 **Adapt your responses based on this profile.**
 
 ### 3. Configuration (`init.yaml`)
-- Operation mode: IDE / Telegram / Hybrid
+- Operation mode: `ide` or `hybrid` (IDE + Telegram)
+- Telegram settings (if enabled): bot_token, user_id, webhook_url
 - Memory settings (SQLite backend)
 - Tool configurations
+
+**Configuration Management:**
+The setup wizard supports evolving configurations:
+- Start with IDE only, add Telegram later
+- Remove Telegram temporarily (keep IDE)
+- Edit agent identity, user profile, or template anytime
 
 ### 4. Memory System (`workspace/memory/`)
 - SQLite database for persistent memory
 - Automatic context recall via `IDEConnector`
 - Stores: conversations, facts, user preferences
 
-### 5. Telegram Mode (if `mode.primary` is `telegram` or `hybrid`)
+### 5. Telegram Integration (if `mode.telegram.enabled` is `true`)
 
-When operating in Telegram mode, you need TWO containers:
+When Telegram is enabled, the system uses TWO containers:
 1. **Kimi Agent** (Docker:8081) - Has the API key, processes LLM requests
 2. **Telegram Bot** - Receives messages, syncs memory
 
@@ -67,7 +74,8 @@ docker-compose logs -f
 Both containers share `./workspace/memory/` volume:
 - Bot writes to local SQLite
 - Kimi Agent reads same SQLite
-- Full sync between Telegram and IDE modes
+- Full sync between Telegram and IDE
+- Memory shared across all interfaces
 
 **Use `core.connectors.ide_connector` to:**
 ```python

@@ -119,6 +119,7 @@ ide-agent-wizard/
 ### 📝 Changelog
 
 #### v1.1.0 (2026-02-22)
+- ✅ **Smart Setup Wizard** - Configuration management: add/remove Telegram, edit settings without recreating
 - ✅ **AGENTS.md Auto-Load** - Kimi Agent now automatically loads AGENTS.md on startup
 - ✅ **Projects Folder** - New `workspace/projects/` folder accessible in both IDE and Telegram modes
 - ✅ **Kimi Agent Patch** - Custom Dockerfile to extend clawd-agent with AGENTS.md support
@@ -135,10 +136,11 @@ ide-agent-wizard/
 
 ### 🎯 Tested Scenarios
 
-- ✅ Fresh install (reset + setup)
-- ✅ Telegram-only mode
-- ✅ IDE-only mode
-- ✅ Hybrid mode
+- ✅ Fresh install: IDE only (reset + setup)
+- ✅ Fresh install: IDE + Telegram
+- ✅ Add Telegram to existing IDE setup
+- ✅ Remove Telegram from existing setup
+- ✅ Edit settings (template, identity, profile)
 - ✅ Memory persistence
 - ✅ Docker auto-start
 - ✅ PII protection

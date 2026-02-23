@@ -1,0 +1,11 @@
+{
+  "text": "Olá! Como posso ajudar você hoje? Sou um assistente virtual pronto para responder suas dúvidas.",
+  "sessionId": "sess-test-123",
+  "chatflowId": "atendimento-flow",
+  "source": "adk_agent",
+  "metadata": {
+    "processing_time_ms": 1250,
+    "model": "gemini-2.0-flash-exp",
+    "timestamp": "2026-02-22T12:00:00Z"
+  }
+}

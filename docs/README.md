@@ -30,9 +30,11 @@
 This will:
 1. Create virtual environment
 2. Install dependencies
-3. Run interactive wizard (name, template, profile)
+3. Run interactive wizard with **smart configuration management**:
+   - **New setup**: IDE only OR IDE + Telegram
+   - **Existing config**: Add/remove Telegram, edit settings
 4. Initialize agent with full context
-5. **Auto-start Docker** (if Telegram/Hybrid mode)
+5. **Auto-start Docker** (if Telegram mode enabled)
 
 ### Option 2: Manual Setup
 
@@ -71,10 +73,26 @@ Telegram → Bot Container → Kimi Agent (port 8081) → API Kimi
 1. **Telegram Bot Token** - Get from [@BotFather](https://t.me/BotFather)
 2. **Kimi API Key** - Get from [platform.moonshot.cn](https://platform.moonshot.cn)
 
+### Setup Telegram
+
+You can add Telegram to an existing IDE-only setup anytime:
+
+```bash
+./setup.sh
+# Select: "Add Telegram to existing setup"
+```
+
+Or remove it later:
+
+```bash
+./setup.sh
+# Select: "Remove Telegram"
+```
+
 ### Start
 
 ```bash
-# After setup.sh, Docker starts automatically
+# After setup.sh, Docker starts automatically (if Telegram enabled)
 # Or manually:
 docker compose up -d
 
@@ -130,6 +148,8 @@ The agent reads `init.yaml` and context files automatically:
 
 | Template | Best For |
 |----------|----------|
+| Template | Best For |
+|----------|----------|
 | `general` | Everyday tasks, Q&A |
 | `architect` | System design, cloud, AI/ML |
 | `developer` | Coding, debugging, review |
@@ -137,6 +157,70 @@ The agent reads `init.yaml` and context files automatically:
 | `legal` | Legal research, contracts |
 | `marketing` | Marketing strategy, copywriting |
 | `ui` | UI/UX design, prototyping |
+
+---
+
+## 🔄 Configuration Management
+
+The setup wizard automatically detects existing configurations and offers context-appropriate options:
+
+### New Setup (no init.yaml found)
+
+```
+🎯 New Configuration
+
+[1] 💻 IDE only
+    Works with Kimi Code, Claude Code, Cursor, etc.
+
+[2] ⭐ IDE + Telegram
+    Both IDE and Telegram bot with shared memory
+```
+
+### Existing Setup (init.yaml detected)
+
+```
+🎯 Configuration Management
+Existing init.yaml detected!
+
+Current setup: IDE only  (or: IDE + Telegram)
+
+[1] 📱 Add Telegram              (shown if no Telegram)
+[1] 💻 Remove Telegram           (shown if has Telegram)
+    Add/remove Telegram bot
+
+[2] ⚙️  Edit Settings
+    Change agent identity, user profile, or template
+
+[3] 🔄 Start Fresh
+    Delete existing and create new configuration
+```
+
+### Examples
+
+**Start with IDE only, add Telegram later:**
+```bash
+# First run - setup IDE only
+./setup.sh
+# Select: IDE only
+
+# Later - add Telegram
+./setup.sh
+# Select: Add Telegram
+```
+
+**Remove Telegram temporarily:**
+```bash
+./setup.sh
+# Select: Remove Telegram
+# (Keeps IDE working, disables Telegram bot)
+```
+
+**Update your profile:**
+```bash
+./setup.sh
+# Select: Edit Settings → User Profile
+# Change name, role, or communication style
+```
 
 ---
 

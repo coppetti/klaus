@@ -1,0 +1,31 @@
+# 🔄 Workflow Sequencial ETL - Fixture de Teste
+# Pipeline de Extração, Transformação e Carga
+
+name: pipeline_etl
+type: sequential
+
+description: |
+  Pipeline ETL (Extract, Transform, Load) para processamento
+  de dados de vendas.
+
+steps:
+  - agent: extrator_dados
+    output_key: dados_brutos
+    description: Extrai dados das fontes
+    
+  - agent: validador_qualidade
+    output_key: dados_validados
+    description: Valida qualidade dos dados
+    
+  - agent: transformador
+    output_key: dados_transformados
+    description: Transforma e enriquece dados
+    
+  - agent: carregador_dw
+    output_key: resultado_carga
+    description: Carrega no Data Warehouse
+
+config:
+  fail_fast: true           # Parar no primeiro erro
+  save_intermediate: true   # Salvar resultados intermediários
+  timeout_per_step: 300     # 5 minutos por passo

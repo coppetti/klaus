@@ -1,0 +1,155 @@
+# Cloud Build Pipeline
+# Configuração para CI/CD no Google Cloud Build
+
+steps:
+  # ===========================================
+  # Etapa 1: Cache de dependências
+  # ===========================================
+  - name: 'python:3.11'
+    id: 'install-dependencies'
+    entrypoint: 'pip'
+    args: ['install', '-e', '.[dev]']
+    
+  # ===========================================
+  # Etapa 2: Linting e Formatação
+  # ===========================================
+  - name: 'python:3.11'
+    id: 'lint'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install -e ".[dev]"
+        black --check src/ tests/
+        ruff check src/ tests/
+    waitFor: ['install-dependencies']
+    
+  # ===========================================
+  # Etapa 3: Type Checking
+  # ===========================================
+  - name: 'python:3.11'
+    id: 'type-check'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install -e ".[dev]"
+        mypy src/
+    waitFor: ['install-dependencies']
+    
+  # ===========================================
+  # Etapa 4: Testes
+  # ===========================================
+  - name: 'python:3.11'
+    id: 'test'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install -e ".[dev]"
+        pytest tests/ -v --cov=agent_builder --cov-report=xml --cov-report=term
+    waitFor: ['install-dependencies']
+    
+  # ===========================================
+  # Etapa 5: Build da imagem Docker
+  # ===========================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-image'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/agent-builder:${COMMIT_SHA}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/agent-builder:latest'
+      - '-f'
+      - 'deployment/Dockerfile'
+      - '.'
+    waitFor: ['test']
+    
+  # ===========================================
+  # Etapa 6: Push da imagem
+  # ===========================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-image'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/agent-builder:${COMMIT_SHA}'
+    waitFor: ['build-image']
+    
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-image-latest'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/agent-builder:latest'
+    waitFor: ['build-image']
+
+  # ===========================================
+  # Etapa 7: Deploy para Cloud Run (Staging)
+  # ===========================================
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-staging'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'agent-builder-staging'
+      - '--image'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/agent-builder:${COMMIT_SHA}'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '5'
+      - '--memory'
+      - '1Gi'
+      - '--cpu'
+      - '1'
+      - '--set-env-vars'
+      - 'GOOGLE_CLOUD_PROJECT=${PROJECT_ID},ENVIRONMENT=staging'
+      - '--service-account'
+      - 'agent-builder@${PROJECT_ID}.iam.gserviceaccount.com'
+    waitFor: ['push-image']
+    
+  # ===========================================
+  # Etapa 8: Testes de Integração (Staging)
+  # ===========================================
+  - name: 'python:3.11'
+    id: 'integration-test'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install pytest requests
+        pytest tests/integration/ -v --endpoint=https://agent-builder-staging-${PROJECT_ID}.${_REGION}.run.app
+    waitFor: ['deploy-staging']
+
+# ===========================================
+# Opções
+# ===========================================
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_MEDIUM'
+  substitutionOption: 'ALLOW_LOOSE'
+
+# ===========================================
+# Substituições (padrões)
+# ===========================================
+substitutions:
+  _REGION: us-central1
+  _REPOSITORY: agent-builder
+
+# ===========================================
+# Imagens a serem armazenadas
+# ===========================================
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/agent-builder:${COMMIT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/agent-builder:latest'
+
+# ===========================================
+# Timeout
+# ===========================================
+timeout: '1800s'  # 30 minutos

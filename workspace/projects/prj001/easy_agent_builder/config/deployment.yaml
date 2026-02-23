@@ -1,0 +1,147 @@
+# Configuração de Deployment
+# Template - Copie para deployment.staging.yaml ou deployment.production.yaml
+
+# ===========================================
+# Configuração GCP
+# ===========================================
+gcp:
+  project_id: "${GOOGLE_CLOUD_PROJECT}"
+  location: "us-central1"
+  staging_bucket: "${VERTEX_AI_STAGING_BUCKET}"
+
+# ===========================================
+# Vertex AI Agent Engine
+# ===========================================
+agent_engine:
+  enabled: true
+  
+  # Configuração de recursos
+  resources:
+    machine_type: "e2-standard-2"
+    min_replicas: 1
+    max_replicas: 5
+    
+  # Variáveis de ambiente
+  env_vars:
+    LOG_LEVEL: "INFO"
+    ENABLE_TRACING: "true"
+    
+  # Secrets (referências ao Secret Manager)
+  secrets:
+    # - name: "api_key"
+    #   secret_id: "projects/${PROJECT_NUMBER}/secrets/api-key"
+
+# ===========================================
+# Cloud Run (para API HTTP)
+# ===========================================
+cloud_run:
+  enabled: true
+  
+  service_name_prefix: "agent-"
+  
+  resources:
+    memory: "1Gi"
+    cpu: "1"
+    concurrency: 80
+    timeout: "300s"
+    
+  scaling:
+    min_instances: 0
+    max_instances: 10
+    
+  env_vars:
+    PORT: "8080"
+    
+# ===========================================
+# Integração Bibha.ai
+# ===========================================
+bibha:
+  enabled: false  # Habilitar quando integrar
+  
+  # Configuração de webhook
+  webhook:
+    url: "${BIBHA_WEBHOOK_URL}"
+    secret: "${BIBHA_WEBHOOK_SECRET}"
+    
+  # Configuração de sessão
+  session:
+    store: "redis"  # "memory" | "redis"
+    ttl: 3600  # segundos
+    
+  redis:
+    host: "${REDIS_HOST}"
+    port: "${REDIS_PORT}"
+    password: "${REDIS_PASSWORD}"
+
+# ===========================================
+# Observabilidade
+# ===========================================
+observability:
+  # Cloud Logging
+  logging:
+    enabled: true
+    level: "INFO"
+    
+  # Cloud Trace
+  tracing:
+    enabled: true
+    sampling_rate: 0.1
+    
+  # Cloud Monitoring
+  monitoring:
+    enabled: true
+    metrics:
+      - "request_count"
+      - "request_latency"
+      - "agent_execution_time"
+      - "error_rate"
+      
+  # Alerting
+  alerts:
+    enabled: false
+    channels:
+      # - type: "email"
+      #   address: "alerts@company.com"
+
+# ===========================================
+# Segurança
+# ===========================================
+security:
+  # Autenticação
+  auth:
+    enabled: true
+    methods:
+      - "api_key"
+      - "iam"
+      
+  # Rate Limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 100
+    
+  # CORS
+  cors:
+    enabled: true
+    allowed_origins:
+      - "https://bibha.ai"
+      - "https://app.company.com"
+    allowed_methods:
+      - "POST"
+      - "GET"
+      - "OPTIONS"
+
+# ===========================================
+# Pipeline CI/CD
+# ===========================================
+cicd:
+  provider: "cloud_build"  # "cloud_build" | "github_actions"
+  
+  triggers:
+    - name: "deploy-staging"
+      branch: "develop"
+      env: "staging"
+      
+    - name: "deploy-production"
+      branch: "main"
+      env: "production"
+      require_approval: true

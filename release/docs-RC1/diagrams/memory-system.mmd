@@ -1,0 +1,55 @@
+%% IDE Agent Wizard - Memory System
+%% Use with Mermaid: https://mermaid.live
+
+flowchart TB
+    subgraph Input["User Input"]
+        Message["Message/Question"]
+    end
+    
+    subgraph MemorySystem["Memory System"]
+        direction TB
+        
+        subgraph Retrieval["Context Retrieval"]
+            Search[("Semantic Search")]
+            Recent["Recent History"]
+            Facts["Stored Facts"]
+        end
+        
+        subgraph Storage["Storage"]
+            StoreInteraction["store_interaction()"]
+            StoreFact["store_fact()"]
+        end
+        
+        SQLite[("SQLite Database<br/>agent_memory.db")]
+    end
+    
+    subgraph Processing["Agent Processing"]
+        ContextBuilder["Build Context"]
+        LLM["LLM Provider"]
+        Response["Generate Response"]
+    end
+    
+    subgraph Output["Output"]
+        Answer["Answer to User"]
+    end
+    
+    Message -->|"1. Get Context"| Retrieval
+    Retrieval -->|"Query"| SQLite
+    SQLite -->|"Results"| Retrieval
+    
+    Recent --> ContextBuilder
+    Facts --> ContextBuilder
+    Search --> ContextBuilder
+    
+    ContextBuilder -->|"Context + Message"| LLM
+    LLM --> Response
+    Response --> Answer
+    
+    Answer -->|"2. Store"| Storage
+    StoreInteraction -->|"INSERT"| SQLite
+    StoreFact -->|"INSERT"| SQLite
+    
+    style Input fill:#E3F2FD
+    style Output fill:#E8F5E9
+    style MemorySystem fill:#FFF3E0
+    style Processing fill:#F3E5F5

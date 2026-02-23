@@ -1,0 +1,97 @@
+%% IDE Agent Wizard - Memory Retrieval Flow
+%% How context is built from memories
+
+flowchart TB
+    subgraph Input["User Query"]
+        Query["How do I deploy this API?"]
+    end
+    
+    subgraph ContextBuilder["Context Builder"]
+        direction TB
+        
+        subgraph StaticFiles["Static Context Files"]
+            SOUL["SOUL.md
+            ---
+            Name: Klaus
+            Role: Architect
+            Tone: professional"]
+            
+            USER["USER.md
+            ---
+            Name: John
+            Role: Developer
+            Experience: advanced"]
+        end
+        
+        subgraph MemoryRetrieval["Memory Retrieval"]
+            direction TB
+            Recent["Get Recent
+            (last 15 items)"]
+            
+            Keyword["Keyword Matching
+            query: 'deploy api'"]
+            
+            Score["Score Results
+            • deploy: +1
+            • api: +1
+            • recency: +timestamp"]
+            
+            Sort["Sort by
+            score + recency"]
+            
+            Top5["Select Top 5"]
+        end
+        
+        subgraph RetrievedMemories["Retrieved Memories"]
+            M1["[conversation] Q: How to setup Docker..."]
+            M2["[fact] Project uses FastAPI..."]
+            M3["[preference] User prefers CLI over GUI..."]
+        end
+    end
+    
+    subgraph Output["Final Context"]
+        FinalContext["--- AGENT SOUL ---
+        Name: Klaus...
+        
+        --- USER PROFILE ---
+        Name: John...
+        
+        --- RELEVANT MEMORIES ---
+        • [conversation] Q: How to setup Docker...
+        • [fact] Project uses FastAPI...
+        • [preference] User prefers CLI..."]
+    end
+    
+    subgraph LLM["LLM Processing"]
+        Generate["Generate Response
+        (with full context)"]
+    end
+    
+    subgraph Storage["Store New Memory"]
+        NewMemory["Q: How do I deploy this API?
+        A: You can deploy using..."]
+        Insert["INSERT INTO memories
+        category='conversation'
+        importance='medium'"]
+    end
+    
+    Query --> MemoryRetrieval
+    
+    SOUL --> FinalContext
+    USER --> FinalContext
+    
+    Recent --> Keyword
+    Keyword --> Score
+    Score --> Sort
+    Sort --> Top5
+    Top5 --> RetrievedMemories
+    RetrievedMemories --> FinalContext
+    
+    FinalContext --> Generate
+    Generate --> NewMemory
+    NewMemory --> Insert
+    
+    style Input fill:#E3F2FD
+    style Output fill:#FFF3E0
+    style LLM fill:#E8F5E9
+    style Storage fill:#FFEBEE

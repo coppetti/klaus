@@ -1,0 +1,118 @@
+%% IDE Agent Wizard - Detailed Memory Architecture
+%% Complete view of how memory works internally
+
+flowchart TB
+    subgraph AppLayer["Application Layer"]
+        direction TB
+        
+        subgraph IDEConnector["IDE Connector"]
+            GetContext["get_context(message)
+            ---
+            1. Load SOUL.md
+            2. Load USER.md
+            3. Call memory.recall()"]
+            
+            StoreInteraction["store_interaction(q, a)
+            ---
+            Create summary
+            Call memory.store()"]
+            
+            StoreFact["store_fact(fact)
+            ---
+            Direct storage
+            Call memory.store()"]
+        end
+        
+        subgraph TelegramBot["Telegram Bot"]
+            BotProcess["Process message"]
+            BotStore["Store response"]
+        end
+    end
+    
+    subgraph MemoryLayer["Memory Layer (memory.py)"]
+        direction TB
+        
+        subgraph MemoryStore["MemoryStore Class"]
+            Store["store(content, category,
+            importance, metadata)"]
+            Recall["recall(query, limit)
+            ---
+            1. Get recent (limit*3)
+            2. Keyword match
+            3. Score & sort
+            4. Update access_count"]
+            Stats["get_stats()"]
+            Clear["clear()"]
+        end
+        
+        subgraph Algorithm["Retrieval Algorithm"]
+            A1["Get recent 15 items
+            ORDER BY created_at DESC"]
+            A2["For each item:
+            keywords = query.split()"]
+            A3["score = sum(1 for kw
+            if kw in content)"]
+            A4["Sort by (score, date)
+            RETURN top 5"]
+            A5["UPDATE access_count,
+            last_accessed"]
+        end
+    end
+    
+    subgraph Database["SQLite Database"]
+        direction TB
+        
+        subgraph Schema["Table: memories"]
+            ID["id: INTEGER PK"]
+            Content["content: TEXT"]
+            Category["category: TEXT"]
+            Importance["importance: TEXT"]
+            Metadata["metadata: TEXT (JSON)"]
+            Created["created_at: TIMESTAMP"]
+            AccessCount["access_count: INTEGER"]
+            LastAccessed["last_accessed: TIMESTAMP"]
+        end
+        
+        subgraph Indexes["Indexes"]
+            Idx1["INDEX idx_category
+            ON memories(category)"]
+        end
+        
+        subgraph File["File System"]
+            DBFile["workspace/memory/
+            agent_memory.db"]
+        end
+    end
+    
+    %% Connections
+    GetContext --> Recall
+    StoreInteraction --> Store
+    StoreFact --> Store
+    BotProcess --> GetContext
+    BotStore --> StoreInteraction
+    
+    Store --> |"INSERT INTO"| Schema
+    Recall --> |"SELECT FROM"| Schema
+    Stats --> |"SELECT COUNT"| Schema
+    Clear --> |"DELETE FROM"| Schema
+    
+    Recall --> Algorithm
+    Algorithm --> Schema
+    
+    Schema --> DBFile
+    Indexes --> DBFile
+    
+    %% Shared volume
+    subgraph SharedVolume["Shared Volume
+    (Docker)"]
+        Mount["./workspace/memory/
+        ↔
+        /app/memory/"]
+    end
+    
+    DBFile --> Mount
+    
+    style AppLayer fill:#E3F2FD
+    style MemoryLayer fill:#E8F5E9
+    style Database fill:#FFF3E0
+    style SharedVolume fill:#F3E5F5

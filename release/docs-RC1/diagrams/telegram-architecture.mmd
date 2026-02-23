@@ -1,0 +1,59 @@
+%% IDE Agent Wizard - Telegram Architecture
+%% Use with Mermaid: https://mermaid.live
+
+flowchart TB
+    subgraph User["User"]
+        Phone["Telegram App<br/>(Mobile/Desktop)"]
+    end
+    
+    subgraph TelegramCloud["Telegram Cloud"]
+        TelegramAPI["Telegram Bot API"]
+    end
+    
+    subgraph DockerHost["Docker Host"]
+        subgraph BotContainer["telegram-bot Container"]
+            Bot["Telegram Bot<br/>(Python)"]
+            BotMemory["Local Memory<br/>Access"]
+        end
+        
+        subgraph AgentContainer["kimi-agent Container"]
+            KimiAgent["Kimi Agent<br/>(FastAPI :8081)"]
+            AGENTS["AGENTS.md<br/>(Loaded on Start)"]
+            APIKey["Kimi API Key<br/>(Environment)"]
+        end
+        
+        subgraph SharedVolume["Shared Volume"]
+            SQLite[("SQLite DB<br/>./workspace/memory/")]
+            SOUL["SOUL.md"]
+            USER["USER.md"]
+        end
+    end
+    
+    subgraph External["External Services"]
+        KimiAPI["Kimi API<br/>(Moonshot AI)"]
+    end
+    
+    Phone -->|"1. Send Message"| TelegramAPI
+    TelegramAPI -->|"2. Webhook/Poll"| Bot
+    
+    Bot -->|"3. HTTP POST"| KimiAgent
+    Bot -->|"Read/Write"| SQLite
+    
+    KimiAgent -->|"Read"| AGENTS
+    KimiAgent -->|"Read"| SOUL
+    KimiAgent -->|"Read"| USER
+    KimiAgent -->|"Read/Write"| SQLite
+    KimiAgent -->|"4. API Call"| KimiAPI
+    
+    KimiAPI -->|"5. LLM Response"| KimiAgent
+    KimiAgent -->|"6. HTTP Response"| Bot
+    Bot -->|"7. Send Message"| TelegramAPI
+    TelegramAPI -->|"8. Deliver"| Phone
+    
+    style User fill:#E3F2FD
+    style TelegramCloud fill:#BBDEFB
+    style DockerHost fill:#E8F5E9
+    style BotContainer fill:#C8E6C9
+    style AgentContainer fill:#C8E6C9
+    style SharedVolume fill:#FFF3E0
+    style External fill:#FFEBEE

@@ -46,10 +46,12 @@
 - [x] Anthropic provider
 - [x] OpenAI provider
 
-### Modes
-- [x] IDE mode
-- [x] Telegram mode
-- [x] Hybrid mode
+### Configuration Management
+- [x] New setup: IDE only
+- [x] New setup: IDE + Telegram
+- [x] Add Telegram to existing
+- [x] Remove Telegram from existing
+- [x] Edit settings (agent identity, user profile)
 
 ## 🚀 Release Status: READY
 

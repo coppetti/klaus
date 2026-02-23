@@ -1,0 +1,37 @@
+%% IDE Agent Wizard - Memory Database Schema
+%% How the SQLite memory actually works
+
+erDiagram
+    MEMORIES {
+        INTEGER id PK "AUTOINCREMENT"
+        TEXT content "Memory content (Q&A or fact)"
+        TEXT category "Type: conversation, fact, preference..."
+        TEXT importance "low, medium, high"
+        TEXT metadata "JSON: timestamp, source, user, agent"
+        TIMESTAMP created_at "When stored"
+        INTEGER access_count "How many times recalled"
+        TIMESTAMP last_accessed "Last retrieval time"
+    }
+    
+    MEMORIES ||--o{ INDEX_CATEGORY : "indexed by"
+    
+    INDEX_CATEGORY {
+        TEXT category
+    }
+
+```
+
+Table: memories
+┌─────────┬─────────────────┬───────────┬────────────┬──────────────────┬─────────────────┬──────────────┬─────────────────┐
+│   id    │     content     │  category │ importance │     metadata     │    created_at   │ access_count │  last_accessed  │
+├─────────┼─────────────────┼───────────┼────────────┼──────────────────┼─────────────────┼──────────────┼─────────────────┤
+│    1    │ Q: How to...    │conversation│  medium    │ {"user":"John",  │ 2026-02-23      │      3       │ 2026-02-23      │
+│         │ A: You can...   │           │            │  "source":"ide"} │ 10:30:00        │              │ 14:20:00        │
+├─────────┼─────────────────┼───────────┼────────────┼──────────────────┼─────────────────┼──────────────┼─────────────────┤
+│    2    │ User prefers    │preference │   high     │ {"type":"fact"}  │ 2026-02-23      │      5       │ 2026-02-23      │
+│         │ Python over JS  │           │            │                  │ 11:00:00        │              │ 15:00:00        │
+├─────────┼─────────────────┼───────────┼────────────┼──────────────────┼─────────────────┼──────────────┼─────────────────┤
+│    3    │ Project uses    │   fact    │   high     │ {"project":"api"}│ 2026-02-23      │      2       │ 2026-02-23      │
+│         │ FastAPI         │           │            │                  │ 12:00:00        │              │ 13:00:00        │
+└─────────┴─────────────────┴───────────┴────────────┴──────────────────┴─────────────────┴──────────────┴─────────────────┘
+```

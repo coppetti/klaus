@@ -69,3 +69,4 @@ test_*.py
 *.bak
 *.backup
 backup/
+fun-snippets/

@@ -57,26 +57,72 @@ class SetupWizard:
         # Step 1: Check for existing backups
         self._check_backups()
         
-        # Step 2: Choose mode
+        # Step 2: Choose mode (detects existing config)
         self._choose_mode()
         
-        # Step 3: Select template
-        self._select_template()
+        action = self.answers.get("action", "new_setup")
         
-        # Step 4: User profile
-        self._build_profile()
+        if action == "new_setup":
+            # Full new setup flow
+            self._select_template()
+            self._build_profile()
+            self._agent_identity()
+        elif action == "add_telegram":
+            # Telegram already configured in _configure_telegram()
+            pass
+        elif action == "remove_telegram":
+            # Just confirm removal
+            pass
+        elif action == "edit_settings":
+            # Ask what to edit
+            self._edit_settings_menu()
         
-        # Step 5: Agent identity
-        self._agent_identity()
-        
-        # Step 6: Review and confirm
+        # Review and generate
         self._review_and_confirm()
-        
-        # Step 7: Generate files
         self._generate_files()
         
-        print("\n✅ Setup complete! Start chatting with:")
-        print("   python agent-cli.py chat")
+        # Final message
+        if action == "add_telegram":
+            print("\n✅ Telegram added!")
+            print("   Start: docker-compose up -d")
+        elif action == "remove_telegram":
+            print("\n✅ Telegram removed!")
+            print("   IDE mode active.")
+        elif action == "edit_settings":
+            print("\n✅ Settings updated!")
+        else:
+            print("\n✅ Setup complete! Start chatting with:")
+            print("   python agent-cli.py chat")
+    
+    def _edit_settings_menu(self):
+        """Menu for editing specific settings."""
+        print("\n⚙️  What would you like to edit?\n")
+        
+        options = [
+            ("1", "Agent Identity", "Name, tone, template", "🤖"),
+            ("2", "User Profile", "Your name, role, preferences", "👤"),
+            ("3", "Both", "All settings", "🔄"),
+        ]
+        
+        for num, name, desc, emoji in options:
+            print(f"  [{num}] {emoji} {name}")
+            print(f"      {desc}")
+            print()
+        
+        choice = input("Select [1-3]: ").strip()
+        
+        if choice == "1":
+            self._select_template()
+            self._agent_identity()
+        elif choice == "2":
+            self._build_profile()
+        elif choice == "3":
+            self._select_template()
+            self._build_profile()
+            self._agent_identity()
+        else:
+            print("Invalid choice. No changes made.")
+            sys.exit(0)
     
     def _check_backups(self):
         """Check for existing backup to import."""
@@ -145,26 +191,91 @@ class SetupWizard:
             self.answers["import_mode"] = choice
     
     def _choose_mode(self):
-        """Select operation mode."""
-        print("\n🎯 Choose Setup Mode\n")
+        """Select operation mode based on existing config."""
+        init_yaml = Path("./init.yaml")
+        existing_config = None
+        
+        if init_yaml.exists():
+            try:
+                with open(init_yaml) as f:
+                    existing_config = yaml.safe_load(f)
+            except Exception:
+                pass
+        
+        if existing_config:
+            # Existing config detected - management mode
+            print("\n🎯 Configuration Management\n")
+            print("Existing init.yaml detected!\n")
+            
+            current_mode = existing_config.get("mode", {}).get("primary", "ide")
+            telegram_enabled = existing_config.get("mode", {}).get("telegram", {}).get("enabled", False)
+            
+            print(f"Current setup: {'IDE + Telegram' if telegram_enabled else 'IDE only'}\n")
+            
+            options = []
+            if not telegram_enabled:
+                options.append(("1", "Add Telegram", "Add Telegram bot to existing IDE setup", "📱"))
+            else:
+                options.append(("1", "Remove Telegram", "Remove Telegram, keep IDE only", "💻"))
+            
+            options.append(("2", "Edit Settings", "Change profile, template, or other settings", "⚙️"))
+            options.append(("3", "Start Fresh", "Delete existing and create new configuration", "🔄"))
+            
+            for num, name, desc, emoji in options:
+                print(f"  [{num}] {emoji} {name}")
+                print(f"      {desc}")
+                print()
+            
+            choice = input(f"Select [1-{len(options)}]: ").strip()
+            
+            if choice == "1":
+                if telegram_enabled:
+                    self.answers["action"] = "remove_telegram"
+                    self.answers["existing_config"] = existing_config
+                else:
+                    self.answers["action"] = "add_telegram"
+                    self.answers["existing_config"] = existing_config
+                    self._configure_telegram()
+            elif choice == "2":
+                self.answers["action"] = "edit_settings"
+                self.answers["existing_config"] = existing_config
+            elif choice == "3":
+                confirm = input("⚠️  This will DELETE your current init.yaml. Continue? [y/N]: ").strip().lower()
+                if confirm == "y":
+                    self._new_setup_flow()
+                else:
+                    print("Cancelled.")
+                    sys.exit(0)
+            else:
+                print("Invalid choice. Exiting.")
+                sys.exit(1)
+        else:
+            # No existing config - new setup flow
+            self._new_setup_flow()
+    
+    def _new_setup_flow(self):
+        """New configuration setup."""
+        print("\n🎯 New Configuration\n")
         
         modes = [
-            ("IDE", "Works with Kimi Code, Claude Code, Cursor, etc.", "💻"),
-            ("Telegram", "Chat via Telegram bot on your phone", "📱"),
-            ("Hybrid", "Both IDE and Telegram (shared memory)", "⭐"),
+            ("ide_only", "IDE only - Works with Kimi Code, Claude Code, Cursor, etc.", "💻"),
+            ("ide_telegram", "IDE + Telegram - Both IDE and Telegram bot", "⭐"),
         ]
         
-        for i, (name, desc, emoji) in enumerate(modes, 1):
-            print(f"  [{i}] {emoji} {name}")
+        for i, (key, desc, emoji) in enumerate(modes, 1):
+            print(f"  [{i}] {emoji} {key.replace('_', ' ').title()}")
             print(f"      {desc}")
             print()
         
-        choice = input("Select mode [1-3]: ").strip()
-        mode_map = {"1": "ide", "2": "telegram", "3": "hybrid"}
-        self.answers["mode"] = mode_map.get(choice, "ide")
+        choice = input("Select [1-2]: ").strip()
+        mode_map = {"1": "ide_only", "2": "ide_telegram"}
+        selected = mode_map.get(choice, "ide_only")
+        
+        self.answers["action"] = "new_setup"
+        self.answers["mode"] = "ide" if selected == "ide_only" else "hybrid"
         
         # Configure Telegram if needed
-        if self.answers["mode"] in ["telegram", "hybrid"]:
+        if selected == "ide_telegram":
             self._configure_telegram()
     
     def _configure_telegram(self):
@@ -353,28 +464,45 @@ class SetupWizard:
         """Show summary and confirm."""
         print("\n📋 Configuration Summary\n")
         print("-" * 40)
-        print(f"Mode: {self.answers['mode'].upper()}")
         
-        # Show Telegram config if applicable
-        if self.answers['mode'] in ['telegram', 'hybrid']:
+        action = self.answers.get("action", "new_setup")
+        
+        if action == "add_telegram":
+            print("Action: ADD Telegram to existing setup")
             token = self.answers.get('telegram_token', '')
             masked_token = f"{token[:15]}...{token[-10:]}" if len(token) > 25 else "***"
             print(f"Telegram Token: {masked_token}")
-            if 'kimi_api_key' in self.answers:
-                print(f"Docker: Kimi Agent on port 8081")
             if 'telegram_user_id' in self.answers:
                 print(f"Authorized User: {self.answers['telegram_user_id']}")
             if 'telegram_webhook' in self.answers:
                 print(f"Webhook: {self.answers['telegram_webhook']}")
+        elif action == "remove_telegram":
+            print("Action: REMOVE Telegram (keep IDE)")
+        elif action == "edit_settings":
+            print("Action: EDIT existing settings")
+            print(f"Template: {self.answers.get('template', 'unchanged')}")
+            print(f"Agent Name: {self.answers.get('agent_name', 'unchanged')}")
+        else:
+            # New setup
+            mode_display = "IDE only" if self.answers.get('mode') == 'ide' else "IDE + Telegram"
+            print(f"Mode: {mode_display}")
+            
+            if self.answers.get('mode') == 'hybrid':
+                token = self.answers.get('telegram_token', '')
+                masked_token = f"{token[:15]}...{token[-10:]}" if len(token) > 25 else "***"
+                print(f"Telegram Token: {masked_token}")
+                if 'telegram_user_id' in self.answers:
+                    print(f"Authorized User: {self.answers['telegram_user_id']}")
+            
+            print(f"Template: {self.answers['template']}")
+            print(f"Agent Name: {self.answers['agent_name']}")
+            print(f"User: {self.answers['user_name']} ({self.answers['user_role']})")
+            print(f"Experience: {self.answers['experience']}")
+            print(f"Communication: {self.answers['communication']}")
         
-        print(f"Template: {self.answers['template']}")
-        print(f"Agent Name: {self.answers['agent_name']}")
-        print(f"User: {self.answers['user_name']} ({self.answers['user_role']})")
-        print(f"Experience: {self.answers['experience']}")
-        print(f"Communication: {self.answers['communication']}")
         print("-" * 40)
         
-        if input("\nCreate this configuration? [Y/n]: ").strip().lower() == "n":
+        if input("\nProceed? [Y/n]: ").strip().lower() == "n":
             print("Setup cancelled.")
             sys.exit(0)
     
@@ -409,7 +537,161 @@ class SetupWizard:
         print(f"  ✓ workspace/SOUL.md created (fallback)")
 
     def _generate_files(self):
-        """Generate configuration files."""
+        """Generate or update configuration files."""
+        action = self.answers.get("action", "new_setup")
+        
+        if action == "add_telegram":
+            self._update_add_telegram()
+        elif action == "remove_telegram":
+            self._update_remove_telegram()
+        elif action == "edit_settings":
+            self._update_edit_settings()
+        else:
+            self._create_new_config()
+    
+    def _update_add_telegram(self):
+        """Add Telegram to existing config."""
+        print("\n📝 Adding Telegram to existing config...")
+        
+        config = self.answers["existing_config"]
+        
+        # Update mode
+        config["mode"]["primary"] = "hybrid"
+        config["mode"]["telegram"]["enabled"] = True
+        config["mode"]["telegram"]["bot_token"] = self.answers.get("telegram_token", "")
+        config["mode"]["telegram"]["user_id"] = self.answers.get("telegram_user_id", "")
+        config["mode"]["telegram"]["webhook_url"] = self.answers.get("telegram_webhook", "")
+        
+        # Save init.yaml
+        with open("./init.yaml", "w") as f:
+            yaml.dump(config, f, default_flow_style=False)
+        print("  ✓ init.yaml updated with Telegram")
+        
+        # Update or create .env
+        if self.answers.get("kimi_api_key"):
+            env_content = f"""# IDE Agent Wizard - Environment Variables
+TELEGRAM_BOT_TOKEN={self.answers.get("telegram_token", "")}
+KIMI_API_KEY={self.answers.get("kimi_api_key", "")}
+KIMI_AGENT_URL=http://localhost:8081
+"""
+            Path("./.env").write_text(env_content)
+            print("  ✓ .env created (for Docker)")
+        
+        print("\n✅ Telegram added!")
+        print("   Start the bot with: docker-compose up -d")
+    
+    def _update_remove_telegram(self):
+        """Remove Telegram from existing config."""
+        print("\n📝 Removing Telegram from config...")
+        
+        config = self.answers["existing_config"]
+        
+        # Update mode
+        config["mode"]["primary"] = "ide"
+        config["mode"]["telegram"]["enabled"] = False
+        # Keep other telegram settings but disable
+        
+        # Save init.yaml
+        with open("./init.yaml", "w") as f:
+            yaml.dump(config, f, default_flow_style=False)
+        print("  ✓ init.yaml updated (Telegram disabled)")
+        
+        print("\n✅ Telegram removed!")
+        print("   IDE mode is still active.")
+        print("   To completely stop the bot: docker-compose down")
+    
+    def _update_edit_settings(self):
+        """Edit settings in existing config."""
+        print("\n📝 Updating settings...")
+        
+        config = self.answers["existing_config"]
+        
+        # Update agent settings if changed
+        if "agent_name" in self.answers:
+            config["agent"]["name"] = self.answers["agent_name"]
+        if "template" in self.answers:
+            config["agent"]["template"] = self.answers["template"]
+        if "tone" in self.answers:
+            config["agent"]["personality"]["tone"] = self.answers["tone"]
+        
+        # Update user settings if changed
+        if "user_name" in self.answers:
+            config["user"]["name"] = self.answers["user_name"]
+        if "user_role" in self.answers:
+            config["user"]["role"] = self.answers["user_role"]
+        if "experience" in self.answers:
+            config["user"]["experience_level"] = self.answers["experience"]
+        if "communication" in self.answers:
+            config["user"]["preferences"]["communication"] = self.answers["communication"]
+        
+        # Save init.yaml
+        with open("./init.yaml", "w") as f:
+            yaml.dump(config, f, default_flow_style=False)
+        print("  ✓ init.yaml updated")
+        
+        # Update SOUL.md if template changed
+        if "template" in self.answers:
+            self._update_soul_md()
+        
+        # Update USER.md if user info changed
+        if any(k in self.answers for k in ["user_name", "user_role", "experience", "communication"]):
+            self._update_user_md()
+        
+        print("\n✅ Settings updated!")
+    
+    def _update_soul_md(self):
+        """Update SOUL.md from template."""
+        template = self.answers.get("template")
+        if not template:
+            return
+            
+        soul_src = Path(f"templates/{template}/SOUL.md")
+        soul_dst = Path("./workspace/SOUL.md")
+        
+        if soul_src.exists():
+            try:
+                content = soul_src.read_text()
+                replacements = {
+                    "{{agent_name}}": self.answers.get("agent_name", config.get("agent", {}).get("name", "Assistant")),
+                    "{{created_date}}": "2026-02-22",
+                    "{{tone}}": self.answers.get("tone", config.get("agent", {}).get("personality", {}).get("tone", "professional")),
+                    "{{style}}": "balanced",
+                    "{{language}}": "en",
+                }
+                for old, new in replacements.items():
+                    content = content.replace(old, new)
+                soul_dst.write_text(content)
+                print(f"  ✓ workspace/SOUL.md updated (from {template} template)")
+            except Exception as e:
+                print(f"  ⚠️  Error updating SOUL.md: {e}")
+    
+    def _update_user_md(self):
+        """Update USER.md with new info."""
+        config = self.answers["existing_config"]
+        
+        user_name = self.answers.get("user_name", config.get("user", {}).get("name", "User"))
+        user_role = self.answers.get("user_role", config.get("user", {}).get("role", ""))
+        experience = self.answers.get("experience", config.get("user", {}).get("experience_level", "intermediate"))
+        communication = self.answers.get("communication", config.get("user", {}).get("preferences", {}).get("communication", "concise"))
+        
+        user_md = f"""# USER - {user_name}
+
+## Profile
+**Name:** {user_name}  
+**Role:** {user_role}  
+**Experience Level:** {experience}
+
+## Preferences
+- **Communication:** {communication}
+- **Code Style:** clean
+
+---
+"""
+        Path("./workspace/USER.md").write_text(user_md)
+        print("  ✓ workspace/USER.md updated")
+    
+    def _create_new_config(self):
+        """Generate new configuration files."""
         print("\n📝 Generating files...")
         
         # Create directories
