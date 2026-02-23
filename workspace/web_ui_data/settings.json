@@ -1,6 +1,6 @@
 {
   "provider": "kimi",
-  "model": "",
+  "model": "kimi-k2-0711",
   "temperature": 0.7,
   "max_tokens": 4096,
   "mode": "balanced",

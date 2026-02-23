@@ -1022,10 +1022,16 @@ async def get_chat_page():
                         </div>
                         <div class="flex items-center justify-between mt-1">
                             <span class="text-xs text-gray-500">${{s.message_count}} msgs · ${{date}}</span>
-                            <button onclick="event.stopPropagation(); deleteSession('${{s.id}}')" 
-                                    class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <i class="fas fa-trash text-xs"></i>
-                            </button>
+                            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="event.stopPropagation(); renameSession('${{s.id}}', '${{s.name}}')" 
+                                        class="text-gray-400 hover:text-blue-500">
+                                    <i class="fas fa-edit text-xs"></i>
+                                </button>
+                                <button onclick="event.stopPropagation(); deleteSession('${{s.id}}')" 
+                                        class="text-gray-400 hover:text-red-500">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1097,6 +1103,32 @@ async def get_chat_page():
                 }}
             }} catch (error) {{
                 console.error('Failed to load session:', error);
+            }}
+        }}
+        
+        async function renameSession(sessionId, currentName) {{
+            const newName = prompt('New session name:', currentName);
+            if (newName === null || newName.trim() === '' || newName === currentName) return;
+            
+            try {{
+                const res = await fetch(`/api/sessions/${{sessionId}}/rename`, {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{ name: newName.trim() }})
+                }});
+                
+                if (res.ok) {{
+                    // Update current session name if it's the same session
+                    if (sessionId === currentSessionId) {{
+                        document.getElementById('current-session-name').textContent = newName.trim();
+                    }}
+                    loadSessions();
+                }} else {{
+                    alert('Failed to rename session');
+                }}
+            }} catch (error) {{
+                console.error('Failed to rename session:', error);
+                alert('Failed to rename session');
             }}
         }}
         
@@ -1694,6 +1726,36 @@ async def load_session_endpoint(session_id: str):
         "session": current_session.dict(),
         "messages": web_messages
     })
+
+@app.post("/api/sessions/{session_id}/rename")
+async def rename_session_endpoint(session_id: str, request: Request):
+    """Rename a session."""
+    global current_session
+    
+    try:
+        data = await request.json()
+        new_name = data.get("name", "").strip()
+        
+        if not new_name:
+            return JSONResponse({"error": "Name cannot be empty"}, status_code=400)
+        
+        # Load session
+        session = load_session(session_id)
+        if not session:
+            return JSONResponse({"error": "Session not found"}, status_code=404)
+        
+        # Update name
+        session.name = new_name
+        session.updated_at = datetime.now().isoformat()
+        save_session(session)
+        
+        # Update current session if it's the same
+        if current_session and current_session.id == session_id:
+            current_session.name = new_name
+        
+        return JSONResponse({"status": "ok", "session": session.dict()})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.delete("/api/sessions/{session_id}")
 async def delete_session_endpoint(session_id: str):
