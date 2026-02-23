@@ -661,7 +661,7 @@ async def get_chat_page():
         
         sendBtn.addEventListener('click', sendMessage);
         
-        function addMessage(text, sender) {{
+        function addMessage(text, sender, modelInfo = null) {{
             const div = document.createElement('div');
             div.className = 'flex ' + (sender === 'user' ? 'justify-end' : 'justify-start');
             
@@ -671,7 +671,8 @@ async def get_chat_page():
             
             const senderLabel = document.createElement('div');
             senderLabel.className = 'font-medium text-xs opacity-70 mb-2';
-            senderLabel.textContent = sender === 'user' ? USER_NAME : AGENT_NAME;
+            const modelBadge = modelInfo ? `<span class="ml-2 px-1.5 py-0.5 bg-white/20 rounded text-[10px]">${{modelInfo}}</span>` : '';
+            senderLabel.innerHTML = (sender === 'user' ? USER_NAME : AGENT_NAME) + modelBadge;
             bubble.appendChild(senderLabel);
             
             const content = document.createElement('div');
@@ -740,7 +741,8 @@ async def get_chat_page():
                 
                 const data = await response.json();
                 if (data.response) {{
-                    addMessage(data.response, 'assistant');
+                    const modelInfo = data.model_used ? `${{data.provider}}/${{data.model_used}}` : null;
+                    addMessage(data.response, 'assistant', modelInfo);
                 }} else if (data.error) {{
                     addMessage('Error: ' + data.error, 'assistant');
                     updateConnectionStatus('error');
@@ -1214,6 +1216,8 @@ async def chat(request: Request):
             messages.append({"role": role, "content": msg["text"]})
         
         # Get response from the configured provider
+        print(f"🤖 Chat: provider={settings.provider}, model={settings.model}, temp={settings.temperature}, max_tokens={settings.max_tokens}", flush=True)
+        
         try:
             assistant_message = await chat_with_provider(
                 provider=settings.provider,
@@ -1222,6 +1226,7 @@ async def chat(request: Request):
                 temperature=settings.temperature,
                 max_tokens=settings.max_tokens
             )
+            print(f"✅ Response received from {settings.model}", flush=True)
         except Exception as provider_error:
             # Fallback to Kimi Agent if direct provider fails
             try:
@@ -1252,7 +1257,11 @@ async def chat(request: Request):
             current_session.updated_at = datetime.now().isoformat()
             save_session(current_session)
         
-        return JSONResponse({"response": assistant_message})
+        return JSONResponse({
+            "response": assistant_message,
+            "model_used": settings.model,
+            "provider": settings.provider
+        })
                 
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)

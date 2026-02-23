@@ -1,6 +1,6 @@
 {
-  "provider": "kimi",
-  "model": "kimi-k2-0711",
+  "provider": "anthropic",
+  "model": "claude-3-opus-20240229",
   "temperature": 0.7,
   "max_tokens": 4096,
   "mode": "balanced",
