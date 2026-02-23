@@ -1,19 +1,24 @@
 """
-Web UI for IDE Agent Wizard
-============================
+Web UI for IDE Agent Wizard v2.1
+=================================
 Modern Shadcn-inspired interface with chat + config panel
 Uses Hybrid Memory (SQLite + Graph) for intelligent context
+Features: Settings Panel, Session Management
 """
 
 import os
 import json
 import sys
 import httpx
+import pickle
+import uuid
 from datetime import datetime
+from typing import Dict, List, Optional
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from pathlib import Path
 import yaml
+from pydantic import BaseModel
 
 # Add core to path for hybrid memory
 # Path: docker/web-ui/app.py -> core/
@@ -32,7 +37,44 @@ except ImportError:
     HYBRID_AVAILABLE = False
     print("⚠️  Hybrid memory not available, using simple storage")
 
-app = FastAPI(title="IDE Agent Wizard - Web UI")
+app = FastAPI(title="IDE Agent Wizard - Web UI v2.1")
+
+# ============================================================================
+# SETTINGS & SESSION MODELS
+# ============================================================================
+
+class Settings(BaseModel):
+    """User settings for the Web UI."""
+    provider: str = "kimi"  # kimi, openrouter, anthropic, openai
+    model: str = "kimi-k2-0711"
+    temperature: float = 0.7
+    max_tokens: int = 4096
+    mode: str = "balanced"  # fast, balanced, deep
+    auto_save: bool = True
+    auto_save_interval: int = 10  # messages
+
+class Session(BaseModel):
+    """Chat session model."""
+    id: str
+    name: str
+    created_at: str
+    updated_at: str
+    message_count: int = 0
+    messages: List[dict] = []
+
+# Provider configurations
+PROVIDER_MODELS = {
+    "kimi": ["kimi-k2-0711", "kimi-latest"],
+    "openrouter": ["anthropic/claude-3.5-sonnet", "openai/gpt-4o", "meta-llama/llama-3.1-70b"],
+    "anthropic": ["claude-3-5-sonnet-20241022", "claude-3-opus-20240229"],
+    "openai": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"]
+}
+
+MODE_PRESETS = {
+    "fast": {"temperature": 0.3, "max_tokens": 2048},
+    "balanced": {"temperature": 0.7, "max_tokens": 4096},
+    "deep": {"temperature": 0.9, "max_tokens": 8192}
+}
 
 # Config
 KIMI_AGENT_URL = os.getenv("KIMI_AGENT_URL", "http://kimi-agent:8081")
@@ -91,7 +133,7 @@ async def get_chat_page():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{agent_name} - AI Assistant</title>
+    <title>{agent_name} - AI Assistant v2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -341,10 +383,41 @@ async def get_chat_page():
         }}
     </style>
 </head>
-<body class="h-screen overflow-hidden">
+<body class="h-screen overflow-hidden bg-gray-50">
     <div class="flex h-full">
-        <!-- Chat Area (2/3) -->
-        <div class="flex-1 flex flex-col border-r border-gray-200">
+        <!-- Sessions Sidebar (Left) -->
+        <div class="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <div class="p-4 border-b border-gray-200">
+                <h2 class="font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-history text-gray-400"></i>
+                    Sessions
+                </h2>
+            </div>
+            
+            <div class="p-3 border-b border-gray-200">
+                <button onclick="createNewSession()" class="btn btn-primary w-full text-sm">
+                    <i class="fas fa-plus"></i>
+                    New Session
+                </button>
+            </div>
+            
+            <div id="sessions-list" class="flex-1 overflow-y-auto p-3 space-y-2">
+                <!-- Sessions will be loaded here -->
+                <div class="text-sm text-gray-500 text-center py-4">Loading sessions...</div>
+            </div>
+            
+            <div class="p-3 border-t border-gray-200 bg-gray-50">
+                <div class="text-xs text-gray-500">
+                    <span id="current-session-name">Current Session</span>
+                </div>
+                <div class="text-xs text-gray-400 mt-1">
+                    <span id="session-message-count">0</span> messages
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Area (flex-1) -->
+        <div class="flex-1 flex flex-col bg-white">
             <!-- Header -->
             <header class="px-6 py-4 border-b border-gray-200 bg-white">
                 <div class="flex items-center justify-between">
@@ -401,16 +474,75 @@ async def get_chat_page():
             </div>
         </div>
         
-        <!-- Config Panel (1/3) -->
-        <div class="w-96 bg-white flex flex-col">
-            <div class="p-6 border-b border-gray-200">
+        <!-- Config Panel (Right) -->
+        <div class="w-96 bg-white border-l border-gray-200 flex flex-col">
+            <div class="p-4 border-b border-gray-200">
                 <h2 class="font-semibold text-gray-900 flex items-center gap-2">
                     <i class="fas fa-sliders"></i>
-                    Configuration
+                    Settings
                 </h2>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- AI Settings -->
+                <div class="sidebar-card">
+                    <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                        <i class="fas fa-brain text-gray-400"></i>
+                        AI Configuration
+                    </h3>
+                    
+                    <!-- Provider -->
+                    <div class="mb-3">
+                        <label class="block text-xs text-gray-500 mb-1">Provider</label>
+                        <select id="setting-provider" class="input-field text-sm" onchange="updateSettings()">
+                            <option value="kimi">Kimi (Moonshot)</option>
+                            <option value="openrouter">OpenRouter</option>
+                            <option value="anthropic">Anthropic (Claude)</option>
+                            <option value="openai">OpenAI</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Model -->
+                    <div class="mb-3">
+                        <label class="block text-xs text-gray-500 mb-1">Model</label>
+                        <select id="setting-model" class="input-field text-sm" onchange="updateSettings()">
+                            <!-- Models populated by JS -->
+                        </select>
+                    </div>
+                    
+                    <!-- Mode Presets -->
+                    <div class="mb-3">
+                        <label class="block text-xs text-gray-500 mb-2">Mode</label>
+                        <div class="flex gap-2">
+                            <button onclick="setMode('fast')" id="mode-fast" class="flex-1 btn btn-secondary text-xs py-1.5">
+                                <i class="fas fa-bolt"></i> Fast
+                            </button>
+                            <button onclick="setMode('balanced')" id="mode-balanced" class="flex-1 btn btn-primary text-xs py-1.5">
+                                <i class="fas fa-scale-balanced"></i> Balanced
+                            </button>
+                            <button onclick="setMode('deep')" id="mode-deep" class="flex-1 btn btn-secondary text-xs py-1.5">
+                                <i class="fas fa-brain"></i> Deep
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Temperature -->
+                    <div class="mb-3">
+                        <label class="block text-xs text-gray-500 mb-1">
+                            Temperature: <span id="temp-value">0.7</span>
+                        </label>
+                        <input type="range" id="setting-temperature" min="0" max="2" step="0.1" value="0.7" 
+                               class="w-full" oninput="updateTempDisplay(); updateSettings()">
+                    </div>
+                    
+                    <!-- Max Tokens -->
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Max Tokens</label>
+                        <input type="number" id="setting-max-tokens" value="4096" min="256" max="32768" step="256"
+                               class="input-field text-sm" onchange="updateSettings()">
+                    </div>
+                </div>
+                
                 <!-- System Status -->
                 <div class="sidebar-card">
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
@@ -446,9 +578,9 @@ async def get_chat_page():
                 <div class="sidebar-card">
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                         <i class="fas fa-clock-rotate-left text-gray-400"></i>
-                        Session
+                        Current Session
                     </h3>
-                    <div class="space-y-3">
+                    <div class="space-y-2">
                         <div class="text-sm">
                             <span class="text-gray-500">Messages:</span>
                             <span id="msg-count" class="font-medium text-gray-900 ml-1">0</span>
@@ -467,6 +599,10 @@ async def get_chat_page():
                         Actions
                     </h3>
                     <div class="space-y-2">
+                        <button onclick="saveCurrentSession()" class="btn btn-secondary w-full text-sm">
+                            <i class="fas fa-save"></i>
+                            Save Session
+                        </button>
                         <button onclick="compactContext()" class="btn btn-secondary w-full text-sm">
                             <i class="fas fa-compress"></i>
                             Compact Context
@@ -474,10 +610,6 @@ async def get_chat_page():
                         <button onclick="resetSession()" class="btn btn-destructive w-full text-sm">
                             <i class="fas fa-rotate-right"></i>
                             Reset Session
-                        </button>
-                        <button onclick="checkHealth()" class="btn btn-secondary w-full text-sm">
-                            <i class="fas fa-stethoscope"></i>
-                            Health Check
                         </button>
                     </div>
                 </div>
@@ -502,9 +634,9 @@ async def get_chat_page():
             </div>
             
             <!-- Footer -->
-            <div class="p-4 border-t border-gray-200 bg-gray-50">
+            <div class="p-3 border-t border-gray-200 bg-gray-50">
                 <p class="text-xs text-gray-500 text-center">
-                    IDE Agent Wizard v1.1.0
+                    IDE Agent Wizard v2.1.0
                 </p>
             </div>
         </div>
@@ -717,8 +849,249 @@ async def get_chat_page():
                 `;
                 messageCount = 0;
                 msgCount.textContent = 0;
+                sessionMessages = [];
             }}
         }}
+        
+        // ============================================================================
+        // SETTINGS MANAGEMENT
+        // ============================================================================
+        
+        let currentSettings = {{}};
+        let providerModels = {{}};
+        
+        async function loadSettings() {{
+            try {{
+                // Load settings
+                const settingsRes = await fetch('/api/settings');
+                currentSettings = await settingsRes.json();
+                
+                // Load providers
+                const providersRes = await fetch('/api/settings/providers');
+                const providersData = await providersRes.json();
+                providerModels = providersData.models;
+                
+                // Apply settings to UI
+                document.getElementById('setting-provider').value = currentSettings.provider;
+                updateModelOptions();
+                document.getElementById('setting-model').value = currentSettings.model;
+                document.getElementById('setting-temperature').value = currentSettings.temperature;
+                document.getElementById('temp-value').textContent = currentSettings.temperature;
+                document.getElementById('setting-max-tokens').value = currentSettings.max_tokens;
+                
+                // Update mode buttons
+                updateModeButtons(currentSettings.mode);
+                
+            }} catch (error) {{
+                console.error('Failed to load settings:', error);
+            }}
+        }}
+        
+        function updateModelOptions() {{
+            const provider = document.getElementById('setting-provider').value;
+            const modelSelect = document.getElementById('setting-model');
+            const models = providerModels[provider] || [];
+            
+            modelSelect.innerHTML = models.map(m => `<option value="${{m}}">${{m}}</option>`).join('');
+        }}
+        
+        function updateTempDisplay() {{
+            const temp = document.getElementById('setting-temperature').value;
+            document.getElementById('temp-value').textContent = temp;
+        }}
+        
+        async function updateSettings() {{
+            const newSettings = {{
+                provider: document.getElementById('setting-provider').value,
+                model: document.getElementById('setting-model').value,
+                temperature: parseFloat(document.getElementById('setting-temperature').value),
+                max_tokens: parseInt(document.getElementById('setting-max-tokens').value),
+                mode: currentSettings.mode || 'balanced',
+                auto_save: currentSettings.auto_save !== false,
+                auto_save_interval: currentSettings.auto_save_interval || 10
+            }};
+            
+            try {{
+                await fetch('/api/settings', {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify(newSettings)
+                }});
+                currentSettings = newSettings;
+            }} catch (error) {{
+                console.error('Failed to update settings:', error);
+            }}
+        }}
+        
+        async function setMode(mode) {{
+            try {{
+                const res = await fetch(`/api/settings/mode/${{mode}}`, {{ method: 'POST' }});
+                const data = await res.json();
+                if (data.settings) {{
+                    currentSettings = data.settings;
+                    document.getElementById('setting-temperature').value = currentSettings.temperature;
+                    document.getElementById('temp-value').textContent = currentSettings.temperature;
+                    document.getElementById('setting-max-tokens').value = currentSettings.max_tokens;
+                    updateModeButtons(mode);
+                }}
+            }} catch (error) {{
+                console.error('Failed to set mode:', error);
+            }}
+        }}
+        
+        function updateModeButtons(activeMode) {{
+            ['fast', 'balanced', 'deep'].forEach(mode => {{
+                const btn = document.getElementById(`mode-${{mode}}`);
+                if (mode === activeMode) {{
+                    btn.className = 'flex-1 btn btn-primary text-xs py-1.5';
+                }} else {{
+                    btn.className = 'flex-1 btn btn-secondary text-xs py-1.5';
+                }}
+            }});
+        }}
+        
+        // ============================================================================
+        // SESSIONS MANAGEMENT
+        // ============================================================================
+        
+        async function loadSessions() {{
+            try {{
+                const res = await fetch('/api/sessions');
+                const sessions = await res.json();
+                renderSessions(sessions);
+            }} catch (error) {{
+                console.error('Failed to load sessions:', error);
+            }}
+        }}
+        
+        function renderSessions(sessions) {{
+            const container = document.getElementById('sessions-list');
+            
+            if (sessions.length === 0) {{
+                container.innerHTML = '<div class="text-sm text-gray-400 text-center py-4">No saved sessions</div>';
+                return;
+            }}
+            
+            container.innerHTML = sessions.map(s => {{
+                const isCurrent = s.id === (currentSessionId || '');
+                const date = new Date(s.updated_at).toLocaleDateString();
+                return `
+                    <div class="group p-2 rounded-lg border ${{isCurrent ? 'border-violet-500 bg-violet-50' : 'border-gray-200 hover:border-gray-300'}} cursor-pointer transition-colors"
+                         onclick="loadSession('${{s.id}}')">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-900 truncate flex-1">${{s.name}}</span>
+                            ${{isCurrent ? '<i class="fas fa-check text-violet-500 text-xs"></i>' : ''}}
+                        </div>
+                        <div class="flex items-center justify-between mt-1">
+                            <span class="text-xs text-gray-500">${{s.message_count}} msgs · ${{date}}</span>
+                            <button onclick="event.stopPropagation(); deleteSession('${{s.id}}')" 
+                                    class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }}).join('');
+        }}
+        
+        let currentSessionId = '';
+        
+        async function createNewSession() {{
+            const name = prompt('Session name (optional):');
+            if (name === null) return;  // Cancelled
+            
+            try {{
+                const res = await fetch('/api/sessions', {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{ name: name || undefined }})
+                }});
+                const data = await res.json();
+                
+                if (data.session) {{
+                    currentSessionId = data.session.id;
+                    document.getElementById('current-session-name').textContent = data.session.name;
+                    document.getElementById('session-message-count').textContent = '0';
+                    
+                    // Clear chat
+                    chatMessages.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-2xl">
+                                <i class="fas fa-wand-magic-sparkles"></i>
+                            </div>
+                            <h2 class="text-xl font-semibold text-gray-900 mb-2">${{data.session.name}}</h2>
+                            <p class="text-gray-500">Start a new conversation.</p>
+                        </div>
+                    `;
+                    messageCount = 0;
+                    msgCount.textContent = 0;
+                    sessionMessages = [];
+                    
+                    loadSessions();
+                }}
+            }} catch (error) {{
+                console.error('Failed to create session:', error);
+            }}
+        }}
+        
+        async function loadSession(sessionId) {{
+            try {{
+                const res = await fetch(`/api/sessions/${{sessionId}}/load`, {{ method: 'POST' }});
+                const data = await res.json();
+                
+                if (data.session) {{
+                    currentSessionId = data.session.id;
+                    document.getElementById('current-session-name').textContent = data.session.name;
+                    document.getElementById('session-message-count').textContent = data.session.message_count;
+                    
+                    // Load messages
+                    sessionMessages = data.messages || [];
+                    messageCount = sessionMessages.length;
+                    msgCount.textContent = messageCount;
+                    
+                    // Render messages
+                    chatMessages.innerHTML = '';
+                    sessionMessages.forEach(m => {{
+                        addMessage(m.text, m.sender);
+                    }});
+                    
+                    loadSessions();
+                }}
+            }} catch (error) {{
+                console.error('Failed to load session:', error);
+            }}
+        }}
+        
+        async function deleteSession(sessionId) {{
+            if (!confirm('Delete this session?')) return;
+            
+            try {{
+                await fetch(`/api/sessions/${{sessionId}}`, {{ method: 'DELETE' }});
+                loadSessions();
+            }} catch (error) {{
+                console.error('Failed to delete session:', error);
+            }}
+        }}
+        
+        async function saveCurrentSession() {{
+            try {{
+                // Current session is auto-saved, but we can trigger a manual save
+                const res = await fetch('/api/session/current');
+                const data = await res.json();
+                if (data.id) {{
+                    alert('Session saved!');
+                    loadSessions();
+                }}
+            }} catch (error) {{
+                console.error('Failed to save session:', error);
+            }}
+        }}
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {{
+            loadSettings();
+            loadSessions();
+        }});
     </script>
 </body>
 </html>"""
@@ -766,8 +1139,105 @@ async def chat(request: Request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
+# ============================================================================
+# PERSISTENCE FUNCTIONS
+# ============================================================================
+
+DATA_DIR = Path("/app/workspace/web_ui_data")
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+SETTINGS_FILE = DATA_DIR / "settings.json"
+SESSIONS_DIR = DATA_DIR / "sessions"
+SESSIONS_DIR.mkdir(exist_ok=True)
+CURRENT_SESSION_FILE = DATA_DIR / "current_session.json"
+
+def load_settings() -> Settings:
+    """Load settings from file or return defaults."""
+    if SETTINGS_FILE.exists():
+        try:
+            with open(SETTINGS_FILE) as f:
+                return Settings(**json.load(f))
+        except:
+            pass
+    return Settings()
+
+def save_settings(settings: Settings):
+    """Save settings to file."""
+    with open(SETTINGS_FILE, 'w') as f:
+        json.dump(settings.dict(), f, indent=2)
+
+def load_sessions() -> List[Session]:
+    """Load all saved sessions."""
+    sessions = []
+    if SESSIONS_DIR.exists():
+        for session_file in SESSIONS_DIR.glob("*.json"):
+            try:
+                with open(session_file) as f:
+                    sessions.append(Session(**json.load(f)))
+            except:
+                pass
+    return sorted(sessions, key=lambda s: s.updated_at, reverse=True)
+
+def load_session(session_id: str) -> Optional[Session]:
+    """Load a specific session."""
+    session_file = SESSIONS_DIR / f"{session_id}.json"
+    if session_file.exists():
+        try:
+            with open(session_file) as f:
+                return Session(**json.load(f))
+        except:
+            pass
+    return None
+
+def save_session(session: Session):
+    """Save a session to file."""
+    session_file = SESSIONS_DIR / f"{session.id}.json"
+    with open(session_file, 'w') as f:
+        json.dump(session.dict(), f, indent=2, default=str)
+
+def delete_session(session_id: str):
+    """Delete a session."""
+    session_file = SESSIONS_DIR / f"{session_id}.json"
+    if session_file.exists():
+        session_file.unlink()
+
+def create_session(name: str = None) -> Session:
+    """Create a new session."""
+    now = datetime.now().isoformat()
+    session = Session(
+        id=str(uuid.uuid4())[:8],
+        name=name or f"Session {now[:10]}",
+        created_at=now,
+        updated_at=now,
+        message_count=0,
+        messages=[]
+    )
+    save_session(session)
+    return session
+
+# ============================================================================
+# INITIALIZE
+# ============================================================================
+
 # In-memory message storage for the web session
 web_messages = []
+current_session: Optional[Session] = None
+
+# Load settings
+settings = load_settings()
+
+# Load or create current session
+if CURRENT_SESSION_FILE.exists():
+    try:
+        with open(CURRENT_SESSION_FILE) as f:
+            current_id = json.load(f).get("current_session_id")
+            if current_id:
+                current_session = load_session(current_id)
+    except:
+        pass
+
+if not current_session:
+    current_session = create_session("Current Session")
 
 # Initialize hybrid memory store
 hybrid_memory = None
@@ -784,7 +1254,7 @@ if HYBRID_AVAILABLE:
 @app.post("/api/compact")
 async def compact_context(request: Request):
     """Analyze conversation, extract key facts, save to hybrid memory (SQLite + Graph)."""
-    global web_messages, hybrid_memory
+    global web_messages, hybrid_memory, current_session
     
     if not web_messages:
         return JSONResponse({"message": "No messages to compact", "facts_extracted": 0})
@@ -842,9 +1312,15 @@ async def compact_context(request: Request):
                     except:
                         pass
         
-        # Clear web session messages
+        # Clear web session messages and update session
         message_count = len(web_messages)
         web_messages = []
+        
+        if current_session:
+            current_session.messages = []
+            current_session.message_count = 0
+            current_session.updated_at = datetime.now().isoformat()
+            save_session(current_session)
         
         # Get memory stats
         memory_stats = {}
@@ -903,6 +1379,152 @@ def extract_important_facts(messages):
     return facts[:5]  # Max 5 facts
 
 
+# ============================================================================
+# SETTINGS & SESSIONS API
+# ============================================================================
+
+@app.get("/api/settings")
+async def get_settings():
+    """Get current settings."""
+    return JSONResponse(settings.dict())
+
+@app.post("/api/settings")
+async def update_settings(request: Request):
+    """Update settings."""
+    global settings
+    try:
+        data = await request.json()
+        new_settings = Settings(**data)
+        save_settings(new_settings)
+        settings = new_settings
+        return JSONResponse({"status": "ok", "settings": settings.dict()})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=400)
+
+@app.get("/api/settings/providers")
+async def get_providers():
+    """Get available providers and models."""
+    return JSONResponse({
+        "providers": list(PROVIDER_MODELS.keys()),
+        "models": PROVIDER_MODELS,
+        "modes": list(MODE_PRESETS.keys()),
+        "mode_presets": MODE_PRESETS
+    })
+
+@app.post("/api/settings/mode/{mode}")
+async def set_mode(mode: str):
+    """Set mode preset (fast, balanced, deep)."""
+    global settings
+    if mode not in MODE_PRESETS:
+        return JSONResponse({"error": f"Unknown mode: {mode}"}, status_code=400)
+    
+    preset = MODE_PRESETS[mode]
+    settings.temperature = preset["temperature"]
+    settings.max_tokens = preset["max_tokens"]
+    settings.mode = mode
+    save_settings(settings)
+    return JSONResponse({"status": "ok", "settings": settings.dict()})
+
+# Session endpoints
+@app.get("/api/sessions")
+async def get_sessions():
+    """Get all saved sessions."""
+    sessions = load_sessions()
+    return JSONResponse([s.dict() for s in sessions])
+
+@app.post("/api/sessions")
+async def create_new_session(request: Request):
+    """Create a new session."""
+    global current_session, web_messages
+    try:
+        data = await request.json()
+        name = data.get("name", f"Session {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        
+        # Save current session first
+        if current_session:
+            current_session.messages = web_messages
+            current_session.message_count = len(web_messages)
+            current_session.updated_at = datetime.now().isoformat()
+            save_session(current_session)
+        
+        # Create new session
+        current_session = create_session(name)
+        web_messages = []
+        
+        # Save current session ID
+        with open(CURRENT_SESSION_FILE, 'w') as f:
+            json.dump({"current_session_id": current_session.id}, f)
+        
+        return JSONResponse({"status": "ok", "session": current_session.dict()})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.get("/api/sessions/{session_id}")
+async def get_session(session_id: str):
+    """Get a specific session."""
+    session = load_session(session_id)
+    if session:
+        return JSONResponse(session.dict())
+    return JSONResponse({"error": "Session not found"}, status_code=404)
+
+@app.post("/api/sessions/{session_id}/load")
+async def load_session_endpoint(session_id: str):
+    """Load a session as current."""
+    global current_session, web_messages
+    session = load_session(session_id)
+    if not session:
+        return JSONResponse({"error": "Session not found"}, status_code=404)
+    
+    # Save current session first
+    if current_session:
+        current_session.messages = web_messages
+        current_session.message_count = len(web_messages)
+        current_session.updated_at = datetime.now().isoformat()
+        save_session(current_session)
+    
+    # Load new session
+    current_session = session
+    web_messages = session.messages.copy()
+    
+    # Save current session ID
+    with open(CURRENT_SESSION_FILE, 'w') as f:
+        json.dump({"current_session_id": current_session.id}, f)
+    
+    return JSONResponse({
+        "status": "ok", 
+        "session": current_session.dict(),
+        "messages": web_messages
+    })
+
+@app.delete("/api/sessions/{session_id}")
+async def delete_session_endpoint(session_id: str):
+    """Delete a session."""
+    global current_session, web_messages
+    
+    if current_session and current_session.id == session_id:
+        # Can't delete current session, create new one first
+        current_session = create_session("Current Session")
+        web_messages = []
+        with open(CURRENT_SESSION_FILE, 'w') as f:
+            json.dump({"current_session_id": current_session.id}, f)
+    
+    delete_session(session_id)
+    return JSONResponse({"status": "ok"})
+
+@app.get("/api/session/current")
+async def get_current_session():
+    """Get current session info."""
+    global current_session
+    if current_session:
+        current_session.messages = web_messages
+        current_session.message_count = len(web_messages)
+        return JSONResponse(current_session.dict())
+    return JSONResponse({"error": "No active session"}, status_code=404)
+
+# ============================================================================
+# HEALTH CHECK
+# ============================================================================
+
 @app.get("/health")
 async def health():
     """Health check endpoint."""
@@ -920,7 +1542,9 @@ async def health():
     return {
         "status": "healthy",
         "kimi_agent_url": KIMI_AGENT_URL,
-        "kimi_agent_status": kimi_status
+        "kimi_agent_status": kimi_status,
+        "web_ui_version": "2.1.0",
+        "features": ["settings", "sessions", "hybrid_memory"]
     }
 
 
