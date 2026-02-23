@@ -1,9 +1,9 @@
 {
-  "provider": "anthropic",
-  "model": "claude-3-opus-20240229",
-  "temperature": 0.7,
-  "max_tokens": 4096,
-  "mode": "balanced",
+  "provider": "openrouter",
+  "model": "anthropic/claude-3.5-sonnet",
+  "temperature": 0.3,
+  "max_tokens": 2048,
+  "mode": "fast",
   "auto_save": true,
   "auto_save_interval": 10
 }

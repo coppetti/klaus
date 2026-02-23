@@ -495,11 +495,12 @@ async def get_chat_page():
                     <div class="mb-3">
                         <label class="block text-xs text-gray-500 mb-1">Provider</label>
                         <select id="setting-provider" class="input-field text-sm">
-                            <option value="kimi">Kimi (Moonshot)</option>
-                            <option value="openrouter">OpenRouter</option>
-                            <option value="anthropic">Anthropic (Claude)</option>
-                            <option value="openai">OpenAI</option>
+                            <!-- Populated by JS based on available providers -->
                         </select>
+                        <div id="provider-info" class="mt-2 text-xs text-gray-400 hidden">
+                            <i class="fas fa-info-circle"></i>
+                            <span id="provider-info-text"></span>
+                        </div>
                     </div>
                     
                     <!-- Model -->
@@ -861,6 +862,8 @@ async def get_chat_page():
         
         let currentSettings = {{}};
         let providerModels = {{}};
+        let allProviders = {{}};
+        let providerAvailability = {{}};
         
         async function loadSettings() {{
             try {{
@@ -872,6 +875,14 @@ async def get_chat_page():
                 const providersRes = await fetch('/api/settings/providers');
                 const providersData = await providersRes.json();
                 providerModels = providersData.models;
+                allProviders = providersData.all_models;
+                providerAvailability = providersData.available;
+                
+                // Populate provider dropdown
+                populateProviderDropdown(providersData.providers, providersData.available);
+                
+                // Show info about locked providers
+                showProviderInfo(providersData);
                 
                 // Apply settings to UI
                 document.getElementById('setting-provider').value = currentSettings.provider;
@@ -886,6 +897,44 @@ async def get_chat_page():
                 
             }} catch (error) {{
                 console.error('Failed to load settings:', error);
+            }}
+        }}
+        
+        function populateProviderDropdown(enabledProviders, availability) {{
+            const select = document.getElementById('setting-provider');
+            const providerNames = {{
+                'kimi': 'Kimi (Moonshot)',
+                'openrouter': 'OpenRouter',
+                'anthropic': 'Anthropic (Claude)',
+                'openai': 'OpenAI'
+            }};
+            
+            let html = '';
+            
+            // Enabled providers
+            enabledProviders.forEach(p => {{
+                html += `<option value="${{p}}">${{providerNames[p]}} ✅</option>`;
+            }});
+            
+            // Disabled providers (grayed out)
+            Object.keys(availability).forEach(p => {{
+                if (!availability[p]) {{
+                    html += `<option value="${{p}}" disabled>${{providerNames[p]}} 🔒 (add API key)</option>`;
+                }}
+            }});
+            
+            select.innerHTML = html;
+        }}
+        
+        function showProviderInfo(providersData) {{
+            const enabledCount = providersData.providers.length;
+            const totalCount = Object.keys(providersData.all_models).length;
+            
+            if (enabledCount < totalCount) {{
+                const infoDiv = document.getElementById('provider-info');
+                const infoText = document.getElementById('provider-info-text');
+                infoDiv.classList.remove('hidden');
+                infoText.textContent = `${{enabledCount}}/${{totalCount}} providers enabled. Add API keys to .env to enable more.`;
             }}
         }}
         
@@ -1643,12 +1692,28 @@ async def update_settings(request: Request):
 
 @app.get("/api/settings/providers")
 async def get_providers():
-    """Get available providers and models."""
+    """Get available providers and models (only those with API keys)."""
+    # Check which providers are available
+    available = {
+        "kimi": os.getenv("KIMI_API_KEY") is not None,
+        "anthropic": os.getenv("ANTHROPIC_API_KEY") is not None,
+        "openai": os.getenv("OPENAI_API_KEY") is not None,
+        "openrouter": os.getenv("OPENROUTER_API_KEY") is not None
+    }
+    
+    # Only include providers with API keys
+    enabled_providers = [p for p, enabled in available.items() if enabled]
+    enabled_models = {p: PROVIDER_MODELS[p] for p in enabled_providers}
+    
     return JSONResponse({
-        "providers": list(PROVIDER_MODELS.keys()),
-        "models": PROVIDER_MODELS,
+        "providers": enabled_providers,  # Only enabled
+        "models": enabled_models,  # Only enabled
+        "all_providers": list(PROVIDER_MODELS.keys()),  # All for reference
+        "all_models": PROVIDER_MODELS,  # All for reference
+        "available": available,  # Status of each
         "modes": list(MODE_PRESETS.keys()),
-        "mode_presets": MODE_PRESETS
+        "mode_presets": MODE_PRESETS,
+        "message": "Add API keys to .env to enable more providers" if len(enabled_providers) < 4 else None
     })
 
 @app.post("/api/settings/mode/{mode}")
