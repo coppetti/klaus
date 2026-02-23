@@ -1,0 +1,62 @@
+# IDE Agent Wizard - Test Environment
+# ===================================
+# Uses different ports to avoid conflicts with production
+# 
+# Ports:
+#   - Kimi Agent: 8083 (prod: 8081)
+#   - Web UI: 8084 (prod: 8082)
+#   - Telegram: standard (uses polling)
+
+version: '3.8'
+
+services:
+  # Test Kimi Agent (Port 8083)
+  kimi-agent-test:
+    build:
+      context: ../docker/kimi-agent-patch
+      dockerfile: Dockerfile
+    container_name: ide-agent-test-kimi
+    ports:
+      - "8083:8080"
+    volumes:
+      - ../workspace/memory:/app/memory:rw
+      - ../workspace:/app/workspace:ro
+      - ../docs:/app/docs:ro
+    env_file:
+      - ../.env.test
+    environment:
+      - MEMORY_PATH=/app/memory
+      - SOUL_MD_PATH=/app/workspace/SOUL.md
+      - USER_MD_PATH=/app/workspace/USER.md
+      - AGENTS_MD_PATH=/app/docs/AGENTS.md
+      - CLAWD_WORKSPACE=/app/workspace
+      - PROJECTS_PATH=/app/workspace/projects
+    restart: "no"  # Don't restart in tests
+    profiles:
+      - test
+
+  # Test Web UI (Port 8084)
+  web-ui-test:
+    build:
+      context: ../docker/web-ui
+      dockerfile: Dockerfile
+    container_name: ide-agent-test-web
+    ports:
+      - "8084:8082"
+    volumes:
+      - ../workspace:/app/workspace:ro
+      - ../init.yaml:/app/init.yaml:ro
+    env_file:
+      - ../.env.test
+    environment:
+      - KIMI_AGENT_URL=http://kimi-agent-test:8080
+      - WEB_UI_PORT=8082
+    restart: "no"
+    depends_on:
+      - kimi-agent-test
+    profiles:
+      - test
+
+networks:
+  default:
+    name: ide-agent-test-network
