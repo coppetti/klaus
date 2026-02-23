@@ -420,11 +420,16 @@ async def get_chat_page():
             <!-- Memory Explorer Section -->
             <div class="border-t border-gray-200">
                 <div class="p-3 bg-gray-50 border-b border-gray-200">
-                    <h3 class="text-xs font-semibold text-gray-600 flex items-center gap-2 cursor-pointer" onclick="toggleMemoryPanel()">
-                        <i class="fas fa-brain text-gray-400"></i>
-                        Memory Explorer
-                        <i id="memory-toggle-icon" class="fas fa-chevron-down text-xs ml-auto"></i>
-                    </h3>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-semibold text-gray-600 flex items-center gap-2 cursor-pointer" onclick="toggleMemoryPanel()">
+                            <i class="fas fa-brain text-gray-400"></i>
+                            Memory Explorer
+                            <i id="memory-toggle-icon" class="fas fa-chevron-down text-xs ml-auto"></i>
+                        </h3>
+                        <a href="/memory-graph" target="_blank" class="text-xs text-violet-600 hover:text-violet-800" title="Open Graph View">
+                            <i class="fas fa-project-diagram"></i>
+                        </a>
+                    </div>
                 </div>
                 
                 <div id="memory-panel" class="hidden">
@@ -2449,6 +2454,392 @@ async def providers_status():
         "openai": {"available": os.getenv("OPENAI_API_KEY") is not None},
         "openrouter": {"available": os.getenv("OPENROUTER_API_KEY") is not None}
     }
+
+@app.get("/memory-graph", response_class=HTMLResponse)
+async def memory_graph_page():
+    """Serve the Memory Graph visualization page."""
+    html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Graph Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        #graph-container {
+            width: 100%;
+            height: calc(100vh - 200px);
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background: #f9fafb;
+        }
+        .memory-card {
+            transition: all 0.2s;
+        }
+        .memory-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen">
+    <div class="h-full flex flex-col">
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <a href="/" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-900">
+                        <i class="fas fa-project-diagram text-violet-500 mr-2"></i>
+                        Memory Graph Explorer
+                    </h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="stats" class="text-sm text-gray-500">
+                        Loading stats...
+                    </div>
+                    <button onclick="loadGraph()" class="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Sidebar - Memory List -->
+            <div class="w-80 bg-white border-r border-gray-200 flex flex-col">
+                <div class="p-4 border-b border-gray-200">
+                    <h2 class="font-medium text-gray-900">Memories</h2>
+                    <p class="text-xs text-gray-500 mt-1">Click to highlight connections</p>
+                </div>
+                <div id="memory-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+                    <div class="text-center text-gray-400 py-8">Loading...</div>
+                </div>
+            </div>
+            
+            <!-- Graph View -->
+            <div class="flex-1 flex flex-col p-6">
+                <!-- Filters -->
+                <div class="mb-4 flex gap-4">
+                    <select id="node-filter" onchange="filterGraph()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        <option value="all">All Nodes</option>
+                        <option value="Memory">Memories</option>
+                        <option value="Topic">Topics</option>
+                        <option value="Entity">Entities</option>
+                    </select>
+                    <select id="layout-select" onchange="changeLayout()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        <option value="force">Force-directed</option>
+                        <option value="hierarchical">Hierarchical</option>
+                        <option value="circular">Circular</option>
+                    </select>
+                    <button onclick="fitGraph()" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm">
+                        <i class="fas fa-compress-arrows-alt mr-1"></i>Fit
+                    </button>
+                </div>
+                
+                <!-- Graph Container -->
+                <div id="graph-container"></div>
+                
+                <!-- Selected Node Info -->
+                <div id="node-info" class="mt-4 p-4 bg-white rounded-lg border border-gray-200 hidden">
+                    <h3 class="font-medium text-gray-900 mb-2" id="selected-node-title"></h3>
+                    <p class="text-sm text-gray-600" id="selected-node-content"></p>
+                    <div class="mt-2 flex gap-2" id="selected-node-connections"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let network = null;
+        let nodesData = null;
+        let edgesData = null;
+        let allNodes = [];
+        let allEdges = [];
+        
+        // Color scheme
+        const colors = {
+            Memory: { background: '#8b5cf6', border: '#7c3aed' },
+            Topic: { background: '#10b981', border: '#059669' },
+            Entity: { background: '#f59e0b', border: '#d97706' },
+            Category: { background: '#3b82f6', border: '#2563eb' }
+        };
+        
+        async function loadGraph() {
+            try {
+                // Load memories and graph stats
+                const [memoriesRes, statsRes] = await Promise.all([
+                    fetch('/api/memory?limit=100'),
+                    fetch('/api/memory/stats')
+                ]);
+                
+                const memoriesData = await memoriesRes.json();
+                const stats = await statsRes.json();
+                
+                // Update stats
+                document.getElementById('stats').innerHTML = `
+                    <span class="font-medium">${stats.sqlite?.total || 0}</span> memories
+                    ${stats.graph_available ? 
+                        `<span class="mx-2">|</span><span class="font-medium">${stats.graph?.nodes || 0}</span> graph nodes` : 
+                        '<span class="mx-2">|</span><span class="text-yellow-600">Graph not available</span>'
+                    }
+                `;
+                
+                // Update memory list
+                renderMemoryList(memoriesData.memories);
+                
+                // Build graph from memories
+                buildGraph(memoriesData.memories);
+                
+            } catch (error) {
+                console.error('Failed to load graph:', error);
+                document.getElementById('graph-container').innerHTML = 
+                    '<div class="flex items-center justify-center h-full text-red-500">Failed to load graph data</div>';
+            }
+        }
+        
+        function renderMemoryList(memories) {
+            const container = document.getElementById('memory-list');
+            if (!memories || memories.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-8">No memories yet</div>';
+                return;
+            }
+            
+            container.innerHTML = memories.map(m => `
+                <div class="memory-card p-3 bg-gray-50 rounded-lg cursor-pointer border border-gray-200 hover:border-violet-300"
+                     onclick="highlightMemory('${m.id}')">
+                    <div class="text-sm text-gray-700 line-clamp-2">${escapeHtml(m.content || m.text || 'No content')}</div>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="px-2 py-0.5 bg-white rounded text-xs text-gray-500 border">${m.category || 'general'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function buildGraph(memories) {
+            // Create nodes from memories
+            const nodes = [];
+            const edges = [];
+            
+            // Add memory nodes
+            memories.forEach((m, index) => {
+                nodes.push({
+                    id: `mem-${m.id}`,
+                    label: truncate(m.content || m.text || 'Memory', 30),
+                    title: m.content || m.text,
+                    group: 'Memory',
+                    color: colors.Memory,
+                    shape: 'box',
+                    font: { color: 'white', size: 12 },
+                    data: m
+                });
+                
+                // Create edges based on category
+                if (m.category) {
+                    const categoryId = `cat-${m.category}`;
+                    if (!nodes.find(n => n.id === categoryId)) {
+                        nodes.push({
+                            id: categoryId,
+                            label: m.category,
+                            group: 'Category',
+                            color: colors.Category,
+                            shape: 'ellipse',
+                            font: { color: 'white', size: 11 }
+                        });
+                    }
+                    edges.push({
+                        from: categoryId,
+                        to: `mem-${m.id}`,
+                        label: 'HAS_CATEGORY',
+                        color: { color: '#cbd5e1' },
+                        arrows: 'to'
+                    });
+                }
+                
+                // Create temporal connections (if memories have timestamps)
+                if (index > 0 && m.created_at && memories[index-1].created_at) {
+                    edges.push({
+                        from: `mem-${memories[index-1].id}`,
+                        to: `mem-${m.id}`,
+                        color: { color: '#e5e7eb' },
+                        dashes: true,
+                        arrows: 'to'
+                    });
+                }
+            });
+            
+            allNodes = nodes;
+            allEdges = edges;
+            
+            // Create vis.js dataset
+            nodesData = new vis.DataSet(nodes);
+            edgesData = new vis.DataSet(edges);
+            
+            // Network options
+            const options = {
+                nodes: {
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    width: 2,
+                    shadow: false,
+                    smooth: { type: 'continuous' }
+                },
+                physics: {
+                    forceAtlas2Based: {
+                        gravitationalConstant: -50,
+                        centralGravity: 0.01,
+                        springLength: 100,
+                        springConstant: 0.08
+                    },
+                    maxVelocity: 50,
+                    solver: 'forceAtlas2Based',
+                    timestep: 0.35,
+                    stabilization: { iterations: 150 }
+                },
+                interaction: {
+                    hover: true,
+                    tooltipDelay: 200,
+                    hideEdgesOnDrag: true
+                }
+            };
+            
+            // Create network
+            const container = document.getElementById('graph-container');
+            network = new vis.Network(container, { nodes: nodesData, edges: edgesData }, options);
+            
+            // Event handlers
+            network.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    showNodeInfo(params.nodes[0]);
+                } else {
+                    hideNodeInfo();
+                }
+            });
+        }
+        
+        function highlightMemory(memoryId) {
+            const nodeId = `mem-${memoryId}`;
+            network.selectNodes([nodeId]);
+            network.focus(nodeId, { scale: 1.2, animation: true });
+            showNodeInfo(nodeId);
+        }
+        
+        function showNodeInfo(nodeId) {
+            const node = allNodes.find(n => n.id === nodeId);
+            if (!node || !node.data) {
+                hideNodeInfo();
+                return;
+            }
+            
+            const info = document.getElementById('node-info');
+            document.getElementById('selected-node-title').textContent = 
+                node.group === 'Memory' ? 'Memory' : node.group;
+            document.getElementById('selected-node-content').textContent = 
+                node.data.content || node.data.text || node.title || 'No details';
+            
+            // Show connected nodes
+            const connectedEdges = allEdges.filter(e => e.from === nodeId || e.to === nodeId);
+            const connectionsHtml = connectedEdges.map(e => {
+                const otherId = e.from === nodeId ? e.to : e.from;
+                const otherNode = allNodes.find(n => n.id === otherId);
+                return `<span class="px-2 py-1 bg-gray-100 rounded text-xs">${otherNode?.label || otherId}</span>`;
+            }).join('');
+            
+            document.getElementById('selected-node-connections').innerHTML = 
+                connectionsHtml || '<span class="text-xs text-gray-400">No connections</span>';
+            
+            info.classList.remove('hidden');
+        }
+        
+        function hideNodeInfo() {
+            document.getElementById('node-info').classList.add('hidden');
+        }
+        
+        function filterGraph() {
+            const filter = document.getElementById('node-filter').value;
+            
+            if (filter === 'all') {
+                nodesData.clear();
+                nodesData.add(allNodes);
+                edgesData.clear();
+                edgesData.add(allEdges);
+            } else {
+                const filteredNodes = allNodes.filter(n => n.group === filter);
+                const nodeIds = new Set(filteredNodes.map(n => n.id));
+                const filteredEdges = allEdges.filter(e => nodeIds.has(e.from) && nodeIds.has(e.to));
+                
+                nodesData.clear();
+                nodesData.add(filteredNodes);
+                edgesData.clear();
+                edgesData.add(filteredEdges);
+            }
+        }
+        
+        function changeLayout() {
+            const layout = document.getElementById('layout-select').value;
+            let options = {};
+            
+            if (layout === 'hierarchical') {
+                options = {
+                    layout: {
+                        hierarchical: {
+                            direction: 'UD',
+                            sortMethod: 'directed'
+                        }
+                    }
+                };
+            } else if (layout === 'circular') {
+                // Use circular positioning (approximated with fixed positions)
+                options = {
+                    layout: {
+                        hierarchical: false
+                    }
+                };
+            } else {
+                // Force-directed (default)
+                options = {
+                    layout: {
+                        hierarchical: false
+                    },
+                    physics: {
+                        enabled: true
+                    }
+                };
+            }
+            
+            network.setOptions(options);
+        }
+        
+        function fitGraph() {
+            network.fit({ animation: true });
+        }
+        
+        function truncate(str, len) {
+            if (!str) return '';
+            return str.length > len ? str.substring(0, len) + '...' : str;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Load on startup
+        document.addEventListener('DOMContentLoaded', loadGraph);
+    </script>
+</body>
+</html>"""
+    return HTMLResponse(content=html_content)
 
 @app.get("/health")
 async def health():
