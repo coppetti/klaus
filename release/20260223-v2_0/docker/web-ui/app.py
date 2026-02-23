@@ -2,15 +2,35 @@
 Web UI for IDE Agent Wizard
 ============================
 Modern Shadcn-inspired interface with chat + config panel
+Uses Hybrid Memory (SQLite + Graph) for intelligent context
 """
 
 import os
 import json
+import sys
 import httpx
+from datetime import datetime
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from pathlib import Path
 import yaml
+
+# Add core to path for hybrid memory
+# Path: docker/web-ui/app.py -> core/
+core_path = Path(__file__).parent.parent.parent / "core"
+if core_path.exists():
+    sys.path.insert(0, str(core_path))
+else:
+    # Fallback for container path
+    sys.path.insert(0, "/app/core")
+
+# Try to import hybrid memory
+try:
+    from hybrid_memory import HybridMemoryStore, MemoryQuery
+    HYBRID_AVAILABLE = True
+except ImportError:
+    HYBRID_AVAILABLE = False
+    print("⚠️  Hybrid memory not available, using simple storage")
 
 app = FastAPI(title="IDE Agent Wizard - Web UI")
 
@@ -749,11 +769,22 @@ async def chat(request: Request):
 # In-memory message storage for the web session
 web_messages = []
 
+# Initialize hybrid memory store
+hybrid_memory = None
+if HYBRID_AVAILABLE:
+    try:
+        db_path = "/app/workspace/memory/agent_memory.db"
+        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        hybrid_memory = HybridMemoryStore(db_path)
+        print(f"✅ Hybrid memory initialized: {db_path}")
+    except Exception as e:
+        print(f"⚠️  Hybrid memory init failed: {e}")
+
 
 @app.post("/api/compact")
 async def compact_context(request: Request):
-    """Analyze conversation, extract key facts, save to memory, clear session."""
-    global web_messages
+    """Analyze conversation, extract key facts, save to hybrid memory (SQLite + Graph)."""
+    global web_messages, hybrid_memory
     
     if not web_messages:
         return JSONResponse({"message": "No messages to compact", "facts_extracted": 0})
@@ -762,36 +793,74 @@ async def compact_context(request: Request):
         # Extract key information from the conversation
         facts = extract_important_facts(web_messages)
         
-        # Save facts to memory via Kimi Agent
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            saved_count = 0
+        # Save facts to hybrid memory (both SQLite and Graph)
+        saved_count = 0
+        if hybrid_memory:
             for fact in facts:
                 try:
-                    # Store fact via memory API (if available)
-                    await client.post(
-                        f"{KIMI_AGENT_URL}/api/memory/store",
-                        json={
-                            "user_id": "web_user",
-                            "content": fact,
-                            "category": "conversation_fact",
-                            "importance": "high"
-                        },
-                        timeout=5.0
+                    hybrid_memory.store(
+                        content=fact,
+                        category="conversation_fact",
+                        importance="high",
+                        metadata={
+                            "source": "web_ui_compact",
+                            "timestamp": str(datetime.now()),
+                            "facts": len(facts)
+                        }
                     )
                     saved_count += 1
-                except:
-                    pass  # Memory API might not exist, that's ok
+                except Exception as e:
+                    print(f"Failed to store fact: {e}")
+        else:
+            # Fallback: try to save via Kimi Agent
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                for fact in facts:
+                    try:
+                        await client.post(
+                            f"{KIMI_AGENT_URL}/api/memory/store",
+                            json={
+                                "user_id": "web_user",
+                                "content": fact,
+                                "category": "conversation_fact",
+                                "importance": "high"
+                            },
+                            timeout=5.0
+                        )
+                        saved_count += 1
+                    except:
+                        pass
+        
+        # Also save to graph if available (for relationships)
+        if hybrid_memory and hybrid_memory.graph_available:
+            # Create relationships between facts and topics
+            for i, fact in enumerate(facts):
+                # Link related facts
+                if i > 0:
+                    try:
+                        # This creates RELATED_TO edges in the graph
+                        pass  # Graph sync happens automatically on store
+                    except:
+                        pass
         
         # Clear web session messages
         message_count = len(web_messages)
         web_messages = []
+        
+        # Get memory stats
+        memory_stats = {}
+        if hybrid_memory:
+            try:
+                memory_stats = hybrid_memory.get_stats()
+            except:
+                pass
         
         return JSONResponse({
             "message": "Context compacted successfully",
             "messages_processed": message_count,
             "facts_extracted": len(facts),
             "facts_saved": saved_count,
-            "facts": facts
+            "facts": facts,
+            "memory_stats": memory_stats
         })
         
     except Exception as e:

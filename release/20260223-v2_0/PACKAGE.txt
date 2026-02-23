@@ -6,11 +6,24 @@ Version: v2.0.0
 WHAT'S NEW IN v2.0.0:
 ====================
 
+🧠 HYBRID MEMORY (SQLite + Kuzu Graph)
+- Dual storage: SQLite for fast access, Graph for semantic queries
+- Automatic relationship detection between memories
+- Topic extraction and entity recognition
+- Context chain traversal for deep conversations
+- Transparent fallback to SQLite if Graph unavailable
+
+Query Types:
+  - "quick": SQLite keyword search (fast)
+  - "semantic": Graph topic/entity search (contextual)
+  - "context": Graph relationship traversal (deep context)
+  - "related": Graph entity relationships
+
 🌐 WEB UI (BROWSER INTERFACE)
 - Modern chat interface at http://localhost:8082
 - Clean 2/3 + 1/3 professional layout
 - Markdown rendering with syntax highlighting
-- Compact Context: Extract and save important facts to memory
+- Compact Context: Extract and save important facts to Hybrid Memory
 - Reset Session: Clear conversation while preserving context
 - Real-time status monitoring (Kimi Agent, Web UI, Telegram)
 
@@ -20,11 +33,15 @@ WHAT'S NEW IN v2.0.0:
 - Edit settings without recreating config
 - Detects existing setup and adapts options
 
-🧠 ENHANCED MEMORY SYSTEM
-- SQLite-based persistent memory
-- Automatic context retrieval
-- Shared across IDE, Telegram, and Web UI
-- Memory synchronization via Docker volumes
+💻 IDE MODE
+- Works with Kimi Code, Claude Code, Cursor, etc.
+- Hybrid Memory for contextual recall
+- Persistent memory across sessions
+
+📱 TELEGRAM MODE
+- Full Telegram bot integration
+- Hybrid Memory with graph relationships
+- Shared memory with IDE and Web UI
 
 🎨 UI/UX IMPROVEMENTS
 - User and agent names from config (no more generic "USER")
@@ -35,21 +52,29 @@ WHAT'S NEW IN v2.0.0:
 📦 CONTENTS:
 ===========
 - setup.sh / reset.sh (launchers)
-- bot/ (Telegram bot)
-- cli/ (CLI tools)
-- core/ (main code)
-- docker/ (Docker configs + NEW web-ui/)
-- docs/ (documentation)
-- scripts/ (setup wizard)
-- templates/ (7 agent personalities)
-- examples/ (example projects)
-- fun-snippets/ (dev jokes)
+- core/
+  - hybrid_memory.py         # NEW: Hybrid SQLite+Graph memory
+  - memory.py                # SQLite memory
+  - connectors/ide_connector.py  # IDE integration with Hybrid Memory
+  - providers/               # LLM providers (Kimi, Claude, etc.)
+- bot/telegram_bot.py        # Telegram bot with Hybrid Memory
+- cli/                       # CLI tools
+- docker/
+  - docker-compose.yml
+  - web-ui/app.py           # Web UI with Hybrid Memory
+  - kimi-agent-patch/       # Patched Kimi Agent
+- docs/                      # Documentation
+- scripts/                   # Setup wizard
+- templates/                 # 7 agent personalities
+- tests/                     # Test suite
+- examples/                  # Example projects
+- fun-snippets/              # Dev jokes
 
 INTERFACES:
 ==========
-💻 IDE Mode: Direct integration with Kimi Code, Claude Code, Cursor
-📱 Telegram: Bot interface with shared memory
-🌐 Web UI: Browser chat interface
+💻 IDE Mode: Direct integration with Hybrid Memory
+📱 Telegram: Bot with graph-based context
+🌐 Web UI: Browser chat with Compact Context
 
 INSTALL:
 ========
@@ -69,11 +94,21 @@ docker compose --profile web up -d
 # All interfaces
 docker compose --profile web up -d
 
+HYBRID MEMORY:
+==============
+The Hybrid Memory system uses:
+- SQLite: Fast writes, simple queries, reliable fallback
+- Kuzu Graph: Semantic relationships, context chains, topic clusters
+
+All three interfaces (IDE, Web, Telegram) share the same
+intelligent memory with relationship awareness.
+
 REQUIREMENTS:
 =============
 - Python 3.11+
 - Docker (for Telegram/Web modes)
 - API key (for Docker modes)
+- Optional: Kuzu for graph features (pip install kuzu)
 
 DOCS: docs/README.md
 WEB UI: http://localhost:8082 (when enabled)

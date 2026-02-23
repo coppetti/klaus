@@ -16,6 +16,7 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from memory import MemoryStore
+from core.hybrid_memory import HybridMemoryStore, MemoryQuery
 
 class IDEConnector:
     """
@@ -53,22 +54,24 @@ class IDEConnector:
         return {}
     
     def _init_memory(self):
-        """Initialize memory like Telegram bot."""
+        """Initialize hybrid memory (SQLite + Graph)."""
         memory_config = self.config.get('memory', {})
         
         if not memory_config.get('enabled', True):
             return
         
-        backend = memory_config.get('backend', 'sqlite')
+        # Use hybrid memory (SQLite + Kuzu Graph)
+        db_path = memory_config.get('sqlite', {}).get('path', './memory.db')
+        # Adjust path if in workspace
+        if not Path(db_path).exists() and Path('workspace').exists():
+            db_path = f"workspace/{db_path}"
         
-        if backend == 'sqlite':
-            db_path = memory_config.get('sqlite', {}).get('path', './memory.db')
-            # Adjust path if in workspace
-            if not Path(db_path).exists() and Path('workspace').exists():
-                db_path = f"workspace/{db_path}"
+        # Initialize hybrid store (auto-fallback to SQLite if Graph fails)
+        try:
+            self.memory = HybridMemoryStore(db_path)
+        except Exception as e:
+            print(f"⚠️  Hybrid memory failed: {e}, using SQLite fallback")
             self.memory = MemoryStore(db_path)
-        else:
-            self.memory = MemoryStore('./memory.db')
     
     def get_context(self, message: str, include_memories: bool = True) -> str:
         """
@@ -97,13 +100,32 @@ class IDEConnector:
                 context_parts.append(f"--- USER PROFILE ---\n{path.read_text()}")
                 break
         
-        # Add relevant memories
+        # Add relevant memories (use hybrid memory for contextual recall)
         if include_memories and self.memory:
-            memories = self.memory.recall(message, limit=5)
+            # Use context-aware recall if hybrid, fallback to simple recall
+            if hasattr(self.memory, 'recall') and callable(getattr(self.memory, 'recall')):
+                try:
+                    # Try hybrid/contextual recall first
+                    if isinstance(self.memory, HybridMemoryStore):
+                        query = MemoryQuery(
+                            query_type="context",
+                            text=message,
+                            limit=5,
+                            context_depth=2
+                        )
+                        memories = self.memory.recall(query)
+                    else:
+                        # Fallback to simple SQLite recall
+                        memories = self.memory.recall(message, limit=5)
+                except Exception:
+                    memories = self.memory.recall(message, limit=5)
+            else:
+                memories = []
+            
             if memories:
                 mem_lines = ["--- RELEVANT MEMORIES ---"]
                 for m in memories:
-                    mem_lines.append(f"• [{m['category']}] {m['content']}")
+                    mem_lines.append(f"• [{m.get('category', 'general')}] {m['content']}")
                 context_parts.append("\n".join(mem_lines))
         
         return "\n\n".join(context_parts)
