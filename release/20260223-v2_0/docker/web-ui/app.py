@@ -414,6 +414,56 @@ async def get_chat_page():
                     <span id="session-message-count">0</span> messages
                 </div>
             </div>
+            
+            <!-- Memory Explorer Section -->
+            <div class="border-t border-gray-200">
+                <div class="p-3 bg-gray-50 border-b border-gray-200">
+                    <h3 class="text-xs font-semibold text-gray-600 flex items-center gap-2 cursor-pointer" onclick="toggleMemoryPanel()">
+                        <i class="fas fa-brain text-gray-400"></i>
+                        Memory Explorer
+                        <i id="memory-toggle-icon" class="fas fa-chevron-down text-xs ml-auto"></i>
+                    </h3>
+                </div>
+                
+                <div id="memory-panel" class="hidden">
+                    <div class="p-3 space-y-3">
+                        <!-- Memory Stats -->
+                        <div class="text-xs text-gray-500 flex justify-between">
+                            <span id="memory-count">0 memories</span>
+                            <span id="memory-graph-status" class="text-gray-400"></span>
+                        </div>
+                        
+                        <!-- Search -->
+                        <div class="relative">
+                            <input type="text" id="memory-search" placeholder="Search memories..."
+                                   class="input-field text-xs py-2 pl-8"
+                                   onkeypress="if(event.key==='Enter') searchMemories()">
+                            <i class="fas fa-search absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
+                        </div>
+                        
+                        <!-- Search Type -->
+                        <div class="flex gap-1">
+                            <button onclick="setMemorySearchType('quick')" id="mem-search-quick" class="flex-1 btn btn-primary text-[10px] py-1">
+                                Quick
+                            </button>
+                            <button onclick="setMemorySearchType('semantic')" id="mem-search-semantic" class="flex-1 btn btn-secondary text-[10px] py-1">
+                                Smart
+                            </button>
+                        </div>
+                        
+                        <!-- Memories List -->
+                        <div id="memories-list" class="space-y-2 max-h-48 overflow-y-auto">
+                            <div class="text-xs text-gray-400 text-center py-2">Click search to load</div>
+                        </div>
+                        
+                        <!-- Load More -->
+                        <button onclick="loadMoreMemories()" id="load-more-memories" class="btn btn-secondary w-full text-xs py-1.5 hidden">
+                            <i class="fas fa-chevron-down"></i>
+                            Load More
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- Chat Area (flex-1) -->
@@ -1208,6 +1258,173 @@ async def get_chat_page():
             }}
         }}
         
+        // ============================================================================
+        // MEMORY EXPLORER
+        // ============================================================================
+        
+        let memoryOffset = 0;
+        let memorySearchType = 'quick';
+        let currentMemoryQuery = '';
+        
+        function toggleMemoryPanel() {{
+            const panel = document.getElementById('memory-panel');
+            const icon = document.getElementById('memory-toggle-icon');
+            panel.classList.toggle('hidden');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+            
+            if (!panel.classList.contains('hidden') && memoryOffset === 0) {{
+                loadMemories();
+                loadMemoryStats();
+            }}
+        }}
+        
+        async function loadMemoryStats() {{
+            try {{
+                const res = await fetch('/api/memory/stats');
+                const data = await res.json();
+                
+                document.getElementById('memory-count').textContent = 
+                    `${{data.sqlite_count || 0}} memories`;
+                document.getElementById('memory-graph-status').textContent = 
+                    data.graph_available ? '(Graph ✅)' : '(SQLite only)';
+            }} catch (error) {{
+                console.error('Failed to load memory stats:', error);
+            }}
+        }}
+        
+        async function loadMemories(reset = false) {{
+            if (reset) {{
+                memoryOffset = 0;
+                currentMemoryQuery = '';
+            }}
+            
+            try {{
+                const res = await fetch(`/api/memory?limit=10&offset=${{memoryOffset}}`);
+                const data = await res.json();
+                
+                renderMemories(data.memories, reset);
+                
+                // Show/hide load more button
+                const loadMoreBtn = document.getElementById('load-more-memories');
+                if (data.memories.length === 10) {{
+                    loadMoreBtn.classList.remove('hidden');
+                }} else {{
+                    loadMoreBtn.classList.add('hidden');
+                }}
+            }} catch (error) {{
+                console.error('Failed to load memories:', error);
+            }}
+        }}
+        
+        async function searchMemories() {{
+            const query = document.getElementById('memory-search').value.trim();
+            if (!query) {{
+                loadMemories(true);
+                return;
+            }}
+            
+            currentMemoryQuery = query;
+            
+            try {{
+                const res = await fetch('/api/memory/search', {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{
+                        query: query,
+                        type: memorySearchType,
+                        limit: 10
+                    }})
+                }});
+                
+                const data = await res.json();
+                renderMemories(data.memories, true);
+                
+                // Hide load more for search results
+                document.getElementById('load-more-memories').classList.add('hidden');
+            }} catch (error) {{
+                console.error('Failed to search memories:', error);
+            }}
+        }}
+        
+        function renderMemories(memories, reset) {{
+            const container = document.getElementById('memories-list');
+            
+            if (reset) {{
+                container.innerHTML = '';
+            }}
+            
+            if (memories.length === 0) {{
+                container.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">No memories found</div>';
+                return;
+            }}
+            
+            memories.forEach(m => {{
+                const div = document.createElement('div');
+                div.className = 'p-2 bg-white border border-gray-200 rounded-lg text-xs group hover:border-violet-300 transition-colors';
+                
+                const content = m.content || m.text || 'No content';
+                const preview = content.length > 60 ? content.substring(0, 60) + '...' : content;
+                const category = m.category || 'general';
+                const date = m.created_at ? new Date(m.created_at).toLocaleDateString() : 'Unknown';
+                
+                div.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1">
+                            <div class="text-gray-700 leading-tight">${{preview}}</div>
+                            <div class="flex items-center gap-2 mt-1.5">
+                                <span class="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] text-gray-500">${{category}}</span>
+                                <span class="text-[10px] text-gray-400">${{date}}</span>
+                            </div>
+                        </div>
+                        <button onclick="deleteMemory(${{m.id}})" 
+                                class="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            }});
+            
+            memoryOffset += memories.length;
+        }}
+        
+        function setMemorySearchType(type) {{
+            memorySearchType = type;
+            
+            // Update buttons
+            document.getElementById('mem-search-quick').className = 
+                type === 'quick' ? 'flex-1 btn btn-primary text-[10px] py-1' : 'flex-1 btn btn-secondary text-[10px] py-1';
+            document.getElementById('mem-search-semantic').className = 
+                type === 'semantic' ? 'flex-1 btn btn-primary text-[10px] py-1' : 'flex-1 btn btn-secondary text-[10px] py-1';
+            
+            // Re-search if there's a query
+            if (currentMemoryQuery) {{
+                searchMemories();
+            }}
+        }}
+        
+        function loadMoreMemories() {{
+            if (currentMemoryQuery) {{
+                searchMemories();
+            }} else {{
+                loadMemories();
+            }}
+        }}
+        
+        async function deleteMemory(id) {{
+            if (!confirm('Delete this memory?')) return;
+            
+            try {{
+                await fetch(`/api/memory/${{id}}`, {{ method: 'DELETE' }});
+                loadMemories(true);
+                loadMemoryStats();
+            }} catch (error) {{
+                console.error('Failed to delete memory:', error);
+            }}
+        }}
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {{
             console.log('DOM loaded, initializing...');
@@ -1845,6 +2062,140 @@ async def delete_session_endpoint(session_id: str):
     
     delete_session(session_id)
     return JSONResponse({"status": "ok"})
+
+# ============================================================================
+# MEMORY EXPLORER API
+# ============================================================================
+
+@app.get("/api/memory")
+async def get_memories(
+    limit: int = 50,
+    offset: int = 0,
+    category: str = None,
+    search: str = None
+):
+    """Get memories from hybrid memory store with optional filtering."""
+    global hybrid_memory
+    
+    if not hybrid_memory:
+        return JSONResponse({
+            "memories": [],
+            "total": 0,
+            "message": "Hybrid memory not available"
+        })
+    
+    try:
+        # Get all memories from SQLite
+        memories = hybrid_memory.sqlite.get_all_memories(limit=limit + offset)
+        
+        # Apply category filter
+        if category:
+            memories = [m for m in memories if m.get("category") == category]
+        
+        # Apply search filter
+        if search:
+            search_lower = search.lower()
+            memories = [m for m in memories if search_lower in m.get("content", "").lower()]
+        
+        # Get total count
+        total = len(memories)
+        
+        # Apply pagination
+        memories = memories[offset:offset + limit]
+        
+        # Get unique categories for filter
+        categories = list(set(m.get("category", "general") for m in memories))
+        
+        return JSONResponse({
+            "memories": memories,
+            "total": total,
+            "categories": categories,
+            "message": None
+        })
+    except Exception as e:
+        return JSONResponse({
+            "memories": [],
+            "total": 0,
+            "message": str(e)
+        }, status_code=500)
+
+@app.get("/api/memory/stats")
+async def get_memory_stats():
+    """Get memory statistics."""
+    global hybrid_memory
+    
+    if not hybrid_memory:
+        return JSONResponse({
+            "sqlite_count": 0,
+            "graph_available": False,
+            "categories": [],
+            "message": "Hybrid memory not available"
+        })
+    
+    try:
+        stats = hybrid_memory.get_stats()
+        return JSONResponse(stats)
+    except Exception as e:
+        return JSONResponse({
+            "sqlite_count": 0,
+            "graph_available": False,
+            "categories": [],
+            "message": str(e)
+        })
+
+@app.delete("/api/memory/{memory_id}")
+async def delete_memory(memory_id: int):
+    """Delete a specific memory."""
+    global hybrid_memory
+    
+    if not hybrid_memory:
+        return JSONResponse({"error": "Hybrid memory not available"}, status_code=503)
+    
+    try:
+        success = hybrid_memory.sqlite.delete_memory(memory_id)
+        if success:
+            return JSONResponse({"status": "ok", "message": f"Memory {memory_id} deleted"})
+        else:
+            return JSONResponse({"error": "Memory not found"}, status_code=404)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/memory/search")
+async def search_memories(request: Request):
+    """Search memories with semantic/contextual query."""
+    global hybrid_memory
+    
+    if not hybrid_memory:
+        return JSONResponse({"memories": [], "message": "Hybrid memory not available"})
+    
+    try:
+        data = await request.json()
+        query = data.get("query", "")
+        query_type = data.get("type", "quick")  # quick, semantic, context
+        limit = data.get("limit", 10)
+        
+        if not query:
+            return JSONResponse({"memories": [], "message": "Empty query"})
+        
+        # Use hybrid memory recall
+        from hybrid_memory import MemoryQuery
+        
+        mem_query = MemoryQuery(
+            query_type=query_type,
+            text=query,
+            limit=limit
+        )
+        
+        results = hybrid_memory.recall(mem_query)
+        
+        return JSONResponse({
+            "memories": results,
+            "query": query,
+            "type": query_type,
+            "count": len(results)
+        })
+    except Exception as e:
+        return JSONResponse({"memories": [], "message": str(e)}, status_code=500)
 
 @app.get("/api/session/current")
 async def get_current_session():

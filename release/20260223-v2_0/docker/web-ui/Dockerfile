@@ -13,6 +13,9 @@ RUN pip install --no-cache-dir \
     openai \
     pydantic
 
+# Try to install kuzu (graph database) - optional
+RUN pip install --no-cache-dir kuzu || echo "Kuzu installation skipped (optional)"
+
 # Copy app
 COPY app.py /app/
 

@@ -1,6 +1,6 @@
 {
-  "provider": "openrouter",
-  "model": "anthropic/claude-3.5-sonnet",
+  "provider": "kimi",
+  "model": "kimi-k2-0711",
   "temperature": 0.3,
   "max_tokens": 2048,
   "mode": "fast",

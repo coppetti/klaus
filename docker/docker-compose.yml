@@ -85,6 +85,8 @@ services:
       # Mount workspace for data persistence (sessions, settings)
       - ../workspace:/app/workspace:rw
       - ../init.yaml:/app/init.yaml:ro
+      # Mount core modules for hybrid memory access
+      - ../core:/app/core:ro
     env_file:
       - ../.env
     environment:
