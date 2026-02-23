@@ -701,6 +701,10 @@ async def get_chat_page():
                         Quick Links
                     </h3>
                     <div class="space-y-2 text-sm">
+                        <a href="/memory-graph" target="_blank" class="flex items-center gap-2 text-violet-600 hover:text-violet-800 transition-colors">
+                            <i class="fas fa-project-diagram text-xs"></i>
+                            Memory Graph Explorer
+                        </a>
                         <a href="http://localhost:8081/health" target="_blank" class="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
                             <i class="fas fa-external-link-alt text-xs"></i>
                             Kimi Agent Health
