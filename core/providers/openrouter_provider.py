@@ -20,6 +20,7 @@ class OpenRouterProvider(BaseProvider):
     async def generate(
         self,
         messages: List[Message],
+        system: Optional[str] = None,
         config: Optional[GenerationConfig] = None
     ) -> AsyncIterator[str]:
         """Stream response from OpenRouter."""
@@ -32,9 +33,13 @@ class OpenRouterProvider(BaseProvider):
             "X-Title": "IDE Agent Wizard"  # Optional site name
         }
         
+        formatted_messages = self.format_messages(messages)
+        if system:
+            formatted_messages.insert(0, {"role": "system", "content": system})
+            
         payload = {
             "model": self.model,
-            "messages": self.format_messages(messages),
+            "messages": formatted_messages,
             "temperature": config.temperature,
             "max_tokens": config.max_tokens,
             "top_p": config.top_p,
@@ -65,11 +70,12 @@ class OpenRouterProvider(BaseProvider):
     async def generate_sync(
         self,
         messages: List[Message],
+        system: Optional[str] = None,
         config: Optional[GenerationConfig] = None
     ) -> str:
         """Non-streaming generation."""
         parts = []
-        async for chunk in self.generate(messages, config):
+        async for chunk in self.generate(messages, system, config):
             parts.append(chunk)
         return "".join(parts)
     

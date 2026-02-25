@@ -12,7 +12,9 @@
   "ngrok_domain": "",
   "ngrok_oauth_provider": "google",
   "ngrok_oauth_allow_emails": "matheuscoppetti@gmail.com",
-  "telegram_enabled": false,
-  "telegram_token": "",
-  "telegram_chat_ids": []
+  "telegram_enabled": true,
+  "telegram_token": "8552605246:AAGjWqeIsNhvRbhAiS1_hCN4z3S4uZaXDCY",
+  "telegram_chat_ids": [
+    "6564821315"
+  ]
 }

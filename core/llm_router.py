@@ -78,8 +78,8 @@ async def chat_with_provider(
         )
         
         # Generate response
-        response = await llm.generate(messages=provider_messages, system=system)
-        return response.content
+        response = await llm.generate_sync(messages=provider_messages, system=system)
+        return response
         
     except ImportError:
         logger.warning("core.providers not found or failed to import, using fallback logic")

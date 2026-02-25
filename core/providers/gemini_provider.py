@@ -37,18 +37,20 @@ class GeminiProvider(BaseProvider):
     async def generate(
         self,
         messages: List[Message],
+        system: Optional[str] = None,
         config: Optional[GenerationConfig] = None
     ) -> AsyncIterator[str]:
         """Stream response from Gemini."""
         config = config or GenerationConfig()
         
-        # Extract system instruction
-        system_instruction = None
+        # Extract system msg if exists
+        system_instruction = system
         chat_messages = []
         
         for msg in messages:
             if msg.role == "system":
-                system_instruction = msg.content
+                if not system_instruction: # Prioritize 'system' argument, only use message if arg not provided
+                    system_instruction = msg.content
             else:
                 chat_messages.append(msg)
         
@@ -95,11 +97,12 @@ class GeminiProvider(BaseProvider):
     async def generate_sync(
         self,
         messages: List[Message],
+        system: Optional[str] = None,
         config: Optional[GenerationConfig] = None
     ) -> str:
         """Non-streaming generation."""
         parts = []
-        async for chunk in self.generate(messages, config):
+        async for chunk in self.generate(messages, system, config):
             parts.append(chunk)
         return "".join(parts)
     

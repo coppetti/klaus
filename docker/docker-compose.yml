@@ -34,6 +34,10 @@ services:
       - CLAWD_WORKSPACE=/app/workspace
       - PROJECTS_PATH=/app/workspace/projects
     restart: unless-stopped
+    networks:
+      default:
+        aliases:
+          - kimi-agent
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health').read()"]
       interval: 30s

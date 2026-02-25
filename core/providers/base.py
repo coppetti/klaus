@@ -48,6 +48,7 @@ class BaseProvider(ABC):
     async def generate(
         self,
         messages: List[Message],
+        system: Optional[str] = None,
         config: Optional[GenerationConfig] = None
     ) -> AsyncIterator[str]:
         """Generate streaming response."""
@@ -57,6 +58,7 @@ class BaseProvider(ABC):
     async def generate_sync(
         self,
         messages: List[Message],
+        system: Optional[str] = None,
         config: Optional[GenerationConfig] = None
     ) -> str:
         """Generate non-streaming response."""

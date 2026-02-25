@@ -1,75 +1,89 @@
 """
 Kimi Provider
 =============
-Moonshot AI Kimi models.
+Moonshot AI Kimi models via Anthropic SDK.
 """
 
-import json
 from typing import AsyncIterator, Dict, List, Optional, Any
-import httpx
+from anthropic import Anthropic
 from .base import BaseProvider, Message, GenerationConfig, ProviderType
 
 class KimiProvider(BaseProvider):
-    """Kimi (Moonshot AI) provider."""
+    """Kimi (Moonshot AI) provider using Anthropic SDK."""
     
-    def __init__(self, api_key: str, model: str = "kimi-latest", config: Dict = None):
+    def __init__(self, api_key: str, model: str = "kimi-k2-5", config: Dict = None):
         super().__init__(api_key, model, config)
         self.provider_type = ProviderType.KIMI
-        self.base_url = "https://api.moonshot.cn/v1"
+        # Kimi API is compatible with Anthropic SDK
+        self.client = Anthropic(
+            api_key=api_key,
+            base_url="https://api.kimi.com/coding"
+        )
         
     async def generate(
         self,
         messages: List[Message],
+        system: Optional[str] = None,
         config: Optional[GenerationConfig] = None
     ) -> AsyncIterator[str]:
         """Stream response from Kimi."""
         config = config or GenerationConfig()
         
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
+        # Format messages for Anthropic SDK
+        formatted_messages = []
+        for msg in messages:
+            formatted_messages.append({
+                "role": msg.role,
+                "content": msg.content
+            })
         
-        payload = {
+        # Build kwargs
+        kwargs = {
             "model": self.model if self.model.startswith("kimi-") else "kimi-k2-5",
-            "messages": self.format_messages(messages),
+            "messages": formatted_messages,
             "temperature": config.temperature,
             "max_tokens": config.max_tokens,
             "top_p": config.top_p,
-            "stream": True
         }
+        if system:
+            kwargs["system"] = system
         
-        async with httpx.AsyncClient() as client:
-            async with client.stream(
-                "POST",
-                f"{self.base_url}/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=120.0
-            ) as response:
-                async for line in response.aiter_lines():
-                    if line.startswith("data: "):
-                        data = line[6:]
-                        if data == "[DONE]":
-                            break
-                        try:
-                            chunk = json.loads(data)
-                            if choices := chunk.get("choices"):
-                                if delta := choices[0].get("delta", {}).get("content"):
-                                    yield delta
-                        except (json.JSONDecodeError, IndexError, KeyError):
-                            continue
+        # Stream the response
+        with self.client.messages.stream(**kwargs) as stream:
+            for text in stream.text_stream:
+                yield text
     
     async def generate_sync(
         self,
         messages: List[Message],
+        system: Optional[str] = None,
         config: Optional[GenerationConfig] = None
     ) -> str:
         """Non-streaming generation."""
-        parts = []
-        async for chunk in self.generate(messages, config):
-            parts.append(chunk)
-        return "".join(parts)
+        config = config or GenerationConfig()
+        
+        # Format messages for Anthropic SDK
+        formatted_messages = []
+        for msg in messages:
+            formatted_messages.append({
+                "role": msg.role,
+                "content": msg.content
+            })
+        
+        # Build kwargs
+        kwargs = {
+            "model": self.model if self.model.startswith("kimi-") else "kimi-k2-5",
+            "messages": formatted_messages,
+            "temperature": config.temperature,
+            "max_tokens": config.max_tokens,
+            "top_p": config.top_p,
+        }
+        if system:
+            kwargs["system"] = system
+        
+        # Generate response
+        response = self.client.messages.create(**kwargs)
+        return response.content[0].text
     
     def count_tokens(self, text: str) -> int:
         """Approximate token count."""

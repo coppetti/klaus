@@ -6,6 +6,7 @@ Integração com Kimi API + Sincronização de Memórias
 import os
 import json
 import sys
+import re
 from typing import Optional, List, Dict
 from datetime import datetime
 from pathlib import Path
@@ -103,6 +104,26 @@ def load_workspace_context() -> str:
 # Carregar system prompt completo
 SOUL_PROMPT = load_workspace_context()
 
+FILE_TOOLS_PROMPT = """
+FERRAMENTAS DE ARQUIVO (WORKSPACE INSIGHTS):
+Você tem permissão para ler e escrever arquivos Markdown (.md) no diretório de projetos local do usuário.
+Para usar essas ferramentas, você deve incluir blocos XML ESTRITOS na sua resposta. O sistema irá interceptá-los e executá-los injetando o resultado na próxima mensagem.
+
+Para LER um arquivo, use exatamente este formato:
+<READ_FILE path="caminho/do/arquivo.md"/>
+(Ex: <READ_FILE path="prj001/README.md"/>)
+
+Para ESCREVER em um arquivo, use exatamente este formato:
+<WRITE_FILE path="caminho/do/arquivo.md">
+# Título
+Conteúdo do arquivo...
+</WRITE_FILE>
+(Ex: <WRITE_FILE path="relatorios/insight.md">...</WRITE_FILE>)
+
+* O caminho (path) é sempre relativo à pasta `projects`.
+* NUNCA invente blocos XML diferentes destes.
+* Você pode usar estas ferramentas de forma proativa quando precisar analisar código ou gerar relatórios solicitados pelo usuário."""
+
 CLAWD_SYSTEM_PROMPT = f"""{SOUL_PROMPT}
 
 CONTEXTO DA SESSÃO:
@@ -120,7 +141,10 @@ REGRAS DE FERRAMENTAS/INTERNET:
 REGRAS DE RESPOSTA:
 - Responda como se estivesse conversando diretamente com o usuário
 - Mantenha o tom definido acima
-- Use o contexto disponível para respostas personalizadas"""
+- Use o contexto disponível para respostas personalizadas
+
+{FILE_TOOLS_PROMPT}
+"""
 
 
 # Models
@@ -258,7 +282,10 @@ REGRAS DE FERRAMENTAS/INTERNET:
 REGRAS DE RESPOSTA:
 - Responda como se estivesse conversando diretamente com o usuário
 - Mantenha o tom definido acima
-- Use o contexto disponível para respostas personalizadas"""
+- Use o contexto disponível para respostas personalizadas
+
+{FILE_TOOLS_PROMPT}
+"""
             else:
                 system_prompt = CLAWD_SYSTEM_PROMPT
         else:
@@ -281,8 +308,64 @@ REGRAS DE RESPOSTA:
                 messages=messages
             )
             response_text = response.content[0].text
+            
+        # 6. Interceptar Ferramentas de Arquivo (XML Tags)
+        projects_dir = Path(CLAWD_WORKSPACE) / "projects"
+        projects_dir.mkdir(parents=True, exist_ok=True)
         
-        # 5. Salvar resposta na sessão
+        # Processar exclusões (Write)
+        write_pattern = r'<WRITE_FILE path="([^"]+)">([\s\S]*?)<\/WRITE_FILE>'
+        writes = re.findall(write_pattern, response_text)
+        system_injection = ""
+        
+        for file_path, file_content in writes:
+            try:
+                # Segurança basica contra path traversal
+                safe_path = os.path.normpath(file_path).lstrip('/')
+                if '..' in safe_path: continue
+                
+                full_path = projects_dir / safe_path
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+                full_path.write_text(file_content.strip(), encoding='utf-8')
+                
+                system_injection += f"\n[SYSTEM: Arquivo '{safe_path}' gravado com sucesso no workspace.]"
+                print(f"📝 O Agente escreveu um arquivo em: {full_path}", flush=True)
+            except Exception as e:
+                system_injection += f"\n[SYSTEM: Erro ao gravar '{safe_path}': {str(e)}]"
+                print(f"❌ Erro ao escrever arquivo: {e}", flush=True)
+                
+        # Limpar as tags WRITE da resposta enviada ao usuário (opcional, deixa mais limpo)
+        response_text_clean = re.sub(write_pattern, f"\n*[Arquivo gravado]*\n", response_text)
+
+        # Processar leituras (Read)
+        read_pattern = r'<READ_FILE path="([^"]+)"\s*\/>'
+        reads = re.findall(read_pattern, response_text)
+        
+        for file_path in reads:
+            try:
+                safe_path = os.path.normpath(file_path).lstrip('/')
+                if '..' in safe_path: continue
+                
+                full_path = projects_dir / safe_path
+                if full_path.exists():
+                    file_content = full_path.read_text(encoding='utf-8')
+                    system_injection += f"\n\n[SYSTEM: Conteúdo do arquivo '{safe_path}':]\n```\n{file_content}\n```"
+                    print(f"📖 O Agente leu o arquivo: {full_path}", flush=True)
+                else:
+                    system_injection += f"\n[SYSTEM: O arquivo '{safe_path}' não foi encontrado no workspace.]"
+            except Exception as e:
+                system_injection += f"\n[SYSTEM: Erro ao ler '{safe_path}': {str(e)}]"
+                
+        # Se houver injeção do sistema, nós também devolvemos na resposta (ou guardamos na sessão)
+        # O mais seguro é anexar silenciosamente ao histórico para a PRÓXIMA rodada
+        if system_injection:
+             sessions.add_message(
+                 user_id=request.user_id,
+                 role="system",
+                 content=system_injection.strip()
+             )
+        
+        # 7. Salvar resposta (limpa) na sessão
         
         input_tokens = None
         output_tokens = None
@@ -293,7 +376,7 @@ REGRAS DE RESPOSTA:
         sessions.add_message(
             user_id=request.user_id,
             role="assistant",
-            content=response_text,
+            content=response_text_clean,
             metadata={
                 "model": KIMI_MODEL,
                 "provider": "kimi",
@@ -306,7 +389,7 @@ REGRAS DE RESPOSTA:
         memory_update = detect_memory_update(request.message, response_text)
         
         return ChatResponse(
-            response=response_text,
+            response=response_text_clean,
             session_id=session.session_id,
             messages_in_session=len(session.messages),
             memory_update=memory_update

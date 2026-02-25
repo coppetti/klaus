@@ -68,7 +68,7 @@
         "normalized": "ai"
       },
       "created_at": "2026-02-23T22:52:48.527542",
-      "updated_at": "2026-02-24T14:21:02.662391"
+      "updated_at": "2026-02-25T17:42:40.868776"
     },
     "technology_flask": {
       "id": "technology_flask",
@@ -115,7 +115,7 @@
         "normalized": "cloud"
       },
       "created_at": "2026-02-23T22:55:44.035677",
-      "updated_at": "2026-02-24T14:21:02.665093"
+      "updated_at": "2026-02-25T17:42:40.868759"
     },
     "topic_database": {
       "id": "topic_database",
@@ -139,7 +139,7 @@
         "normalized": "aws"
       },
       "created_at": "2026-02-24T08:41:52.080575",
-      "updated_at": "2026-02-24T14:21:02.665021"
+      "updated_at": "2026-02-25T17:42:40.868355"
     },
     "technology_gcp": {
       "id": "technology_gcp",
@@ -151,7 +151,7 @@
         "normalized": "gcp"
       },
       "created_at": "2026-02-24T08:41:52.080584",
-      "updated_at": "2026-02-24T14:21:02.665041"
+      "updated_at": "2026-02-25T17:42:40.868714"
     },
     "technology_azure": {
       "id": "technology_azure",
@@ -163,7 +163,7 @@
         "normalized": "azure"
       },
       "created_at": "2026-02-24T08:41:52.080590",
-      "updated_at": "2026-02-24T14:21:02.665058"
+      "updated_at": "2026-02-25T17:42:40.868735"
     },
     "technology_terraform": {
       "id": "technology_terraform",
@@ -302,7 +302,7 @@
         "normalized": "performance"
       },
       "created_at": "2026-02-24T09:12:20.368362",
-      "updated_at": "2026-02-24T11:18:05.746633"
+      "updated_at": "2026-02-25T17:42:40.868769"
     },
     "technology_node.js": {
       "id": "technology_node.js",
@@ -326,7 +326,7 @@
         "normalized": "kubernetes"
       },
       "created_at": "2026-02-24T11:07:28.422448",
-      "updated_at": "2026-02-24T14:21:02.662269"
+      "updated_at": "2026-02-25T17:42:40.868741"
     },
     "technology_postgresql": {
       "id": "technology_postgresql",
@@ -387,6 +387,16 @@
       },
       "created_at": "2026-02-24T11:48:38.504341",
       "updated_at": "2026-02-24T14:21:02.672272"
+    },
+    "topic_serverless": {
+      "id": "topic_serverless",
+      "type": "Topic",
+      "name": "serverless",
+      "properties": {
+        "confidence": 0.6
+      },
+      "created_at": "2026-02-25T17:42:40.868747",
+      "updated_at": "2026-02-25T17:42:40.868747"
     }
   },
   "relationships": {
@@ -1785,6 +1795,105 @@
         "timestamp": "2026-02-24T11:48:38.504400"
       },
       "created_at": "2026-02-24T11:48:38.504401",
+      "strength": 1.0
+    },
+    "ep_20260225172319_3074-MENTIONS-topic_cloud": {
+      "id": "ep_20260225172319_3074-MENTIONS-topic_cloud",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225172319_3074",
+      "target_id": "topic_cloud",
+      "properties": {
+        "timestamp": "2026-02-25T17:23:19.421709"
+      },
+      "created_at": "2026-02-25T17:23:19.421711",
+      "strength": 1.0
+    },
+    "ep_20260225174240_4310-MENTIONS-technology_aws": {
+      "id": "ep_20260225174240_4310-MENTIONS-technology_aws",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225174240_4310",
+      "target_id": "technology_aws",
+      "properties": {
+        "timestamp": "2026-02-25T17:42:40.868365"
+      },
+      "created_at": "2026-02-25T17:42:40.868376",
+      "strength": 1.0
+    },
+    "ep_20260225174240_4310-MENTIONS-technology_gcp": {
+      "id": "ep_20260225174240_4310-MENTIONS-technology_gcp",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225174240_4310",
+      "target_id": "technology_gcp",
+      "properties": {
+        "timestamp": "2026-02-25T17:42:40.868720"
+      },
+      "created_at": "2026-02-25T17:42:40.868723",
+      "strength": 1.0
+    },
+    "ep_20260225174240_4310-MENTIONS-technology_azure": {
+      "id": "ep_20260225174240_4310-MENTIONS-technology_azure",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225174240_4310",
+      "target_id": "technology_azure",
+      "properties": {
+        "timestamp": "2026-02-25T17:42:40.868736"
+      },
+      "created_at": "2026-02-25T17:42:40.868737",
+      "strength": 1.0
+    },
+    "ep_20260225174240_4310-MENTIONS-technology_kubernetes": {
+      "id": "ep_20260225174240_4310-MENTIONS-technology_kubernetes",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225174240_4310",
+      "target_id": "technology_kubernetes",
+      "properties": {
+        "timestamp": "2026-02-25T17:42:40.868742"
+      },
+      "created_at": "2026-02-25T17:42:40.868743",
+      "strength": 1.0
+    },
+    "ep_20260225174240_4310-MENTIONS-topic_serverless": {
+      "id": "ep_20260225174240_4310-MENTIONS-topic_serverless",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225174240_4310",
+      "target_id": "topic_serverless",
+      "properties": {
+        "timestamp": "2026-02-25T17:42:40.868749"
+      },
+      "created_at": "2026-02-25T17:42:40.868750",
+      "strength": 1.0
+    },
+    "ep_20260225174240_4310-MENTIONS-topic_cloud": {
+      "id": "ep_20260225174240_4310-MENTIONS-topic_cloud",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225174240_4310",
+      "target_id": "topic_cloud",
+      "properties": {
+        "timestamp": "2026-02-25T17:42:40.868762"
+      },
+      "created_at": "2026-02-25T17:42:40.868763",
+      "strength": 1.0
+    },
+    "ep_20260225174240_4310-MENTIONS-topic_performance": {
+      "id": "ep_20260225174240_4310-MENTIONS-topic_performance",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225174240_4310",
+      "target_id": "topic_performance",
+      "properties": {
+        "timestamp": "2026-02-25T17:42:40.868771"
+      },
+      "created_at": "2026-02-25T17:42:40.868772",
+      "strength": 1.0
+    },
+    "ep_20260225174240_4310-MENTIONS-topic_ai": {
+      "id": "ep_20260225174240_4310-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225174240_4310",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-25T17:42:40.868777"
+      },
+      "created_at": "2026-02-25T17:42:40.868778",
       "strength": 1.0
     }
   }

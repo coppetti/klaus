@@ -20,18 +20,20 @@ class AnthropicProvider(BaseProvider):
     async def generate(
         self,
         messages: List[Message],
+        system: Optional[str] = None,
         config: Optional[GenerationConfig] = None
     ) -> AsyncIterator[str]:
         """Stream response from Claude."""
         config = config or GenerationConfig()
         
         # Separate system message
-        system_msg = ""
+        system_msg = system or ""
         chat_messages = []
         
         for msg in messages:
             if msg.role == "system":
-                system_msg = msg.content
+                if not system_msg:
+                    system_msg = msg.content
             else:
                 chat_messages.append({
                     "role": msg.role,
@@ -81,6 +83,7 @@ class AnthropicProvider(BaseProvider):
     async def generate_sync(
         self,
         messages: List[Message],
+        system: Optional[str] = None,
         config: Optional[GenerationConfig] = None
     ) -> str:
         """Non-streaming generation."""
@@ -88,7 +91,7 @@ class AnthropicProvider(BaseProvider):
         config.stream = False
         
         parts = []
-        async for chunk in self.generate(messages, config):
+        async for chunk in self.generate(messages, system, config):
             parts.append(chunk)
         return "".join(parts)
     

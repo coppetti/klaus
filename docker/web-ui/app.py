@@ -53,8 +53,10 @@ try:
     from core.context_manager import SessionContextManager, ContextManager
     from core.context_compactor import SessionContextCompactor, ContextCompactor, ContextAnalyzer
     CONTEXT_MANAGER_AVAILABLE = True
+    COMPACTOR_AVAILABLE = True
 except ImportError:
     CONTEXT_MANAGER_AVAILABLE = False
+    COMPACTOR_AVAILABLE = False
     SessionContextManager = Any  # type: ignore
     SessionContextCompactor = Any  # type: ignore
     print("⚠️  Context manager or compactor not available")
@@ -880,10 +882,10 @@ async def get_chat_page():
                             <i class="fas fa-comments sm:mr-2"></i><span class="hidden sm:inline">Chat</span>
                         </button>
                         <button onclick="switchTab('graph')" id="tab-graph" class="px-2 sm:px-4 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 transition-all">
-                            <i class="fas fa-project-diagram sm:mr-2"></i><span class="hidden sm:inline">Graph</span>
+                            <i class="fas fa-brain sm:mr-2"></i><span class="hidden sm:inline">Memory</span>
                         </button>
-                        <button onclick="switchTab('episodic')" id="tab-episodic" class="px-2 sm:px-4 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 transition-all">
-                            <i class="fas fa-brain sm:mr-2"></i><span class="hidden sm:inline">Memories</span>
+                        <button onclick="switchTab('episodic')" id="tab-episodic" class="hidden px-2 sm:px-4 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 transition-all">
+                            <i class="fas fa-history sm:mr-2"></i><span class="hidden sm:inline">Episodic</span>
                         </button>
                     </div>
                     <div class="flex items-center gap-2">
@@ -891,6 +893,10 @@ async def get_chat_page():
                             <i class="fas fa-circle text-xs"></i>
                             <span class="hidden lg:inline">Connecting...</span>
                         </div>
+                        <button onclick="showForkModal()" class="px-3 py-1.5 ml-1 bg-violet-50 text-violet-700 hover:bg-violet-100 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2 border border-violet-100 shadow-sm" title="Fork Context">
+                            <i class="fas fa-code-branch"></i>
+                            <span class="hidden lg:inline">Fork Context</span>
+                        </button>
                         <button md:hidden onclick="toggleSidebarMobile('right')" class="md:hidden p-2 text-gray-500 bg-gray-100 rounded-lg">
                             <i class="fas fa-sliders"></i>
                         </button>
@@ -1368,7 +1374,12 @@ async def get_chat_page():
                 content.innerHTML = escapeHtml(text).replace(/\\n/g, '<br>');
             }} else {{
                 // Markdown for assistant
-                content.innerHTML = marked.parse(text);
+                // Intercept the file write placeholder and style it nicely
+                const formattedText = text.replace(
+                    /\*\[Arquivo gravado\]\*/g,
+                    '<div class="my-2 inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100 text-xs font-medium"><i class="fas fa-file-check"></i> Arquivo Salvo</div>'
+                );
+                content.innerHTML = marked.parse(formattedText);
             }}
             
             bubble.appendChild(content);
@@ -1532,11 +1543,19 @@ async def get_chat_page():
             const tabs = ['chat', 'graph', 'episodic'];
             tabs.forEach(t => {{
                 const btn = document.getElementById('tab-' + t);
+                let classes = '';
+                
                 if (t === tabName) {{
-                    btn.className = 'px-4 py-1.5 rounded-md text-sm font-medium bg-white text-gray-900 shadow-sm transition-all';
+                    classes = 'px-2 sm:px-4 py-1.5 rounded-md text-sm font-medium bg-white text-gray-900 shadow-sm transition-all';
                 }} else {{
-                    btn.className = 'px-4 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 transition-all';
+                    classes = 'px-2 sm:px-4 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 transition-all';
                 }}
+                
+                if (t === 'episodic') {{
+                    classes = 'hidden ' + classes;
+                }}
+                
+                btn.className = classes;
             }});
             
             // Refresh iframes when switching to them
@@ -2674,7 +2693,130 @@ async def get_chat_page():
                 console.error('Failed to create session:', error);
             }}
         }}
+
+        async function showForkModal() {{
+            if (!currentSessionId) {{
+                alert('Please select a session to fork first.');
+                return;
+            }}
+            
+            // Load templates
+            let templates = [];
+            try {{
+                const res = await fetch('/api/templates');
+                const data = await res.json();
+                templates = data.templates || [];
+            }} catch (e) {{
+                console.error('Could not load templates:', e);
+            }}
+            
+            // Build template options
+            const templateOptions = templates.map(t => 
+                `<option value="${{t.id}}">${{t.name}} - ${{t.role}}</option>`
+            ).join('');
+            
+            // Create modal HTML
+            const modalHtml = `
+                <div id="fork-session-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-6 w-[400px] max-w-full shadow-xl">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center">
+                                <i class="fas fa-code-branch"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900">Fork Context to Agent</h3>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6">Branch this session's history into a new space where the selected Agent will continue the work.</p>
+                        
+                        <!-- Agent Template -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Target Agent Template</label>
+                            <select id="fork-session-template" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none">
+                                <option value="default">Default Assistant</option>
+                                ${{templateOptions}}
+                            </select>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button onclick="closeForkModal()" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium">Cancel</button>
+                            <button onclick="submitForkSession()" class="px-4 py-2 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 font-medium transition-colors shadow-sm">
+                                Create Fork
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }}
         
+        function closeForkModal() {{
+            const modal = document.getElementById('fork-session-modal');
+            if (modal) modal.remove();
+        }}
+        
+        async function submitForkSession() {{
+            const templateInput = document.getElementById('fork-session-template');
+            const template = templateInput.value;
+            
+            closeForkModal();
+            
+            try {{
+                const res = await fetch('/api/sessions/' + currentSessionId + '/fork', {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{ template }})
+                }});
+                const data = await res.json();
+                
+                if (data.session) {{
+                    currentSessionId = data.session.id;
+                    document.getElementById('current-session-name').textContent = data.session.name;
+                    document.getElementById('session-message-count').textContent = data.session.message_count;
+                    
+                    // Update template and context display
+                    const templateEl = document.getElementById('current-session-template');
+                    
+                    if (data.session.template && data.session.template !== 'default') {{
+                        templateEl.textContent = data.session.template;
+                        templateEl.classList.remove('hidden');
+                    }} else {{
+                        templateEl.classList.add('hidden');
+                    }}
+                    
+                    // Render messages locally
+                    sessionMessages = data.session.messages || [];
+                    messageCount = sessionMessages.length;
+                    msgCount.textContent = messageCount;
+                    
+                    chatMessages.innerHTML = '';
+                    sessionMessages.forEach(m => {{
+                        const content = m.content || m.text;
+                        const role = (m.role === 'user' || m.sender === 'user') ? 'user' : 'bot';
+                        if(m.role !== 'system') {{
+                            addMessage(content, role);
+                        }} else {{
+                            // Check if it's an internal command response that should be hidden
+                            if (content.startsWith('[SYSTEM:')) {{
+                                // Do not render internal file I/O context directly to user
+                                return;
+                            }}
+                            // Otherwise, render system notification bubble natively
+                            const systemDiv = document.createElement('div');
+                            systemDiv.className = 'flex justify-center my-4';
+                            systemDiv.innerHTML = `<div class="bg-violet-50 text-violet-700 px-4 py-2 rounded-full text-xs font-medium border border-violet-100">${{content}}</div>`;
+                            chatMessages.appendChild(systemDiv);
+                        }}
+                    }});
+                    
+                    loadSessions();
+                }}
+            }} catch (error) {{
+                console.error('Failed to fork session:', error);
+                alert('Failed to fork session: ' + error.message);
+            }}
+        }}
+
         async function loadSession(sessionId) {{
             try {{
                 const res = await fetch(`/api/sessions/${{sessionId}}/load`, {{ method: 'POST' }});
@@ -2711,7 +2853,22 @@ async def get_chat_page():
                     // Render messages
                     chatMessages.innerHTML = '';
                     sessionMessages.forEach(m => {{
-                        addMessage(m.text, m.sender);
+                        const content = m.content || m.text;
+                        const role = (m.role === 'user' || m.sender === 'user') ? 'user' : 'bot';
+                        if(m.role !== 'system') {{
+                            addMessage(content, role);
+                        }} else {{
+                            // Check if it's an internal command response that should be hidden
+                            if (content.startsWith('[SYSTEM:')) {{
+                                // Do not render internal file I/O context directly to user
+                                return;
+                            }}
+                            // Otherwise, render system notification bubble natively
+                            const systemDiv = document.createElement('div');
+                            systemDiv.className = 'flex justify-center my-4';
+                            systemDiv.innerHTML = `<div class="bg-violet-50 text-violet-700 px-4 py-2 rounded-full text-xs font-medium border border-violet-100">${{content}}</div>`;
+                            chatMessages.appendChild(systemDiv);
+                        }}
                     }});
                     
                     // Context facts loading disabled
@@ -5185,6 +5342,39 @@ async def get_providers():
         "message": "Add API keys to .env to enable more providers" if len(enabled_providers) < 4 else None
     })
 
+@app.get("/api/settings/provider/{provider}")
+async def get_provider_settings(provider: str):
+    """Get settings for a specific provider (e.g. if key is set)."""
+    env_key = f"{provider.upper()}_API_KEY"
+    if provider == "kimi":
+        api_key = os.getenv("KIMI_API_KEY")
+    elif provider == "anthropic":
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+    elif provider == "openai":
+        api_key = os.getenv("OPENAI_API_KEY")
+    elif provider == "google":
+        api_key = os.getenv("GOOGLE_API_KEY")
+    elif provider == "openrouter":
+        api_key = os.getenv("OPENROUTER_API_KEY")
+    else:
+        api_key = os.getenv(env_key)
+    
+    # Hide key values but confirm they exist
+    has_key = api_key is not None and api_key != ""
+    
+    # Custom base URL support
+    base_url = ""
+    if provider == "custom":
+        base_url = os.getenv("CUSTOM_BASE_URL", "")
+        
+    return JSONResponse({
+        "provider": provider,
+        "has_key": has_key,
+        "base_url": base_url,
+        "current_model": settings.model if settings.provider == provider else None
+    })
+
+
 @app.post("/api/settings/mode/{mode}")
 async def set_mode(mode: str):
     """Set mode preset (fast, balanced, deep)."""
@@ -5305,6 +5495,55 @@ async def get_session(session_id: str):
     if session:
         return JSONResponse(session.dict())
     return JSONResponse({"error": "Session not found"}, status_code=404)
+
+@app.post("/api/sessions/{session_id}/fork")
+async def fork_session(session_id: str, request: Request):
+    """Fork an existing session and start a new one with its context."""
+    global current_session, web_messages
+    try:
+        data = await request.json()
+        template = data.get("template", "default")
+        
+        # Load the source session
+        source_session = load_session(session_id)
+        if not source_session:
+            return JSONResponse({"error": "Source session not found"}, status_code=404)
+        
+        # Save current session first if active
+        if current_session:
+            current_session.messages = web_messages
+            current_session.message_count = len(web_messages)
+            current_session.updated_at = datetime.now().isoformat()
+            save_session(current_session)
+            
+        # Create new session
+        import uuid
+        fork_name = f"Fork: {source_session.name} -> {template.capitalize()}"
+        current_session = create_session(fork_name, template=template)
+        
+        # Clone messages from source
+        web_messages = source_session.messages.copy()
+        
+        # Add system cue to context
+        web_messages.append({
+            "role": "system",
+            "content": f"[SYSTEM NOTIFICATION] Session forked from '{source_session.template}'. As a '{template}', please analyze the preceding context and assume your role to proceed with the specific tasks.",
+            "timestamp": datetime.now().isoformat(),
+            "id": str(uuid.uuid4())
+        })
+        
+        current_session.messages = web_messages
+        current_session.message_count = len(web_messages)
+        save_session(current_session)
+        
+        # Save current session ID
+        with open(CURRENT_SESSION_FILE, 'w') as f:
+            json.dump({"current_session_id": current_session.id}, f)
+            
+        return JSONResponse({"status": "ok", "session": current_session.dict()})
+        
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.post("/api/sessions/{session_id}/load")
 async def load_session_endpoint(session_id: str):
@@ -5707,7 +5946,7 @@ async def get_compaction_stats(session_id: str):
 async def preview_consolidation(session_id: str):
     """Preview what would be consolidated for this session."""
     try:
-        sys.path.insert(0, '/Users/matheussilveira/Documents/CODE/klaus/core')
+        sys.path.insert(0, '/app/core')
         from cognitive_memory import get_cognitive_memory_manager
         
         manager = get_cognitive_memory_manager()
@@ -7236,31 +7475,31 @@ async def cognitive_memory_graph_page():
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * { font-family: 'Inter', sans-serif; }
-        #graph-container { width: 100%; height: calc(100vh - 200px); border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #f9fafb; }
+        #graph-container { width: 100%; height: 100%; min-height: 400px; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #f9fafb; }
     </style>
 </head>
-<body class="bg-gray-50 h-screen">
+<body class="bg-gray-50 h-[100dvh]">
     <div class="h-full flex flex-col">
-        <header class="bg-white border-b border-gray-200 px-6 py-4">
-            <div class="flex items-center justify-between">
+        <header class="bg-white border-b border-gray-200 px-4 md:px-6 py-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
-                    <h1 class="text-xl font-semibold text-gray-900">
-                        <i class="fas fa-project-diagram text-pink-500 mr-2"></i>Cognitive Memory Graph
+                    <h1 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-brain text-pink-500 mr-2"></i>Cognitive Memory Graph
                     </h1>
                     <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">NEW</span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <div id="stats" class="text-sm text-gray-500">Loading...</div>
-                    <button onclick="loadGraph()" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">
-                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                <div class="flex items-center justify-between w-full md:w-auto gap-3">
+                    <div id="stats" class="text-sm text-gray-500 flex-1 text-center md:text-right">Loading...</div>
+                    <button onclick="loadGraph()" class="px-3 py-1.5 md:px-4 md:py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 whitespace-nowrap">
+                        <i class="fas fa-sync-alt mr-1 md:mr-2"></i>Refresh
                     </button>
                 </div>
             </div>
         </header>
-        <div class="flex-1 flex overflow-hidden">
-            <div class="w-80 bg-white border-r border-gray-200 flex flex-col">
-                <div class="p-4 border-b border-gray-200">
-                    <h2 class="font-medium text-gray-900 mb-3">Entities</h2>
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+            <div class="w-full md:w-80 h-1/3 md:h-full bg-white border-b md:border-r border-gray-200 flex flex-col shrink-0">
+                <div class="p-3 md:p-4 border-b border-gray-200 shrink-0">
+                    <h2 class="font-medium text-gray-900 mb-2 md:mb-3">Entities</h2>
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                         <input type="text" id="entity-search" placeholder="Filter entities..." 
@@ -7268,12 +7507,12 @@ async def cognitive_memory_graph_page():
                                oninput="filterEntities()">
                     </div>
                 </div>
-                <div id="entity-list" class="flex-1 overflow-y-auto p-4 space-y-2">
-                    <div class="text-center text-gray-400 py-8">Loading...</div>
+                <div id="entity-list" class="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 min-h-0">
+                    <div class="text-center text-gray-400 py-4 md:py-8">Loading...</div>
                 </div>
             </div>
-            <div class="flex-1 flex flex-col p-6">
-                <div id="graph-container"></div>
+            <div class="flex-1 flex flex-col p-2 md:p-6 min-h-0 relative">
+                <div id="graph-container" class="absolute inset-2 md:inset-6"></div>
             </div>
         </div>
     </div>

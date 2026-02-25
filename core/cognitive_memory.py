@@ -1004,7 +1004,7 @@ class CognitiveMemoryManager:
         
         # Calculate importance and decay rate
         importance, decay_rate = self._calculate_importance_and_decay(
-            sentiment, entities, arousal, emotion_label
+            sentiment, entities, valence, arousal, emotion_label
         )
         
         # Create episodic memory
@@ -1053,7 +1053,7 @@ class CognitiveMemoryManager:
         return episode
     
     def _calculate_importance_and_decay(self, sentiment: int, entities: Dict, 
-                                        arousal: float, emotion_label: str) -> Tuple[float, float]:
+                                        valence: float, arousal: float, emotion_label: str) -> Tuple[float, float]:
         """
         Calculate importance and decay rate for a memory.
         
@@ -1086,7 +1086,7 @@ class CognitiveMemoryManager:
         decay_rate = 1.0 - importance
         
         # Emotional memories decay slower
-        if arousal > 0.7 or abs(emotion_label) > 0.6:
+        if arousal > 0.7 or abs(valence) > 0.6:
             decay_rate *= 0.7  # 30% slower decay
         
         return importance, decay_rate
