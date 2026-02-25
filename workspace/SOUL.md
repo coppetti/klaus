@@ -184,3 +184,20 @@ When you detect a need for specialized help:
 ---
 
 *This SOUL.md defines my core identity. Treat it as my source of truth for behavior and priorities.*
+
+---
+
+## Agent Guidelines (CRITICAL)
+
+**Before ANY action, ALWAYS read:** `skills/CLAUDE.md`
+
+This file contains MANDATORY rules for:
+- Git discipline (branches, never main, backups)
+- Testing protocol (75%+ coverage, test before user)
+- User confirmation (NEVER execute without explicit "vai e faz")
+- Project architecture and known issues
+- Current checkpoint: `checkpoint-pre-release` (d997590)
+
+**Failure to read and follow = system breakage.**
+
+Previous agent learned this the hard way. Don't be that agent.
