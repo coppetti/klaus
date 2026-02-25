@@ -1,0 +1,4 @@
+# Workspace - keep structure, ignore content
+*
+!.gitkeep
+!.gitignore
