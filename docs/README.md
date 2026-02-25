@@ -1,18 +1,36 @@
-# 🧙 IDE Agent Wizard
+# 🧙 IDE Agent Wizard v2.0
 
-> Universal AI agent setup that works with **any IDE** and **any LLM provider**.
+> Universal AI agent setup with **Hybrid Memory** (SQLite + Graph), **Web UI**, and **Telegram**.
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
 
-## ✨ Features
+## ✨ What's New in v2.0
 
-- 🔌 **Multi-Provider** - Works with Kimi, Anthropic, OpenAI, OpenRouter
+### 🧠 Cognitive Hardened Hybrid Memory (SQLite + Kuzu Graph)
+- **Dual storage**: SQLite for fast fact retrieval, Graph for semantic intelligence
+- **Relevance Gate**: Auto-rejects low-value inputs (e.g. "ok") before they pollute memory
+- **Offline Embeddings**: Uses local `sentence-transformers` for dense Semantic Search
+- **Denoised Relationships**: Strict connection caps (max 3 edges) and `FLOWS_INTO` temporal sequences eliminate graph "hairballs" and orphaned nodes.
+- **Memory Graph Explorer**: Visual graph visualization at `/memory-graph`
+
+### 🌐 Web UI (Port 8082)
+- Modern chat interface with Shadcn-inspired design
+- **File Upload**: Support for .txt, .md, .py, .json, .yaml, .csv, .pdf
+- **Session Management**: Create, save, load, rename sessions
+- **Memory Explorer**: Search and browse memories (Quick/Smart)
+- **Multi-Provider**: Kimi, Anthropic, OpenAI, OpenRouter
+- **Settings Panel**: Temperature, tokens, mode presets
+
+### ✨ Features
+
+- 🔌 **Multi-Provider** - Kimi, Anthropic, OpenAI, OpenRouter
 - 💻 **IDE Agnostic** - Claude Code, Kimi Code, Gemini Code Assist, Cursor
+- 🌐 **Web UI** - Browser interface at http://localhost:8082
 - 📱 **Telegram Support** - Full Telegram bot with memory sync
-- 🧠 **Persistent Memory** - SQLite-based with context retrieval
+- 🧠 **Cognitive Memory** - SQLite + Kuzu Graph + Offline Embeddings (`all-MiniLM-L6-v2`)
 - ⚙️ **YAML Config** - Simple, readable configuration
 - 🐳 **Docker Ready** - One-command deployment
 - 🚀 **Universal CLI** - Works everywhere Python runs
@@ -58,6 +76,36 @@ docker compose up -d
 
 ---
 
+## 🌐 Web UI Mode
+
+### Access
+
+Open your browser at **http://localhost:8082**
+
+### Features
+
+| Feature | Description |
+|---------|-------------|
+| 💬 **Chat** | Markdown support with syntax highlighting |
+| 📎 **File Upload** | .txt, .md, .py, .js, .json, .yaml, .csv, .pdf (max 10MB) |
+| 🧠 **Memory Explorer** | Search memories (Quick/Semantic), browse history |
+| 📊 **Memory Graph** | Visual graph at `/memory-graph` - see relationships |
+| 💾 **Sessions** | Create, save, load, rename conversation sessions |
+| ⚙️ **Settings** | Provider, model, temperature, mode presets |
+| 🗜️ **Compact Context** | Extract key facts and save to memory |
+
+### Memory Graph Explorer
+
+Visualize your memories as an interactive graph:
+- **Nodes**: Memories (purple), Topics (green), Entities (orange), Categories (blue)
+- **Edges**: Relationships between memories
+- **Layouts**: Force-directed, Hierarchical, Circular
+- **Filters**: Show only specific node types
+
+Access at: http://localhost:8082/memory-graph
+
+---
+
 ## 📱 Telegram Mode
 
 ### Architecture
@@ -65,7 +113,7 @@ docker compose up -d
 ```
 Telegram → Bot Container → Kimi Agent (port 8081) → API Kimi
                 ↓                ↓
-           Local SQLite ←── Shared Memory
+           Hybrid Memory ←── Shared (SQLite + Graph)
 ```
 
 ### Requirements
@@ -262,7 +310,20 @@ OPENROUTER_API_KEY=
 | Service | Port | Purpose |
 |---------|------|---------|
 | `kimi-agent` | 8081 | LLM processing, has API key, loads AGENTS.md |
+| `web-ui` | 8082 | Browser interface with chat, memory graph, file upload |
 | `telegram-bot` | - | Receives Telegram messages |
+
+### Web UI Profile
+
+To start with Web UI:
+
+```bash
+# Start all services including Web UI
+docker compose -f docker/docker-compose.yml --profile web up -d
+
+# Or start only base services (no Web UI)
+docker compose -f docker/docker-compose.yml up -d
+```
 
 ### File Paths in Containers
 
@@ -275,10 +336,32 @@ OPENROUTER_API_KEY=
 
 ### Memory Sync
 
-Both containers share `./workspace/memory/`:
-- SQLite database synchronized
-- Works across IDE and Telegram modes
-- Persistent across restarts
+All containers share `./workspace/memory/`:
+- **SQLite**: Fast queries, raw memory storage
+- **Kuzu Graph**: Relationship mapping, semantic search
+- **Sync**: Works across IDE, Web UI, and Telegram modes
+- **Persistent**: Survives restarts
+
+### Hybrid Memory System
+
+```
+┌─────────────┐     ┌─────────────┐
+│   SQLite    │◄───►│ Kuzu Graph  │
+│  (Fast)     │     │ (Semantic)  │
+└──────┬──────┘     └──────┬──────┘
+       │                   │
+       └─────────┬─────────┘
+                 ▼
+          ┌─────────────┐
+          │  Memories   │
+          │  + Relations│
+          └─────────────┘
+```
+
+**Query Types:**
+- `quick`: Fast SQLite search (keywords)
+- `semantic`: Graph-based semantic search
+- `context`: Relationship-aware context retrieval
 
 ---
 

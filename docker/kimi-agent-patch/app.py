@@ -5,9 +5,19 @@ Integração com Kimi API + Sincronização de Memórias
 
 import os
 import json
+import sys
 from typing import Optional, List, Dict
 from datetime import datetime
 from pathlib import Path
+
+# Add core to path
+sys.path.insert(0, "/app/core")
+try:
+    from llm_router import chat_with_provider, load_config
+except ImportError:
+    # Fallback if core is not mounted
+    chat_with_provider = None
+    def load_config(): return {}
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -134,21 +144,52 @@ class SessionData(BaseModel):
 @app.get("/health")
 def health():
     """Health check."""
+    config = load_config()
+    defaults = config.get("defaults", {})
+    
     return {
         "status": "ok",
         "model": KIMI_MODEL,
         "provider": "kimi",
+        "router_available": chat_with_provider is not None,
+        "default_model": defaults.get("model", "kimi-k2-0711"),
+        "default_provider": defaults.get("provider", "kimi"),
         "personality_loaded": Path(SOUL_MD_PATH).exists(),
         "agents_guide_loaded": Path(AGENTS_MD_PATH).exists(),
         "sessions": sessions.get_stats()
     }
 
 
+def load_template_soul(template: str) -> str:
+    """Carrega SOUL.md de um template específico."""
+    if not template or template == "default":
+        return None
+    
+    # Tenta carregar do template
+    template_paths = [
+        Path(f"/app/templates/{template}/SOUL.md"),
+        Path(f"/app/clawd/templates/{template}/SOUL.md"),
+        Path(f"./templates/{template}/SOUL.md"),
+    ]
+    
+    for path in template_paths:
+        if path.exists():
+            content = path.read_text()
+            # Substitui variáveis
+            agent_name = template.capitalize()
+            content = content.replace("{{agent_name}}", agent_name)
+            content = content.replace("{{created_date}}", datetime.now().strftime("%Y-%m-%d"))
+            return content
+    
+    return None
+
+
 @app.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest):
+async def chat(request: ChatRequest):
     """
     Processa mensagem do usuário e retorna resposta do Clawd.
     Mantém contexto da sessão automaticamente.
+    Suporta templates dinâmicos via context.template.
     """
     try:
         # 1. Adicionar mensagem do usuário à sessão
@@ -197,17 +238,58 @@ def chat(request: ChatRequest):
                 "content": content
             })
         
-        # 4. Chamar API do Kimi
-        response = client.messages.create(
-            model=KIMI_MODEL,
-            max_tokens=4096,
-            system=CLAWD_SYSTEM_PROMPT,
-            messages=messages
-        )
+        # 4. Determinar system prompt (template ou padrão)
+        template = request.context.get("template") if request.context else None
+        if template and template != "default":
+            template_soul = load_template_soul(template)
+            if template_soul:
+                # Usa SOUL do template + resto do prompt
+                system_prompt = f"""{template_soul}
+
+CONTEXTO DA SESSÃO:
+- Você tem acesso às últimas 10 mensagens desta conversa
+- Quando detectar algo importante (preferências do usuário, fatos relevantes, decisões), sugira salvar na memória
+- Seja proativo em lembrar contexto de conversas anteriores quando relevante
+
+REGRAS DE FERRAMENTAS/INTERNET:
+- **NUNCA** use ferramentas de busca web a menos que o usuário peça EXPLICITAMENTE
+- Responda baseado apenas no seu conhecimento interno e contexto da conversa
+
+REGRAS DE RESPOSTA:
+- Responda como se estivesse conversando diretamente com o usuário
+- Mantenha o tom definido acima
+- Use o contexto disponível para respostas personalizadas"""
+            else:
+                system_prompt = CLAWD_SYSTEM_PROMPT
+        else:
+            system_prompt = CLAWD_SYSTEM_PROMPT
         
-        response_text = response.content[0].text
+        # 5. Chamar API via LLM Router (suporta vários provedores/modelos dinâmicos)
+        if chat_with_provider:
+            response_text = await chat_with_provider(
+                messages=messages,
+                system=system_prompt,
+                temperature=0.7,
+                max_tokens=4096
+            )
+        else:
+            # Fallback para o comportamento original se o router não estiver disponível
+            response = client.messages.create(
+                model=KIMI_MODEL,
+                max_tokens=4096,
+                system=system_prompt,
+                messages=messages
+            )
+            response_text = response.content[0].text
         
         # 5. Salvar resposta na sessão
+        
+        input_tokens = None
+        output_tokens = None
+        if 'response' in locals() and hasattr(response, 'usage') and response.usage:
+            input_tokens = response.usage.input_tokens
+            output_tokens = response.usage.output_tokens
+            
         sessions.add_message(
             user_id=request.user_id,
             role="assistant",
@@ -215,8 +297,8 @@ def chat(request: ChatRequest):
             metadata={
                 "model": KIMI_MODEL,
                 "provider": "kimi",
-                "input_tokens": response.usage.input_tokens if response.usage else None,
-                "output_tokens": response.usage.output_tokens if response.usage else None
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens
             }
         )
         

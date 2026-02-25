@@ -12,10 +12,11 @@ RUN pip install --no-cache-dir \
     anthropic \
     openai \
     pydantic \
-    python-multipart
+    python-multipart \
+    pyngrok
 
-# Try to install kuzu (graph database) - optional
-RUN pip install --no-cache-dir kuzu || echo "Kuzu installation skipped (optional)"
+# Try to install kuzu and sentence-transformers (graph + embeddings) - optional
+RUN pip install --no-cache-dir kuzu sentence-transformers || echo "Graph/embedding deps skipped"
 
 # Copy app
 COPY app.py /app/
@@ -24,7 +25,7 @@ COPY app.py /app/
 EXPOSE 8082
 
 # Environment variables
-ENV KIMI_AGENT_URL=http://kimi-agent:8081
+ENV KIMI_AGENT_URL=http://kimi-agent:8080
 ENV WEB_UI_PORT=8082
 
 # Run

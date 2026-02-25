@@ -3,7 +3,8 @@
 # Telegram bot with Kimi Agent (port 8081) + Memory Sync
 # Run from project root: docker compose -f docker/docker-compose.yml up -d
 
-version: '3.8'
+version: "3.8"
+name: klaus
 
 services:
   # Kimi Agent Service (Patched for AGENTS.md support)
@@ -12,15 +13,15 @@ services:
     build:
       context: ./kimi-agent-patch
       dockerfile: Dockerfile
-    container_name: ide-agent-kimi
+    container_name: KLAUS_MAIN_kimi
     ports:
-      - "8081:8080"
+      - "7070:8080"
     volumes:
       # Sync memory with host
       - ../workspace/memory:/app/memory:rw
       - ../workspace:/app/workspace:ro
-      # Mount docs for AGENTS.md access
-      - ../docs:/app/docs:ro
+      # Mount core modules for shared logic
+      - ../core:/app/core:ro
       # Mount projects folder (read-write for IDE access)
       - ../workspace/projects:/app/workspace/projects:rw
     env_file:
@@ -33,15 +34,20 @@ services:
       - CLAWD_WORKSPACE=/app/workspace
       - PROJECTS_PATH=/app/workspace/projects
     restart: unless-stopped
-    # Healthcheck removed - container works but doesn't have curl
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # Telegram Bot
   telegram-bot:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: ide-agent-telegram
-    
+    container_name: KLAUS_MAIN_telegram
+
     volumes:
       # Mount workspace for file access
       - ../workspace:/app/workspace:rw
@@ -53,52 +59,60 @@ services:
       - ../docs:/app/docs:ro
       # Mount projects folder (shared with kimi-agent)
       - ../workspace/projects:/app/workspace/projects:rw
-    
+
     env_file:
       - ../.env
-    
+
     environment:
       # Kimi Agent URL (internal docker network)
-      - KIMI_AGENT_URL=http://kimi-agent:8080
-      
+      - KIMI_AGENT_URL=http://KLAUS_MAIN_kimi:8080
+
       # Optional: Override config
       - AGENT_MODE=telegram
-    
+
     restart: unless-stopped
-    
+
     healthcheck:
-      test: ["CMD", "python", "-c", "import sys; sys.path.insert(0, '.'); from core.agent import Agent; print('OK')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+      test: ["CMD", "python", "-c", "import os; from bot.telegram_bot import TelegramBot; print('OK')"]
+      interval: 60s
+      timeout: 20s
+      retries: 5
+      start_period: 30s
 
   # Web UI Service (Browser interface)
   web-ui:
     build:
       context: ./web-ui
       dockerfile: Dockerfile
-    container_name: ide-agent-web
+    container_name: KLAUS_MAIN_web
     ports:
-      - "8082:8082"
+      - "7072:8082"
     volumes:
       # Mount workspace for data persistence (sessions, settings)
       - ../workspace:/app/workspace:rw
       - ../init.yaml:/app/init.yaml:ro
       # Mount core modules for hybrid memory access
       - ../core:/app/core:ro
+      # Mount templates for agent selection
+      - ../templates:/app/templates:ro
     env_file:
       - ../.env
     environment:
-      - KIMI_AGENT_URL=http://kimi-agent:8080
+      - KIMI_AGENT_URL=http://KLAUS_MAIN_kimi:8080
       - WEB_UI_PORT=8082
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8082/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     depends_on:
       - kimi-agent
     profiles:
-      - web  # Only starts with --profile web
+      - web # Only starts with --profile web
 
 # Networks
 networks:
   default:
-    name: ide-agent-network
+    name: KLAUS_MAIN_network

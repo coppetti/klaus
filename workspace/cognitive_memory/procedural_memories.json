@@ -1,0 +1,42 @@
+[
+  {
+    "memory_id": "proc_20260223215845",
+    "timestamp": "2026-02-23T21:58:45.394483",
+    "context_pattern": "Eu trabalho com React e TypeScript na minha empres",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 2,
+    "related_entities": [],
+    "examples": [
+      "ep_20260223215845_5844",
+      "ep_20260223220314_9493"
+    ]
+  },
+  {
+    "memory_id": "proc_20260223220554",
+    "timestamp": "2026-02-23T22:05:54.895635",
+    "context_pattern": "Documenta\u00e7\u00e3o dos aprendizados de hoje: implementam",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260223220554_3259"
+    ]
+  },
+  {
+    "memory_id": "proc_20260224110823",
+    "timestamp": "2026-02-24T11:08:23.281465",
+    "context_pattern": "obrigado",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260224110823_5913"
+    ]
+  }
+]
