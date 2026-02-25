@@ -1,0 +1,290 @@
+{
+  "entities": {
+    "technology_aws": {
+      "id": "technology_aws",
+      "type": "Technology",
+      "name": "AWS",
+      "properties": {
+        "confidence": 0.9
+      },
+      "created_at": "2026-02-25T20:34:56.971142",
+      "updated_at": "2026-02-25T20:34:56.971145"
+    },
+    "technology_gcp": {
+      "id": "technology_gcp",
+      "type": "Technology",
+      "name": "GCP",
+      "properties": {
+        "confidence": 0.9
+      },
+      "created_at": "2026-02-25T20:34:56.971179",
+      "updated_at": "2026-02-25T20:34:56.971180"
+    },
+    "technology_azure": {
+      "id": "technology_azure",
+      "type": "Technology",
+      "name": "Azure",
+      "properties": {
+        "confidence": 0.9
+      },
+      "created_at": "2026-02-25T20:34:56.971186",
+      "updated_at": "2026-02-25T20:34:56.971186"
+    },
+    "technology_terraform": {
+      "id": "technology_terraform",
+      "type": "Technology",
+      "name": "Terraform",
+      "properties": {
+        "confidence": 0.9
+      },
+      "created_at": "2026-02-25T20:34:56.971191",
+      "updated_at": "2026-02-25T20:34:56.971192"
+    },
+    "technology_kubernetes": {
+      "id": "technology_kubernetes",
+      "type": "Technology",
+      "name": "Kubernetes",
+      "properties": {
+        "confidence": 0.9
+      },
+      "created_at": "2026-02-25T20:34:56.971197",
+      "updated_at": "2026-02-25T20:34:56.971197"
+    },
+    "topic_architecture": {
+      "id": "topic_architecture",
+      "type": "Topic",
+      "name": "architecture",
+      "properties": {
+        "confidence": 0.6
+      },
+      "created_at": "2026-02-25T20:34:56.971203",
+      "updated_at": "2026-02-25T20:34:56.971203"
+    },
+    "topic_microservices": {
+      "id": "topic_microservices",
+      "type": "Topic",
+      "name": "microservices",
+      "properties": {
+        "confidence": 0.6
+      },
+      "created_at": "2026-02-25T20:34:56.971209",
+      "updated_at": "2026-02-25T20:34:56.971210"
+    },
+    "topic_cloud": {
+      "id": "topic_cloud",
+      "type": "Topic",
+      "name": "cloud",
+      "properties": {
+        "confidence": 0.6
+      },
+      "created_at": "2026-02-25T20:34:56.971217",
+      "updated_at": "2026-02-25T20:34:56.971218"
+    },
+    "topic_security": {
+      "id": "topic_security",
+      "type": "Topic",
+      "name": "security",
+      "properties": {
+        "confidence": 0.6
+      },
+      "created_at": "2026-02-25T20:34:56.971225",
+      "updated_at": "2026-02-25T20:34:56.971226"
+    },
+    "topic_performance": {
+      "id": "topic_performance",
+      "type": "Topic",
+      "name": "performance",
+      "properties": {
+        "confidence": 0.6
+      },
+      "created_at": "2026-02-25T20:34:56.971231",
+      "updated_at": "2026-02-25T20:34:56.971231"
+    },
+    "topic_scalability": {
+      "id": "topic_scalability",
+      "type": "Topic",
+      "name": "scalability",
+      "properties": {
+        "confidence": 0.6
+      },
+      "created_at": "2026-02-25T20:34:56.971235",
+      "updated_at": "2026-02-25T20:34:56.971236"
+    },
+    "topic_api": {
+      "id": "topic_api",
+      "type": "Topic",
+      "name": "api",
+      "properties": {
+        "confidence": 0.6
+      },
+      "created_at": "2026-02-25T20:34:56.971240",
+      "updated_at": "2026-02-25T20:34:56.971241"
+    },
+    "topic_ai": {
+      "id": "topic_ai",
+      "type": "Topic",
+      "name": "ai",
+      "properties": {
+        "confidence": 0.6
+      },
+      "created_at": "2026-02-25T20:34:56.971245",
+      "updated_at": "2026-02-25T20:35:32.306474"
+    }
+  },
+  "relationships": {
+    "ep_20260225203456_7998-MENTIONS-technology_aws": {
+      "id": "ep_20260225203456_7998-MENTIONS-technology_aws",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "technology_aws",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971165"
+      },
+      "created_at": "2026-02-25T20:34:56.971173",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-technology_gcp": {
+      "id": "ep_20260225203456_7998-MENTIONS-technology_gcp",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "technology_gcp",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971183"
+      },
+      "created_at": "2026-02-25T20:34:56.971184",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-technology_azure": {
+      "id": "ep_20260225203456_7998-MENTIONS-technology_azure",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "technology_azure",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971188"
+      },
+      "created_at": "2026-02-25T20:34:56.971189",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-technology_terraform": {
+      "id": "ep_20260225203456_7998-MENTIONS-technology_terraform",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "technology_terraform",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971194"
+      },
+      "created_at": "2026-02-25T20:34:56.971195",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-technology_kubernetes": {
+      "id": "ep_20260225203456_7998-MENTIONS-technology_kubernetes",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "technology_kubernetes",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971199"
+      },
+      "created_at": "2026-02-25T20:34:56.971200",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-topic_architecture": {
+      "id": "ep_20260225203456_7998-MENTIONS-topic_architecture",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "topic_architecture",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971205"
+      },
+      "created_at": "2026-02-25T20:34:56.971207",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-topic_microservices": {
+      "id": "ep_20260225203456_7998-MENTIONS-topic_microservices",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "topic_microservices",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971211"
+      },
+      "created_at": "2026-02-25T20:34:56.971212",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-topic_cloud": {
+      "id": "ep_20260225203456_7998-MENTIONS-topic_cloud",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "topic_cloud",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971221"
+      },
+      "created_at": "2026-02-25T20:34:56.971223",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-topic_security": {
+      "id": "ep_20260225203456_7998-MENTIONS-topic_security",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "topic_security",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971228"
+      },
+      "created_at": "2026-02-25T20:34:56.971229",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-topic_performance": {
+      "id": "ep_20260225203456_7998-MENTIONS-topic_performance",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "topic_performance",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971233"
+      },
+      "created_at": "2026-02-25T20:34:56.971234",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-topic_scalability": {
+      "id": "ep_20260225203456_7998-MENTIONS-topic_scalability",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "topic_scalability",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971238"
+      },
+      "created_at": "2026-02-25T20:34:56.971239",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-topic_api": {
+      "id": "ep_20260225203456_7998-MENTIONS-topic_api",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "topic_api",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971242"
+      },
+      "created_at": "2026-02-25T20:34:56.971243",
+      "strength": 1.0
+    },
+    "ep_20260225203456_7998-MENTIONS-topic_ai": {
+      "id": "ep_20260225203456_7998-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203456_7998",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-25T20:34:56.971247"
+      },
+      "created_at": "2026-02-25T20:34:56.971248",
+      "strength": 1.0
+    },
+    "ep_20260225203532_7907-MENTIONS-topic_ai": {
+      "id": "ep_20260225203532_7907-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225203532_7907",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-25T20:35:32.306483"
+      },
+      "created_at": "2026-02-25T20:35:32.306489",
+      "strength": 1.0
+    }
+  }
+}
