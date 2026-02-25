@@ -5,6 +5,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://docker.com)
+<a href='https://ko-fi.com/B0B41UXJ9K' target='_blank'><img height='28' style='border:0px;height:28px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 ---
 
@@ -138,3 +139,13 @@ MIT License — See [LICENSE](LICENSE) for details.
 ---
 
 **Built with ❤️ for developers who want AI that actually understands context.**
+
+---
+
+## 💚 Support Klaus
+
+Klaus is **100% free and open source**. If you find it valuable, consider supporting development:
+
+<a href='https://ko-fi.com/B0B41UXJ9K' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+
+Your support helps keep Klaus alive and growing! 🙏
