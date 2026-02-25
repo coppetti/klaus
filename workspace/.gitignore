@@ -1,4 +1,6 @@
-# Workspace - keep structure, ignore content
+# Workspace - keep structure, ignore user data
 *
 !.gitkeep
 !.gitignore
+!SOUL.md
+!USER.md
