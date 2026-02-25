@@ -41,3 +41,8 @@ logs/
 
 # OS
 Thumbs.db
+
+# Marketing (personal, not for repo)
+workspace/marketing/
+docs/marketing/
+index.html
