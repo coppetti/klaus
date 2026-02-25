@@ -1,0 +1,26 @@
+# Klaus - Dependencies
+# ================================
+
+# Core
+pyyaml>=6.0
+httpx>=0.25.0
+
+# Telegram
+python-telegram-bot>=20.6
+aiohttp>=3.9.0
+
+# Web Search (for real-time information)
+duckduckgo-search>=3.9.0  # Web search without API key
+
+# Optional: For advanced features
+# google-generativeai>=0.3.0  # Gemini native (optional)
+# anthropic>=0.8.0  # Anthropic SDK (optional)
+# openai>=1.0.0  # OpenAI SDK (optional)
+
+# Hybrid Memory (optional but recommended)
+kuzu>=0.4.0                    # Graph database for semantic relationships
+sentence-transformers>=2.2.0   # Semantic embeddings (all-MiniLM-L6-v2, ~80MB, fully offline)
+
+# Development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0

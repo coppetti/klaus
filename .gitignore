@@ -1,0 +1,43 @@
+# Secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets/
+credentials/
+
+# Runtime data (user-specific)
+workspace/sessions/*
+workspace/memory/*
+workspace/logs/*
+!workspace/sessions/.gitkeep
+!workspace/memory/.gitkeep
+!workspace/logs/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# OS
+Thumbs.db
