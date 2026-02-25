@@ -96,6 +96,25 @@
     "last_accessed": null
   },
   {
+    "memory_id": "sm_20260225172319_3074",
+    "timestamp": "2026-02-25T17:23:19.331472",
+    "session_id": "cd1939ff",
+    "user_intent": "hey",
+    "approach_taken": "Direct concise response",
+    "outcome": "Task completed, neutral satisfaction",
+    "interaction_type": "task_completion",
+    "sentiment": 3,
+    "what_worked": [],
+    "what_to_avoid": [],
+    "key_insights": [],
+    "user_state": "neutral",
+    "topics": [],
+    "related_memories": [],
+    "importance_score": 0.6,
+    "access_count": 0,
+    "last_accessed": null
+  },
+  {
     "memory_id": "sm_20260225164711_50",
     "timestamp": "2026-02-25T16:47:11.419082",
     "session_id": "cd1939ff",
@@ -347,72 +366,6 @@
     "last_accessed": null
   },
   {
-    "memory_id": "sm_20260224182959_1794",
-    "timestamp": "2026-02-24T18:29:59.161792",
-    "session_id": "66496b22",
-    "user_intent": "Hey Klaus",
-    "approach_taken": "Direct concise response",
-    "outcome": "Task completed, neutral satisfaction",
-    "interaction_type": "task_completion",
-    "sentiment": 3,
-    "what_worked": [],
-    "what_to_avoid": [],
-    "key_insights": [],
-    "user_state": "neutral",
-    "topics": [
-      "devops",
-      "go"
-    ],
-    "related_memories": [],
-    "importance_score": 0.6,
-    "access_count": 0,
-    "last_accessed": null
-  },
-  {
-    "memory_id": "sm_20260224182400_4735",
-    "timestamp": "2026-02-24T18:24:00.293546",
-    "session_id": "66496b22",
-    "user_intent": "OLa",
-    "approach_taken": "Direct concise response",
-    "outcome": "Task completed, neutral satisfaction",
-    "interaction_type": "task_completion",
-    "sentiment": 3,
-    "what_worked": [],
-    "what_to_avoid": [],
-    "key_insights": [],
-    "user_state": "neutral",
-    "topics": [
-      "devops"
-    ],
-    "related_memories": [],
-    "importance_score": 0.6,
-    "access_count": 0,
-    "last_accessed": null
-  },
-  {
-    "memory_id": "sm_20260224181037_783",
-    "timestamp": "2026-02-24T18:10:37.807090",
-    "session_id": "66496b22",
-    "user_intent": "all good?",
-    "approach_taken": "Direct concise response",
-    "outcome": "Task completed successfully with high satisfaction",
-    "interaction_type": "task_completion",
-    "sentiment": 4,
-    "what_worked": [],
-    "what_to_avoid": [],
-    "key_insights": [
-      "User responded positively - approach was effective"
-    ],
-    "user_state": "neutral",
-    "topics": [
-      "go"
-    ],
-    "related_memories": [],
-    "importance_score": 0.6,
-    "access_count": 0,
-    "last_accessed": null
-  },
-  {
     "memory_id": "sm_20260225165351_9720",
     "timestamp": "2026-02-25T16:53:51.521507",
     "session_id": "cd1939ff",
@@ -584,21 +537,68 @@
     "last_accessed": null
   },
   {
-    "memory_id": "sm_20260224180607_1720",
-    "timestamp": "2026-02-24T18:06:07.590873",
-    "session_id": "87ce6af8",
-    "user_intent": "who are you",
-    "approach_taken": "Bullet point explanation",
+    "memory_id": "sm_20260224182959_1794",
+    "timestamp": "2026-02-24T18:29:59.161792",
+    "session_id": "66496b22",
+    "user_intent": "Hey Klaus",
+    "approach_taken": "Direct concise response",
     "outcome": "Task completed, neutral satisfaction",
-    "interaction_type": "problem_solving",
+    "interaction_type": "task_completion",
     "sentiment": 3,
     "what_worked": [],
     "what_to_avoid": [],
     "key_insights": [],
     "user_state": "neutral",
-    "topics": [],
+    "topics": [
+      "devops",
+      "go"
+    ],
     "related_memories": [],
-    "importance_score": 0.5,
+    "importance_score": 0.6,
+    "access_count": 0,
+    "last_accessed": null
+  },
+  {
+    "memory_id": "sm_20260224182400_4735",
+    "timestamp": "2026-02-24T18:24:00.293546",
+    "session_id": "66496b22",
+    "user_intent": "OLa",
+    "approach_taken": "Direct concise response",
+    "outcome": "Task completed, neutral satisfaction",
+    "interaction_type": "task_completion",
+    "sentiment": 3,
+    "what_worked": [],
+    "what_to_avoid": [],
+    "key_insights": [],
+    "user_state": "neutral",
+    "topics": [
+      "devops"
+    ],
+    "related_memories": [],
+    "importance_score": 0.6,
+    "access_count": 0,
+    "last_accessed": null
+  },
+  {
+    "memory_id": "sm_20260224181037_783",
+    "timestamp": "2026-02-24T18:10:37.807090",
+    "session_id": "66496b22",
+    "user_intent": "all good?",
+    "approach_taken": "Direct concise response",
+    "outcome": "Task completed successfully with high satisfaction",
+    "interaction_type": "task_completion",
+    "sentiment": 4,
+    "what_worked": [],
+    "what_to_avoid": [],
+    "key_insights": [
+      "User responded positively - approach was effective"
+    ],
+    "user_state": "neutral",
+    "topics": [
+      "go"
+    ],
+    "related_memories": [],
+    "importance_score": 0.6,
     "access_count": 0,
     "last_accessed": null
   },
@@ -784,6 +784,25 @@
     "topics": [],
     "related_memories": [],
     "importance_score": 0.6,
+    "access_count": 0,
+    "last_accessed": null
+  },
+  {
+    "memory_id": "sm_20260224180607_1720",
+    "timestamp": "2026-02-24T18:06:07.590873",
+    "session_id": "87ce6af8",
+    "user_intent": "who are you",
+    "approach_taken": "Bullet point explanation",
+    "outcome": "Task completed, neutral satisfaction",
+    "interaction_type": "problem_solving",
+    "sentiment": 3,
+    "what_worked": [],
+    "what_to_avoid": [],
+    "key_insights": [],
+    "user_state": "neutral",
+    "topics": [],
+    "related_memories": [],
+    "importance_score": 0.5,
     "access_count": 0,
     "last_accessed": null
   },
@@ -1161,11 +1180,11 @@
     "last_accessed": null
   },
   {
-    "memory_id": "sm_20260225172319_3074",
-    "timestamp": "2026-02-25T17:23:19.331472",
-    "session_id": "cd1939ff",
-    "user_intent": "hey",
-    "approach_taken": "Direct concise response",
+    "memory_id": "sm_20260225185835_9776",
+    "timestamp": "2026-02-25T18:58:35.743081",
+    "session_id": "5318bc50",
+    "user_intent": "e qual seria o or\u00e7amento desta campanha para alcan\u00e7ar um publico de 1M viewers e captar pelo menos 1",
+    "approach_taken": "Provided code example",
     "outcome": "Task completed, neutral satisfaction",
     "interaction_type": "task_completion",
     "sentiment": 3,
@@ -1173,9 +1192,36 @@
     "what_to_avoid": [],
     "key_insights": [],
     "user_state": "neutral",
-    "topics": [],
+    "topics": [
+      "go",
+      "api"
+    ],
     "related_memories": [],
     "importance_score": 0.6,
+    "access_count": 0,
+    "last_accessed": null
+  },
+  {
+    "memory_id": "sm_20260225185912_3293",
+    "timestamp": "2026-02-25T18:59:12.419543",
+    "session_id": "5318bc50",
+    "user_intent": "alguma implica\u00e7\u00e3o legal nessa nossa abordagem?",
+    "approach_taken": "Provided code example",
+    "outcome": "Positive reception, may need follow-up",
+    "interaction_type": "problem_solving",
+    "sentiment": 4,
+    "what_worked": [],
+    "what_to_avoid": [],
+    "key_insights": [
+      "User responded positively - approach was effective"
+    ],
+    "user_state": "neutral",
+    "topics": [
+      "go",
+      "api"
+    ],
+    "related_memories": [],
+    "importance_score": 0.5,
     "access_count": 0,
     "last_accessed": null
   }

@@ -1,101 +1,109 @@
 #!/usr/bin/env python3
 """
-Test Runner for IDE Agent Wizard
-================================
-Run all tests: python tests/run_tests.py
-Run unit tests only: python tests/run_tests.py --unit
-Run integration tests: python tests/run_tests.py --integration
+Test Runner for Klaus
+=====================
+
+Usage:
+    python tests/run_tests.py              # Run all tests
+    python tests/run_tests.py unit         # Run unit tests only
+    python tests/run_tests.py integration  # Run integration tests only
+    python tests/run_tests.py e2e          # Run E2E tests only
+    python tests/run_tests.py coverage     # Run with coverage report
 """
 
 import sys
-import os
+import subprocess
 import argparse
-import unittest
-
-# Add parent to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pathlib import Path
 
 
-def run_tests(test_type="all", verbose=False):
-    """Run test suite."""
+def run_command(cmd, description):
+    """Run a command and print results."""
+    print(f"\n{'='*60}")
+    print(f"Running: {description}")
+    print(f"{'='*60}\n")
     
-    # Discover tests
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
-    
-    test_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    if test_type in ("all", "unit"):
-        try:
-            unit_tests = loader.discover(
-                os.path.join(test_dir, "unit"),
-                pattern="test_*.py"
-            )
-            suite.addTests(unit_tests)
-            print(f"✅ Loaded unit tests")
-        except Exception as e:
-            print(f"⚠️  Could not load unit tests: {e}")
-    
-    if test_type in ("all", "integration"):
-        try:
-            integration_tests = loader.discover(
-                os.path.join(test_dir, "integration"),
-                pattern="test_*.py"
-            )
-            suite.addTests(integration_tests)
-            print(f"✅ Loaded integration tests")
-        except Exception as e:
-            print(f"⚠️  Could not load integration tests: {e}")
-    
-    # Run tests
-    verbosity = 2 if verbose else 1
-    runner = unittest.TextTestRunner(verbosity=verbosity)
-    result = runner.run(suite)
-    
-    # Return exit code
-    return 0 if result.wasSuccessful() else 1
+    result = subprocess.run(cmd, shell=True)
+    return result.returncode
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run IDE Agent Wizard tests")
+    parser = argparse.ArgumentParser(description="Klaus Test Runner")
     parser.add_argument(
-        "--unit", 
-        action="store_true",
-        help="Run unit tests only"
-    )
-    parser.add_argument(
-        "--integration",
-        action="store_true", 
-        help="Run integration tests only"
+        "test_type",
+        nargs="?",
+        default="all",
+        choices=["all", "unit", "integration", "e2e", "coverage"],
+        help="Type of tests to run"
     )
     parser.add_argument(
         "-v", "--verbose",
         action="store_true",
         help="Verbose output"
     )
+    parser.add_argument(
+        "-x", "--fail-fast",
+        action="store_true",
+        help="Stop on first failure"
+    )
     
     args = parser.parse_args()
     
-    # Determine test type
-    test_type = "all"
-    if args.unit:
-        test_type = "unit"
-    elif args.integration:
-        test_type = "integration"
+    # Base pytest command
+    pytest_base = "python -m pytest"
     
-    print(f"🧪 Running {test_type} tests...")
-    print("=" * 50)
+    if args.verbose:
+        pytest_base += " -v"
+    if args.fail_fast:
+        pytest_base += " -x"
     
-    exit_code = run_tests(test_type, args.verbose)
+    test_dir = Path(__file__).parent
+    returncode = 0
     
-    print("=" * 50)
-    if exit_code == 0:
+    if args.test_type == "all":
+        print("🧪 Running ALL tests...")
+        cmd = f"{pytest_base} {test_dir} --tb=short"
+        returncode = run_command(cmd, "All Tests")
+        
+    elif args.test_type == "unit":
+        print("🔬 Running UNIT tests...")
+        cmd = f"{pytest_base} {test_dir}/unit --tb=short"
+        returncode = run_command(cmd, "Unit Tests")
+        
+    elif args.test_type == "integration":
+        print("🔗 Running INTEGRATION tests...")
+        cmd = f"{pytest_base} {test_dir}/integration --tb=short"
+        returncode = run_command(cmd, "Integration Tests")
+        
+    elif args.test_type == "e2e":
+        print("🎭 Running E2E tests...")
+        cmd = f"{pytest_base} {test_dir}/e2e --tb=short"
+        returncode = run_command(cmd, "E2E Tests")
+        
+    elif args.test_type == "coverage":
+        print("📊 Running tests with COVERAGE...")
+        cmd = (
+            f"{pytest_base} {test_dir} "
+            f"--cov=core "
+            f"--cov=docker/web-ui "
+            f"--cov-report=html:coverage_html "
+            f"--cov-report=term-missing "
+            f"--tb=short"
+        )
+        returncode = run_command(cmd, "Tests with Coverage")
+        
+        if returncode == 0:
+            print("\n✅ Coverage report generated in: coverage_html/index.html")
+    
+    print(f"\n{'='*60}")
+    if returncode == 0:
         print("✅ All tests passed!")
     else:
-        print("❌ Some tests failed")
+        print(f"❌ Tests failed with code: {returncode}")
+    print(f"{'='*60}\n")
     
-    sys.exit(exit_code)
+    return returncode
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -44,7 +44,7 @@
         "normalized": "api"
       },
       "created_at": "2026-02-23T21:58:45.394471",
-      "updated_at": "2026-02-24T14:21:02.662360"
+      "updated_at": "2026-02-25T18:59:12.565839"
     },
     "technology_rest": {
       "id": "technology_rest",
@@ -68,7 +68,7 @@
         "normalized": "ai"
       },
       "created_at": "2026-02-23T22:52:48.527542",
-      "updated_at": "2026-02-25T18:00:50.284453"
+      "updated_at": "2026-02-25T18:59:12.565853"
     },
     "technology_flask": {
       "id": "technology_flask",
@@ -210,7 +210,7 @@
         "normalized": "architecture"
       },
       "created_at": "2026-02-24T08:48:01.921322",
-      "updated_at": "2026-02-24T14:21:02.665076"
+      "updated_at": "2026-02-25T18:51:00.224539"
     },
     "topic_microservices": {
       "id": "topic_microservices",
@@ -233,7 +233,7 @@
         "normalized": "security"
       },
       "created_at": "2026-02-24T08:48:01.921359",
-      "updated_at": "2026-02-24T14:21:02.665110"
+      "updated_at": "2026-02-25T18:59:12.565827"
     },
     "topic_scalability": {
       "id": "topic_scalability",
@@ -350,7 +350,7 @@
         "normalized": "ci/cd"
       },
       "created_at": "2026-02-24T11:07:28.422477",
-      "updated_at": "2026-02-24T14:21:02.662338"
+      "updated_at": "2026-02-25T18:51:00.224562"
     },
     "topic_frontend": {
       "id": "topic_frontend",
@@ -399,6 +399,26 @@
       },
       "created_at": "2026-02-25T17:42:40.868747",
       "updated_at": "2026-02-25T18:00:50.284392"
+    },
+    "technology_openai": {
+      "id": "technology_openai",
+      "type": "Technology",
+      "name": "OpenAI",
+      "properties": {
+        "confidence": 0.9
+      },
+      "created_at": "2026-02-25T18:59:12.565781",
+      "updated_at": "2026-02-25T18:59:12.565784"
+    },
+    "topic_blockchain": {
+      "id": "topic_blockchain",
+      "type": "Topic",
+      "name": "blockchain",
+      "properties": {
+        "confidence": 0.6
+      },
+      "created_at": "2026-02-25T18:59:12.565860",
+      "updated_at": "2026-02-25T18:59:12.565862"
     }
   },
   "relationships": {
@@ -1896,6 +1916,116 @@
         "timestamp": "2026-02-25T17:42:40.868777"
       },
       "created_at": "2026-02-25T17:42:40.868778",
+      "strength": 1.0
+    },
+    "ep_20260225185100_2007-MENTIONS-topic_architecture": {
+      "id": "ep_20260225185100_2007-MENTIONS-topic_architecture",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225185100_2007",
+      "target_id": "topic_architecture",
+      "properties": {
+        "timestamp": "2026-02-25T18:51:00.224551"
+      },
+      "created_at": "2026-02-25T18:51:00.224554",
+      "strength": 1.0
+    },
+    "ep_20260225185100_2007-MENTIONS-topic_ci/cd": {
+      "id": "ep_20260225185100_2007-MENTIONS-topic_ci/cd",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225185100_2007",
+      "target_id": "topic_ci/cd",
+      "properties": {
+        "timestamp": "2026-02-25T18:51:00.224563"
+      },
+      "created_at": "2026-02-25T18:51:00.224564",
+      "strength": 1.0
+    },
+    "ep_20260225185100_2007-MENTIONS-topic_ai": {
+      "id": "ep_20260225185100_2007-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225185100_2007",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-25T18:51:00.224569"
+      },
+      "created_at": "2026-02-25T18:51:00.224570",
+      "strength": 1.0
+    },
+    "ep_20260225185835_9776-MENTIONS-topic_api": {
+      "id": "ep_20260225185835_9776-MENTIONS-topic_api",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225185835_9776",
+      "target_id": "topic_api",
+      "properties": {
+        "timestamp": "2026-02-25T18:58:35.919273"
+      },
+      "created_at": "2026-02-25T18:58:35.919280",
+      "strength": 1.0
+    },
+    "ep_20260225185835_9776-MENTIONS-topic_ai": {
+      "id": "ep_20260225185835_9776-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225185835_9776",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-25T18:58:35.919307"
+      },
+      "created_at": "2026-02-25T18:58:35.919308",
+      "strength": 1.0
+    },
+    "ep_20260225185912_3293-MENTIONS-technology_openai": {
+      "id": "ep_20260225185912_3293-MENTIONS-technology_openai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225185912_3293",
+      "target_id": "technology_openai",
+      "properties": {
+        "timestamp": "2026-02-25T18:59:12.565800"
+      },
+      "created_at": "2026-02-25T18:59:12.565802",
+      "strength": 1.0
+    },
+    "ep_20260225185912_3293-MENTIONS-topic_security": {
+      "id": "ep_20260225185912_3293-MENTIONS-topic_security",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225185912_3293",
+      "target_id": "topic_security",
+      "properties": {
+        "timestamp": "2026-02-25T18:59:12.565831"
+      },
+      "created_at": "2026-02-25T18:59:12.565832",
+      "strength": 1.0
+    },
+    "ep_20260225185912_3293-MENTIONS-topic_api": {
+      "id": "ep_20260225185912_3293-MENTIONS-topic_api",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225185912_3293",
+      "target_id": "topic_api",
+      "properties": {
+        "timestamp": "2026-02-25T18:59:12.565845"
+      },
+      "created_at": "2026-02-25T18:59:12.565848",
+      "strength": 1.0
+    },
+    "ep_20260225185912_3293-MENTIONS-topic_ai": {
+      "id": "ep_20260225185912_3293-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225185912_3293",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-25T18:59:12.565854"
+      },
+      "created_at": "2026-02-25T18:59:12.565855",
+      "strength": 1.0
+    },
+    "ep_20260225185912_3293-MENTIONS-topic_blockchain": {
+      "id": "ep_20260225185912_3293-MENTIONS-topic_blockchain",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225185912_3293",
+      "target_id": "topic_blockchain",
+      "properties": {
+        "timestamp": "2026-02-25T18:59:12.565865"
+      },
+      "created_at": "2026-02-25T18:59:12.565866",
       "strength": 1.0
     }
   }
