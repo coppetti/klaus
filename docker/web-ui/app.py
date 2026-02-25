@@ -1281,9 +1281,16 @@ async def get_chat_page():
             
             <!-- Footer -->
             <div class="p-3 border-t border-gray-200 bg-gray-50">
-                <p class="text-xs text-gray-500 text-center">
+                <p class="text-xs text-gray-500 text-center mb-2">
                     Klaus
                 </p>
+                <div class="flex justify-center">
+                    <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+                    <script type='text/javascript'>
+                        kofiwidget2.init('Support me on Ko-fi', '#8b73f5', 'B0B41UXJ9K');
+                        kofiwidget2.draw();
+                    </script>
+                </div>
             </div>
         </div>
         
