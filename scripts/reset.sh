@@ -1,12 +1,12 @@
 #!/bin/bash
-# IDE Agent Wizard - Factory Reset
+# Klaus - Factory Reset
 # ================================
 # Resets everything to factory defaults.
 # WARNING: This deletes all configurations and memories!
 
 set -e
 
-echo "🔄 IDE Agent Wizard - Factory Reset"
+echo "🔄 Klaus - Factory Reset"
 echo "===================================="
 echo ""
 echo "⚠️  WARNING: This will delete:"

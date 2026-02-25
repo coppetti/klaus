@@ -68,7 +68,7 @@
         "normalized": "ai"
       },
       "created_at": "2026-02-23T22:52:48.527542",
-      "updated_at": "2026-02-25T17:42:40.868776"
+      "updated_at": "2026-02-25T18:00:50.284453"
     },
     "technology_flask": {
       "id": "technology_flask",
@@ -115,7 +115,7 @@
         "normalized": "cloud"
       },
       "created_at": "2026-02-23T22:55:44.035677",
-      "updated_at": "2026-02-25T17:42:40.868759"
+      "updated_at": "2026-02-25T18:00:50.284404"
     },
     "topic_database": {
       "id": "topic_database",
@@ -139,7 +139,7 @@
         "normalized": "aws"
       },
       "created_at": "2026-02-24T08:41:52.080575",
-      "updated_at": "2026-02-25T17:42:40.868355"
+      "updated_at": "2026-02-25T18:00:50.284178"
     },
     "technology_gcp": {
       "id": "technology_gcp",
@@ -151,7 +151,7 @@
         "normalized": "gcp"
       },
       "created_at": "2026-02-24T08:41:52.080584",
-      "updated_at": "2026-02-25T17:42:40.868714"
+      "updated_at": "2026-02-25T18:00:50.284334"
     },
     "technology_azure": {
       "id": "technology_azure",
@@ -163,7 +163,7 @@
         "normalized": "azure"
       },
       "created_at": "2026-02-24T08:41:52.080590",
-      "updated_at": "2026-02-25T17:42:40.868735"
+      "updated_at": "2026-02-25T18:00:50.284350"
     },
     "technology_terraform": {
       "id": "technology_terraform",
@@ -302,7 +302,7 @@
         "normalized": "performance"
       },
       "created_at": "2026-02-24T09:12:20.368362",
-      "updated_at": "2026-02-25T17:42:40.868769"
+      "updated_at": "2026-02-25T18:00:50.284445"
     },
     "technology_node.js": {
       "id": "technology_node.js",
@@ -326,7 +326,7 @@
         "normalized": "kubernetes"
       },
       "created_at": "2026-02-24T11:07:28.422448",
-      "updated_at": "2026-02-25T17:42:40.868741"
+      "updated_at": "2026-02-25T18:00:50.284371"
     },
     "technology_postgresql": {
       "id": "technology_postgresql",
@@ -393,10 +393,12 @@
       "type": "Topic",
       "name": "serverless",
       "properties": {
-        "confidence": 0.6
+        "confidence": 0.6,
+        "consolidated": true,
+        "normalized": "serverless"
       },
       "created_at": "2026-02-25T17:42:40.868747",
-      "updated_at": "2026-02-25T17:42:40.868747"
+      "updated_at": "2026-02-25T18:00:50.284392"
     }
   },
   "relationships": {

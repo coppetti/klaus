@@ -1,5 +1,5 @@
 """
-Interactive Setup Wizard for IDE Agent Wizard
+Interactive Setup Wizard for Klaus
 ============================================
 Conversational setup flow - asks questions, generates config.
 """
@@ -52,7 +52,7 @@ class SetupWizard:
         
     def run(self):
         """Run the full setup wizard."""
-        print("🧙 Welcome to IDE Agent Wizard Setup!\n")
+        print("🧙 Welcome to Klaus Setup!\n")
         
         # Step 1: Check for existing backups
         self._check_backups()
@@ -738,7 +738,7 @@ class SetupWizard:
         
         # Create .env file for Docker
         if self.answers.get("kimi_api_key"):
-            env_content = f"""# IDE Agent Wizard - Environment Variables
+            env_content = f"""# Klaus - Environment Variables
 KIMI_API_KEY={self.answers.get("kimi_api_key", "")}
 KIMI_AGENT_URL=http://localhost:8081
 """

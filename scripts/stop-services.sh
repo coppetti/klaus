@@ -1,5 +1,5 @@
 #!/bin/bash
-# IDE Agent Wizard - Stop Services
+# Klaus - Stop Services
 # ================================
 # Stops all Docker services
 
@@ -8,7 +8,7 @@ set -e
 cd "$(dirname "$0")"
 COMPOSE_FILE="../docker/docker-compose.yml"
 
-echo "🛑 Stopping IDE Agent Wizard Services..."
+echo "🛑 Stopping Klaus Services..."
 echo "========================================"
 echo ""
 

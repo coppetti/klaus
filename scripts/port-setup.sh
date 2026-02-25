@@ -1,12 +1,12 @@
 #!/bin/bash
-# IDE Agent Wizard - Port Configuration
+# Klaus - Port Configuration
 # =====================================
 # Configure custom ports before running setup.sh
 # Usage: ./port-setup.sh
 
 set -e
 
-echo "🔧 IDE Agent Wizard - Port Configuration"
+echo "🔧 Klaus - Port Configuration"
 echo "========================================"
 echo ""
 

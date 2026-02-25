@@ -1,6 +1,6 @@
-# 🧙 IDE Agent Wizard v2.1
+# 🧙 Klaus v2.1
 
-> Universal AI agent setup with **Hybrid Memory** (SQLite + Graph), **Web UI**, **Multi-Provider Support**, and **Telegram Bot**.
+> **Klaus** - AI Solutions Architect with Hybrid Memory (SQLite + Graph), Web UI, Multi-Provider Support, and Telegram Bot.
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)

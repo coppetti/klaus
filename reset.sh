@@ -1,5 +1,5 @@
 #!/bin/bash
-# IDE Agent Wizard - Reset Launcher
+# Klaus - Reset Launcher
 # ==================================
 # This script launches the reset script from the scripts/ directory
 

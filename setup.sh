@@ -1,5 +1,5 @@
 #!/bin/bash
-# IDE Agent Wizard - Setup Launcher
+# Klaus - Setup Launcher
 # ==================================
 # This script launches the setup wizard from the scripts/ directory
 

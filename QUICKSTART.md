@@ -1,4 +1,4 @@
-# Quick Start Guide - IDE Agent Wizard v2.1
+# Quick Start Guide - Klaus v2.1
 
 > Get up and running in 5 minutes
 

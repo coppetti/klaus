@@ -1,5 +1,5 @@
 #!/bin/bash
-# IDE Agent Wizard - Start Services
+# Klaus - Start Services
 # =================================
 # Starts Web UI and Telegram Bot services
 # Usage: ./start-services.sh [web|telegram|all]
@@ -15,7 +15,7 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 IDE Agent Wizard - Starting Services${NC}"
+echo -e "${BLUE}🚀 Klaus - Starting Services${NC}"
 echo "========================================"
 echo ""
 

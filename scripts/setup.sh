@@ -1,5 +1,5 @@
 #!/bin/bash
-# IDE Agent Wizard Setup with Virtual Environment
+# Klaus Setup with Virtual Environment
 # ================================================
 # Called from root via launcher script
 # v2.1.0 - Supports IDE | WEB | IDE+WEB modes
@@ -8,7 +8,7 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-echo "🧙 IDE Agent Wizard Setup"
+echo "🧙 Klaus Setup"
 echo ""
 
 # Create virtual environment if it doesn't exist

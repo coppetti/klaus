@@ -1,5 +1,5 @@
 """
-Web UI for IDE Agent Wizard v2.1
+Klaus - AI Solutions Architect
 =================================
 Modern Shadcn-inspired interface with chat + config panel
 Uses Hybrid Memory (SQLite + Graph) for intelligent context
@@ -108,7 +108,7 @@ web_search_tool = WebSearchTool() if WEB_SEARCH_AVAILABLE else None
 session_context_managers: Dict[str, SessionContextManager] = {}
 session_compactors: Dict[str, SessionContextCompactor] = {}
 
-app = FastAPI(title="IDE Agent Wizard - Web UI v2.1")
+app = FastAPI(title="Klaus - AI Solutions Architect")
 
 async def send_telegram_notification(message: str):
     """Send an async admin notification via Telegram."""
@@ -329,7 +329,7 @@ async def get_chat_page():
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2103/2103633.png">
-    <title>{agent_name} - AI Assistant v2.1</title>
+    <title>{agent_name}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -1282,7 +1282,7 @@ async def get_chat_page():
             <!-- Footer -->
             <div class="p-3 border-t border-gray-200 bg-gray-50">
                 <p class="text-xs text-gray-500 text-center">
-                    IDE Agent Wizard v2.1.0
+                    Klaus v2.1
                 </p>
             </div>
         </div>
@@ -5972,7 +5972,7 @@ async def consolidate_session_memory(session_id: str):
     """Consolidate session's episodic memories into knowledge graph."""
     try:
         # Import cognitive memory modules
-        sys.path.insert(0, '/Users/matheussilveira/Documents/CODE/klaus/core')
+        sys.path.insert(0, '/app/core')
         from cognitive_memory import get_cognitive_memory_manager
         
         # Get the cognitive memory manager
@@ -6082,7 +6082,7 @@ async def get_semantic_memory(session_id: str = None):
     """Get semantic memories (what the AI has learned about the user) - from cognitive memory system."""
     try:
         # Import cognitive memory system
-        sys.path.insert(0, '/Users/matheussilveira/Documents/CODE/klaus/core')
+        sys.path.insert(0, '/app/core')
         from cognitive_memory import get_cognitive_memory_manager, MemoryDecayCalculator
         
         # Get the cognitive memory manager

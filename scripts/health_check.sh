@@ -1,5 +1,5 @@
 #!/bin/bash
-# Health Check & Auto-Recovery Script for IDE Agent Wizard
+# Health Check & Auto-Recovery Script for Klaus
 # Usage: ./health_check.sh [--auto-restart]
 
 set -e
@@ -210,7 +210,7 @@ quick_restart() {
 show_status() {
     echo ""
     echo "=========================================="
-    echo "    IDE Agent Wizard - System Status"
+    echo "    Klaus - System Status"
     echo "=========================================="
     echo ""
     

@@ -1,4 +1,4 @@
-# Web UI for IDE Agent Wizard
+# Web UI for Klaus
 FROM python:3.11-slim
 
 WORKDIR /app

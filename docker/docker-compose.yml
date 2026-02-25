@@ -1,4 +1,4 @@
-# IDE Agent Wizard - Docker Compose
+# Klaus - Docker Compose
 # ==================================
 # Telegram bot with Kimi Agent (port 8081) + Memory Sync
 # Run from project root: docker compose -f docker/docker-compose.yml up -d

@@ -1,4 +1,4 @@
-# IDE Agent Wizard - Telegram Bot
+# Klaus - Telegram Bot
 # ================================
 # Multi-provider LLM agent with Telegram interface
 

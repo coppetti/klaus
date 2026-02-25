@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-IDE Agent Wizard - Initialization Script
+Klaus - Initialization Script
 ========================================
 Post-setup initialization for the agent.
 
@@ -137,7 +137,7 @@ def initialize_ide_connector(config):
 
 def main():
     """Main initialization routine."""
-    print_header("🧙 IDE Agent Wizard - Initialization")
+    print_header("🧙 Klaus - Initialization")
     print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Working Directory: {Path.cwd()}")
     
