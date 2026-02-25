@@ -507,8 +507,8 @@ ANTHROPIC_API_KEY={self.anthropic_key.get()}
 OPENAI_API_KEY={self.openai_key.get()}
 
 # Ports
-KIMI_AGENT_PORT=7070
-WEB_UI_PORT=7072
+KIMI_AGENT_PORT=2013
+WEB_UI_PORT=2077
 
 # Configuration
 KLAUS_MODE={self.setup_mode.get()}
@@ -599,7 +599,7 @@ defaults:
 echo Starting Klaus...
 docker compose up -d
 echo Klaus is starting...
-echo Web UI: http://localhost:7072
+echo Web UI: http://localhost:2077
 pause
 """
             else:
@@ -608,8 +608,8 @@ pause
 echo "Starting Klaus..."
 docker compose up -d
 echo "Klaus started!"
-echo "Web UI: http://localhost:7072"
-echo "API: http://localhost:7070"
+echo "Web UI: http://localhost:2077"
+echo "API: http://localhost:2013"
 """
                 start_script.chmod(0o755)
             
@@ -631,7 +631,7 @@ echo "API: http://localhost:7070"
                 "To start Klaus, run:\n"
                 f"  cd {self.install_dir.get()}\n"
                 "  ./start.sh (or start.bat on Windows)\n\n"
-                "Then open http://localhost:7072 in your browser."
+                "Then open http://localhost:2077 in your browser."
             ),
             self.root.quit()
         ])

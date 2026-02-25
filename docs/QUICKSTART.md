@@ -10,7 +10,7 @@ Get started with Klaus in 5 minutes.
 ./scripts/start-services.sh
 ```
 
-Open http://localhost:7072 in your browser.
+Open http://localhost:2077 in your browser.
 
 ---
 

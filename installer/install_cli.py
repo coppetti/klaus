@@ -135,8 +135,8 @@ def setup_configuration(install_dir: Path, args) -> bool:
 KIMI_API_KEY={args.kimi_key or ''}
 ANTHROPIC_API_KEY={args.anthropic_key or ''}
 OPENAI_API_KEY={args.openai_key or ''}
-WEB_UI_PORT=7072
-KIMI_AGENT_PORT=7070
+WEB_UI_PORT=2077
+KIMI_AGENT_PORT=2013
 """
         
         env_file = install_dir / ".env"
@@ -192,8 +192,8 @@ echo Starting Klaus...
 docker compose -f docker/docker-compose.yml up -d
 echo.
 echo Klaus is starting...
-echo Web UI: http://localhost:7072
-echo API: http://localhost:7070
+echo Web UI: http://localhost:2077
+echo API: http://localhost:2013
 timeout /t 3 >nul
 echo.
 echo To view logs: docker compose logs -f
@@ -220,8 +220,8 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "✅ Klaus started successfully!"
     echo ""
-    echo "📱 Web UI: http://localhost:7072"
-    echo "🔌 API:    http://localhost:7070"
+    echo "📱 Web UI: http://localhost:2077"
+    echo "🔌 API:    http://localhost:2013"
     echo ""
     echo "Useful commands:"
     echo "  View logs:  docker compose logs -f"
@@ -344,7 +344,7 @@ def install(args):
         print(f"  cd {install_dir}")
         print("  ./start.sh")
     print()
-    print("Then open http://localhost:7072 in your browser.")
+    print("Then open http://localhost:2077 in your browser.")
     print()
     print("Enjoy using Klaus! 🎉")
 

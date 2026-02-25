@@ -72,7 +72,7 @@ class AgentSpawner:
     - API: Spawns agents via Kimi Agent API (Web/Telegram mode)
     """
     
-    def __init__(self, mode: str = "local", base_url: str = "http://localhost:7070"):
+    def __init__(self, mode: str = "local", base_url: str = "http://localhost:2013"):
         self.mode = mode
         self.base_url = base_url
         self.tasks: Dict[str, SubAgentTask] = {}
@@ -351,7 +351,7 @@ Remember: Klaus is waiting for your result to integrate into the main workflow.
 _spawner_instance: Optional[AgentSpawner] = None
 
 
-def get_spawner(mode: str = "local", base_url: str = "http://localhost:7070") -> AgentSpawner:
+def get_spawner(mode: str = "local", base_url: str = "http://localhost:2013") -> AgentSpawner:
     """Get or create singleton spawner instance."""
     global _spawner_instance
     if _spawner_instance is None:

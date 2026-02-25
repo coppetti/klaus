@@ -1,6 +1,6 @@
 # Klaus - Docker Compose
 # ==================================
-# Telegram bot with Kimi Agent (port 8081) + Memory Sync
+# 🎮 Easter Egg Ports: 2013 (Cyberpunk RPG) / 2077 (Cyberpunk 2077)
 # Run from project root: docker compose -f docker/docker-compose.yml up -d
 
 version: "3.8"
@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile
     container_name: KLAUS_MAIN_kimi
     ports:
-      - "7070:8080"
+      - "${KLAUS_AGENT_PORT:-2013}:8080"
     volumes:
       # Sync memory with host
       - ../workspace/memory:/app/memory:rw
@@ -90,7 +90,7 @@ services:
       dockerfile: Dockerfile
     container_name: KLAUS_MAIN_web
     ports:
-      - "7072:8082"
+      - "${WEB_UI_PORT:-2077}:8082"
     volumes:
       # Mount workspace for data persistence (sessions, settings)
       - ../workspace:/app/workspace:rw

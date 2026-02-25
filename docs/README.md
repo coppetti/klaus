@@ -65,7 +65,7 @@ curl -fsSL https://raw.githubusercontent.com/yourusername/klaus/main/install.sh 
 python installer/install_gui.py
 ```
 
-Then open http://localhost:7072 — done.
+Then open http://localhost:2077 — done.
 
 ---
 

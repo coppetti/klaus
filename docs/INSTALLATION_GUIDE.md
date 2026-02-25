@@ -73,8 +73,8 @@ ANTHROPIC_API_KEY=sk-your-anthropic-key
 OPENAI_API_KEY=sk-your-openai-key
 
 # Optional - change ports if needed
-WEB_UI_PORT=7072
-AGENT_PORT=7070
+WEB_UI_PORT=2077
+AGENT_PORT=2013
 ```
 
 ### Step 3: Install Dependencies
@@ -112,8 +112,8 @@ Expected output:
 ✓ Docker running
 ✓ kimiklaus-agent container: healthy
 ✓ kimiklaus-web-ui container: healthy
-✓ API responding on port 7070
-✓ Web UI accessible on port 7072
+✓ API responding on port 2013
+✓ Web UI accessible on port 2077
 ```
 
 ---
@@ -122,9 +122,9 @@ Expected output:
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| Web UI | http://localhost:7072 | Main chat interface |
-| API | http://localhost:7070 | REST API endpoint |
-| Memory Graph | http://localhost:7072/memory-graph | Visual memory explorer |
+| Web UI | http://localhost:2077 | Main chat interface |
+| API | http://localhost:2013 | REST API endpoint |
+| Memory Graph | http://localhost:2077/memory-graph | Visual memory explorer |
 
 ---
 
@@ -133,8 +133,8 @@ Expected output:
 ### Port Already in Use
 
 ```bash
-# Find what's using port 7072
-lsof -i :7072
+# Find what's using port 2077
+lsof -i :2077
 
 # Kill the process or change port in .env
 ```
@@ -162,7 +162,7 @@ chmod +x *.sh
 
 ## Next Steps
 
-1. Open http://localhost:7072 in your browser
+1. Open http://localhost:2077 in your browser
 2. Create your first session
 3. Try uploading a file
 4. Explore the Memory Graph

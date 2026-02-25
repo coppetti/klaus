@@ -47,7 +47,7 @@ Switch providers instantly. No lock-in.
 - **Local/Ollama** — Run privately on your hardware
 
 ### 💬 Interface Freedom
-- **Web UI** — Full-featured chat at http://localhost:7072
+- **Web UI** — Full-featured chat at http://localhost:2077
 - **Telegram Bot** — Chat from anywhere, instant notifications
 - **API** — RESTful API for custom integrations
 
@@ -78,7 +78,7 @@ cp .env.example .env
 ./scripts/start-services.sh
 ```
 
-Then open http://localhost:7072 — done.
+Then open http://localhost:2077 — done.
 
 ---
 

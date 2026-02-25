@@ -33,7 +33,7 @@ cp .env.example .env
 
 ## First Conversation
 
-1. Open http://localhost:7072
+1. Open http://localhost:2077
 2. Create a new session
 3. Start chatting!
 
@@ -66,7 +66,7 @@ Klaus automatically spawns specialists:
 docker compose logs -f web-ui
 
 # Check health
-curl http://localhost:7072/health
+curl http://localhost:2077/health
 
 # Run tests
 pytest
