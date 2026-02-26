@@ -56,6 +56,29 @@ git push origin vX.Y.Z
 
 **NEVER push from DEV repo root - histories are unrelated and will conflict.**
 
+### 🌿 Branch Workflow - DEV Repo
+
+**Sempre use branches para desenvolvimento:**
+
+```bash
+# 1. Criar feature branch
+git checkout -b feature/nome-da-feature
+
+# 2. Desenvolver e commitar
+# ... fazer mudanças ...
+git add .
+git commit -m "feat: descrição"
+
+# 3. Merge para main quando OK
+git checkout main
+git merge feature/nome-da-feature
+
+# 4. Testar na main
+# ... testes ...
+
+# 5. SÓ DEPOIS da autorização: PUSH pro GitHub
+```
+
 ### 🚫 PUSH GitHub - REGRA CRÍTICA
 **A partir de agora, só faça PUSH para GitHub quando o usuário pedir explicitamente:**
 - "PUSH pro github"
@@ -63,6 +86,12 @@ git push origin vX.Y.Z
 - "Deploy to GitHub"
 
 **Commits locais são OK a qualquer momento**, mas **PUSH apenas com autorização explícita**.
+
+**Fluxo completo:**
+1. ✅ Feature branch → dev
+2. ✅ Merge → main (testar)  
+3. ⏳ Esperar autorização
+4. 🚀 PUSH (quando autorizado)
 
 ---
 
