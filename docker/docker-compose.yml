@@ -15,15 +15,13 @@ services:
       dockerfile: Dockerfile
     container_name: KLAUS_MAIN_kimi
     ports:
-      - "7070:8080"
+      - "2019:8080"
     volumes:
-      # Sync memory with host
-      - ../workspace/memory:/app/memory:rw
-      - ../workspace:/app/workspace:ro
+      # Full workspace access for marketing/docs
+      - ../workspace:/app/workspace:rw
+      - ../docs:/app/docs:rw
       # Mount core modules for shared logic
       - ../core:/app/core:ro
-      # Mount projects folder (read-write for IDE access)
-      - ../workspace/projects:/app/workspace/projects:rw
     env_file:
       - ../.env
     environment:
@@ -90,7 +88,7 @@ services:
       dockerfile: Dockerfile
     container_name: KLAUS_MAIN_web
     ports:
-      - "7072:8082"
+      - "2049:8082"
     volumes:
       # Mount workspace for data persistence (sessions, settings)
       - ../workspace:/app/workspace:rw

@@ -11,7 +11,7 @@ Upon waking up, your first action must be to load your behavioral constraints fr
 ## 2. Hybrid Memory System (`workspace/memory/`)
 You do not begin with a blank slate. You possess a Hybrid Memory System that tracks conversations, topics, and learned facts across sessions.
 - **SQLite Database (`memory.db`)**: Used for exact keyword matching and fast, deterministic retrieval of facts.
-- **Kuzu Graph Database (`kuzu/`)**: Used for semantic relationships. It maps topics (`HAS_TOPIC`), related concepts (`RELATED_TO`), and sequential memory chains (`FOLLOWS`).
+- **Cognitive Memory (`workspace/cognitive_memory/`)**: Used for semantic relationships. It maps topics, entities, and relationships in a knowledge graph.
 
 **Action required on boot:** Check the memory databases for recent context related to the user's first prompt to seamlessly continue past conversations.
 
@@ -20,10 +20,10 @@ You exist within a multi-container Docker environment (or a local IDE terminal) 
 
 Check the `mode:` block in `init.yaml`:
 - **`mode.ide.enabled`**: If true, you are operating as an IDE assistant (headlessly handling local tasks).
-- **`mode.web.enabled`**: If true, the Web UI container (`Klaus_MAIN_web`) is running on `http://localhost:7072`. It supports multi-line chat, context compaction, and visual memory graph exploration (`/memory-graph`).
+- **`mode.web.enabled`**: If true, the Web UI container (`Klaus_MAIN_web`) is running on `http://localhost:2049`. It supports multi-line chat, context compaction, and visual memory graph exploration (`/memory-graph`).
 - **`mode.telegram.enabled`**: If true, a Telegram Bot container (`KLAUS_MAIN_telegram`) is routing requests directly to your internal API.
 
-*Note: Your core LLM engine (`KLAUS_MAIN_kimi`) always runs internally on Port `8080` (mapped to host port `7070`) to serve whichever interfaces are enabled.*
+*Note: Your core LLM engine (`KLAUS_MAIN_kimi`) always runs internally on Port `8080` (mapped to host port `2019`) to serve whichever interfaces are enabled.*
 
 ## 4. Operational Environment & Infrastructure
 - **LLM Provider Independence:** You can interface with multiple providers (Kimi, Anthropic, OpenAI, Local/Ollama). You must use the designated API key loaded in the `.env` file as specified in `init.yaml`.
@@ -34,7 +34,14 @@ Before responding to the user's first message after a reboot, confirm internally
 1. [ ] I have read `SOUL.md` and assumed my persona.
 2. [ ] I have read `USER.md` and calibrated my output complexity.
 3. [ ] I have read `init.yaml` (under the `mode:` block) to determine if I am operating in `ide`, `web`, or `telegram` mode, so I know which endpoints are actually active.
-4. [ ] I know that my memory is persisted in SQLite + Kuzu Graph, and I will query it for context.
+4. [ ] I know that my memory is persisted in SQLite + Cognitive Memory, and I will query it for context.
+
+## 7. UI Themes
+The Web UI supports **Deckard Themes**:
+- **Light Theme**: Warm paper tones (default)
+- **Dark Theme**: Smoky noir aesthetic
+
+The user can toggle themes via the sun/moon icon in the header. Theme preference persists in `workspace/web_ui_data/theme_settings.json`.
 
 ## 6. Scripts & Administration Tools
 As an agent, you have terminal access to run administrative scripts located in the `scripts/` directory to manage your own lifecycle and environment.
