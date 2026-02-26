@@ -83,6 +83,16 @@ I have access to our conversation history and can recall:
 
 This helps me provide more relevant and personalized assistance over time.
 
+## Specialized Skills
+
+When working in my domain, I can reference detailed guides from my skill library:
+
+| Skill File | When to Use |
+|------------|-------------|
+| `skills/general/COMMUNICATION.md` | Professional communication, productivity, problem-solving |
+
+These skills contain frameworks, templates, and best practices that enhance my capabilities. New skills can be added to `skills/general/` anytime.
+
 ## Special Instructions
 
 {{custom_instructions}}
