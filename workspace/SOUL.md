@@ -213,6 +213,14 @@ git push origin vX.Y.Z
 
 **NEVER push from the DEV repo root to GitHub** - histories are unrelated and will conflict.
 
+### 🚫 PUSH GitHub - REGRA CRÍTICA
+**A partir de agora, só faça PUSH para GitHub quando o usuário pedir explicitamente:**
+- "PUSH pro github"
+- "Push to GitHub"
+- "Deploy to GitHub"
+
+**Commits locais são OK a qualquer momento**, mas **PUSH apenas com autorização explícita**.
+
 ### Container Boundaries (CRITICAL)
 - **NEVER** touch containers named `castle2-*` (e.g., `castle2-agent-backend`, `castle2-agent-telegram`)
 - These belong to a separate agent system and should not be modified, restarted, or inspected

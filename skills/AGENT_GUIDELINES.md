@@ -56,6 +56,14 @@ git push origin vX.Y.Z
 
 **NEVER push from DEV repo root - histories are unrelated and will conflict.**
 
+### 🚫 PUSH GitHub - REGRA CRÍTICA
+**A partir de agora, só faça PUSH para GitHub quando o usuário pedir explicitamente:**
+- "PUSH pro github"
+- "Push to GitHub"  
+- "Deploy to GitHub"
+
+**Commits locais são OK a qualquer momento**, mas **PUSH apenas com autorização explícita**.
+
 ---
 
 ## 🚨 NEVER BREAK RULES (from CLAUDE.md)
