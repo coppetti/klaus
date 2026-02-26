@@ -213,6 +213,30 @@ git push origin vX.Y.Z
 
 **NEVER push from the DEV repo root to GitHub** - histories are unrelated and will conflict.
 
+### 🌿 Branch Workflow - DEV Repo (KLAUS)
+
+**Sempre use branches para desenvolvimento:**
+
+```bash
+# 1. Criar feature branch a partir da main
+git checkout -b feature/nome-da-feature
+
+# 2. Desenvolver e commitar
+# ... fazer mudanças ...
+git add .
+git commit -m "feat: descrição da feature"
+
+# 3. Merge para main quando estiver OK
+git checkout main
+git merge feature/nome-da-feature
+
+# 4. Testar novamente na main
+# ... testes ...
+
+# 5. SÓ DEPOIS dos testes e autorização do usuário:
+# (usuário deve dizer explicitamente "PUSH pro github")
+```
+
 ### 🚫 PUSH GitHub - REGRA CRÍTICA
 **A partir de agora, só faça PUSH para GitHub quando o usuário pedir explicitamente:**
 - "PUSH pro github"
@@ -220,6 +244,12 @@ git push origin vX.Y.Z
 - "Deploy to GitHub"
 
 **Commits locais são OK a qualquer momento**, mas **PUSH apenas com autorização explícita**.
+
+**Workflow completo:**
+1. ✅ Feature branch → desenvolvimento
+2. ✅ Merge → main (testar)
+3. ⏳ Esperar autorização do usuário
+4. 🚀 PUSH pro GitHub (quando autorizado)
 
 ### Container Boundaries (CRITICAL)
 - **NEVER** touch containers named `castle2-*` (e.g., `castle2-agent-backend`, `castle2-agent-telegram`)
