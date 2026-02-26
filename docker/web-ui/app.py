@@ -17,6 +17,8 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pathlib import Path
 import yaml
 from pydantic import BaseModel
@@ -109,6 +111,11 @@ session_context_managers: Dict[str, SessionContextManager] = {}
 session_compactors: Dict[str, SessionContextCompactor] = {}
 
 app = FastAPI(title="Klaus - AI Solutions Architect")
+
+# Templates e static files
+BASE_DIR = Path(__file__).parent
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 async def send_telegram_notification(message: str):
     """Send an async admin notification via Telegram."""
@@ -324,23 +331,35 @@ async def get_chat_page():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#7c3aed">
+    <meta name="theme-color" content="#F5F3EF" id="theme-color-meta">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2103/2103633.png">
     <title>{agent_name}</title>
+    <!-- Theme initialization - prevents flash -->
+    <script>
+        (function() {{
+            const savedTheme = localStorage.getItem('klaus-theme') || 'deckard-light';
+            document.documentElement.classList.add('theme-' + savedTheme);
+            const metaTheme = document.getElementById('theme-color-meta');
+            if (metaTheme) {{
+                metaTheme.content = savedTheme === 'deckard-dark' ? '#161412' : '#F5F3EF';
+            }}
+        }})();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <link rel="stylesheet" href="/static/themes.css">
     <style>
         * {{ font-family: 'Inter', sans-serif; }}
         h1, h2, h3, .btn, .font-heading {{ font-family: 'Outfit', sans-serif; }}
         
-        /* Shadcn-inspired color palette */
+        /* Shadcn-inspired color palette (default fallback) */
         :root {{
             --background: 0 0% 100%;
             --foreground: 240 10% 3.9%;
@@ -364,21 +383,90 @@ async def get_chat_page():
             --radius: 0.5rem;
         }}
         
+        /* DECKARD LIGHT - Noir Detective */
+        .theme-deckard-light {{
+            --background: 36 20% 95%;
+            --foreground: 30 15% 8%;
+            --card: 40 20% 97%;
+            --card-foreground: 30 15% 8%;
+            --popover: 40 20% 97%;
+            --popover-foreground: 30 15% 8%;
+            --primary: 17 100% 60%;
+            --primary-foreground: 0 0% 100%;
+            --secondary: 36 15% 90%;
+            --secondary-foreground: 30 15% 8%;
+            --muted: 36 15% 92%;
+            --muted-foreground: 30 10% 33%;
+            --accent: 165 100% 42%;
+            --accent-foreground: 30 15% 8%;
+            --destructive: 350 55% 35%;
+            --destructive-foreground: 0 0% 100%;
+            --border: 36 12% 80%;
+            --input: 36 12% 80%;
+            --ring: 17 100% 60%;
+            --success: 145 35% 27%;
+            --warning: 45 65% 47%;
+        }}
+        
+        /* DECKARD DARK - Noir Detective */
+        .theme-deckard-dark {{
+            --background: 30 12% 8%;
+            --foreground: 40 15% 92%;
+            --card: 30 10% 12%;
+            --card-foreground: 40 15% 92%;
+            --popover: 30 10% 12%;
+            --popover-foreground: 40 15% 92%;
+            --primary: 17 85% 58%;
+            --primary-foreground: 30 15% 8%;
+            --secondary: 30 10% 18%;
+            --secondary-foreground: 40 15% 92%;
+            --muted: 30 10% 18%;
+            --muted-foreground: 35 10% 60%;
+            --accent: 165 65% 48%;
+            --accent-foreground: 30 15% 8%;
+            --destructive: 350 45% 50%;
+            --destructive-foreground: 0 0% 100%;
+            --border: 30 10% 22%;
+            --input: 30 10% 22%;
+            --ring: 17 85% 58%;
+            --success: 145 30% 40%;
+            --warning: 45 55% 52%;
+        }}
+        
+        /* Deckard theme typography */
+        .theme-deckard-light h1,
+        .theme-deckard-light h2,
+        .theme-deckard-light h3,
+        .theme-deckard-light .font-heading,
+        .theme-deckard-dark h1,
+        .theme-deckard-dark h2,
+        .theme-deckard-dark h3,
+        .theme-deckard-dark .font-heading {{
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.05em;
+        }}
+        
         body {{
             background-color: hsl(var(--background));
             color: hsl(var(--foreground));
+            transition: background-color 0.3s ease, color 0.3s ease;
         }}
         
         .chat-bubble-user {{
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            border-radius: 1rem 1rem 0.25rem 1rem;
+            background: #201E1B;
+            color: #FAF9F7;
+            border-radius: 16px 16px 4px 16px;
+            padding: 1rem 1.25rem;
+            max-width: 75%;
         }}
         
         .chat-bubble-assistant {{
-            background: hsl(var(--secondary));
-            color: hsl(var(--secondary-foreground));
-            border-radius: 1rem 1rem 1rem 0.25rem;
+            background: #EBE8E4;
+            color: #201E1B;
+            border: 1px solid #E5E2DE;
+            border-radius: 16px 16px 16px 4px;
+            padding: 1rem 1.25rem;
+            max-width: 75%;
         }}
         
         .status-badge {{
@@ -392,67 +480,24 @@ async def get_chat_page():
         }}
         
         .status-badge.online {{
-            background: #dcfce7;
-            color: #166534;
+            background: transparent;
+            color: #457A5C;
+            border: 1px solid rgba(69, 122, 92, 0.4);
         }}
         
         .status-badge.offline {{
-            background: #fee2e2;
-            color: #991b1b;
+            background: transparent;
+            color: #8C8884;
+            border: 1px solid #E5E2DE;
         }}
         
         .status-badge.warning {{
-            background: #fef3c7;
-            color: #92400e;
+            background: transparent;
+            color: #B88A2F;
+            border: 1px solid rgba(184, 138, 47, 0.4);
         }}
         
-        .sidebar-card {{
-            background: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
-            border-radius: var(--radius);
-            padding: 1rem;
-        }}
-        
-        .btn {{
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: none;
-        }}
-        
-        .btn-primary {{
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-        }}
-        
-        .btn-primary:hover {{
-            opacity: 0.9;
-        }}
-        
-        .btn-secondary {{
-            background: hsl(var(--secondary));
-            color: hsl(var(--secondary-foreground));
-        }}
-        
-        .btn-secondary:hover {{
-            background: hsl(var(--muted));
-        }}
-        
-        .btn-destructive {{
-            background: hsl(var(--destructive));
-            color: hsl(var(--destructive-foreground));
-        }}
-        
-        .btn-destructive:hover {{
-            opacity: 0.9;
-        }}
+        /* Theme classes defined in themes.css */
         
         .input-field {{
             width: 100%;
@@ -671,7 +716,7 @@ async def get_chat_page():
 
     <div class="flex h-full flex-1 min-h-0">
         <!-- Sessions Sidebar (Left) -->
-        <div id="left-sidebar" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-300">
+        <div id="left-sidebar" class="w-64 sidebar-bg border-r flex flex-col transition-all duration-300">
             <div class="p-4 border-b border-gray-200 flex items-center justify-between">
                 <h2 class="font-semibold text-gray-900 flex items-center gap-2">
                     <i class="fas fa-history text-gray-400"></i>
@@ -683,7 +728,7 @@ async def get_chat_page():
             </div>
             
             <div class="p-3 border-b border-gray-200">
-                <button onclick="createNewSession()" class="btn btn-primary w-full text-sm">
+                <button onclick="createNewSession()" class="btn-filled w-full flex items-center justify-center gap-2 text-sm">
                     <i class="fas fa-plus"></i>
                     New Session
                 </button>
@@ -712,11 +757,11 @@ async def get_chat_page():
                 <div class="p-3 bg-gray-50 border-b border-gray-200">
                     <div class="flex items-center justify-between">
                         <h3 class="text-xs font-semibold text-gray-600 flex items-center gap-2 cursor-pointer" onclick="toggleContextAnalyzerPanel()">
-                            <i class="fas fa-microscope text-indigo-500"></i>
+                            <i class="fas fa-microscope text-orange-500"></i>
                             Context Analyzer
                             <i id="context-analyzer-toggle-icon" class="fas fa-chevron-down text-xs ml-auto"></i>
                         </h3>
-                        <button onclick="analyzeContext()" class="text-xs text-indigo-600 hover:text-indigo-800" title="Analyze context">
+                        <button onclick="analyzeContext()" class="text-xs text-gray-600 hover:text-gray-800" title="Analyze context">
                             <i class="fas fa-play"></i>
                         </button>
                     </div>
@@ -771,7 +816,7 @@ async def get_chat_page():
                     <div class="bg-white rounded-xl shadow-2xl w-[90vw] h-[90vh] flex flex-col">
                         <div class="flex items-center justify-between p-4 border-b">
                             <h2 class="text-lg font-semibold flex items-center gap-2">
-                                <i class="fas fa-microscope text-indigo-500"></i>
+                                <i class="fas fa-microscope text-orange-500"></i>
                                 Context Analysis
                             </h2>
                             <button onclick="closeFullAnalyzer()" class="text-gray-400 hover:text-gray-600">
@@ -785,7 +830,7 @@ async def get_chat_page():
                         </div>
                         <div class="p-4 border-t bg-gray-50 flex justify-between">
                             <div id="full-analyzer-stats" class="text-sm text-gray-600"></div>
-                            <button onclick="compactSelectedMessages()" class="btn btn-primary">
+                            <button onclick="compactSelectedMessages()" class="btn-primary">
                                 <i class="fas fa-compress-alt mr-2"></i>Compact Selected
                             </button>
                         </div>
@@ -798,12 +843,12 @@ async def get_chat_page():
                 <div class="p-3 bg-gray-50 border-b border-gray-200">
                     <div class="flex items-center justify-between">
                         <h3 class="text-xs font-semibold text-gray-600 flex items-center gap-2 cursor-pointer" onclick="toggleSemanticMemoryPanel()">
-                            <i class="fas fa-brain text-pink-500"></i>
+                            <i class="fas fa-brain text-teal-500"></i>
                             What I Learned
-                            <span id="semantic-memory-count" class="ml-1 px-1.5 py-0.5 bg-pink-100 text-pink-700 rounded-full text-[10px]">0</span>
+                            <span id="semantic-memory-count" class="ml-1 px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded-full text-[10px]">0</span>
                             <i id="semantic-memory-toggle-icon" class="fas fa-chevron-down text-xs ml-auto"></i>
                         </h3>
-                        <button onclick="loadSemanticMemory()" class="text-xs text-pink-600 hover:text-pink-800" title="Refresh memories">
+                        <button onclick="loadSemanticMemory()" class="text-xs text-gray-500 hover:text-orange-500" title="Refresh memories">
                             <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
@@ -832,7 +877,7 @@ async def get_chat_page():
                 <div class="bg-white rounded-xl shadow-2xl w-[700px] max-h-[80vh] flex flex-col">
                     <div class="flex items-center justify-between p-4 border-b">
                         <h2 class="text-lg font-semibold flex items-center gap-2">
-                            <i class="fas fa-brain text-pink-500"></i>
+                            <i class="fas fa-brain text-teal-500"></i>
                             What I've Learned About You
                         </h2>
                         <button onclick="closeSemanticMemoryModal()" class="text-gray-400 hover:text-gray-600">
@@ -860,10 +905,10 @@ async def get_chat_page():
         <!-- Chat Area (flex-1) -->
         <div class="flex-1 flex flex-col bg-white">
             <!-- Header -->
-            <header class="px-6 py-3 border-b border-gray-200 bg-white">
+            <header class="px-6 py-3 border-b sidebar-bg">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-500 flex items-center justify-center text-white font-semibold text-lg shrink-0">
                             {agent_name[0].upper()}
                         </div>
                         <div class="hidden sm:block">
@@ -893,7 +938,7 @@ async def get_chat_page():
                             <i class="fas fa-circle text-xs"></i>
                             <span class="hidden lg:inline">Connecting...</span>
                         </div>
-                        <button onclick="showForkModal()" class="px-3 py-1.5 ml-1 bg-violet-50 text-violet-700 hover:bg-violet-100 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2 border border-violet-100 shadow-sm" title="Fork Context">
+                        <button onclick="showForkModal()" class="px-3 py-1.5 ml-1 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2 border border-gray-200 shadow-sm" title="Fork Context">
                             <i class="fas fa-code-branch"></i>
                             <span class="hidden lg:inline">Fork Context</span>
                         </button>
@@ -909,7 +954,7 @@ async def get_chat_page():
                 <!-- Chat Messages -->
                 <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide bg-gray-50/50 min-h-0">
                     <div class="text-center py-12">
-                        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-2xl">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-500 flex items-center justify-center text-white text-2xl">
                             <i class="fas fa-wand-magic-sparkles"></i>
                         </div>
                         <h2 class="text-xl font-semibold text-gray-900 mb-2">Welcome to {agent_name}</h2>
@@ -927,16 +972,16 @@ async def get_chat_page():
                 </div>
                 
                 <!-- Input Area -->
-                <div class="p-4 bg-white border-t border-gray-200 shrink-0">
+                <div class="p-4 bg-primary border-t border-subtle shrink-0">
                 <!-- File Attachment Preview -->
-                <div id="file-attachment" class="hidden mb-3 p-2 bg-violet-50 border border-violet-200 rounded-lg">
+                <div id="file-attachment" class="hidden mb-3 p-2 bg-gray-50 border border-gray-200 rounded-lg">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2 text-sm text-violet-700">
+                        <div class="flex items-center gap-2 text-sm text-gray-700">
                             <i class="fas fa-file"></i>
                             <span id="file-name" class="font-medium"></span>
-                            <span id="file-size" class="text-xs text-violet-500"></span>
+                            <span id="file-size" class="text-xs text-gray-500"></span>
                         </div>
-                        <button onclick="clearFileAttachment()" class="text-violet-400 hover:text-violet-600">
+                        <button onclick="clearFileAttachment()" class="text-gray-400 hover:text-gray-600">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -946,10 +991,10 @@ async def get_chat_page():
                 <!-- Model Selector Bar -->
                 <div class="flex items-center gap-2 mb-2">
                     <div class="relative" id="model-selector-container">
-                        <button id="model-selector-btn" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs text-gray-700 hover:border-violet-300 hover:shadow-sm transition-all group">
-                            <span id="model-icon" class="w-2 h-2 rounded-full bg-violet-500"></span>
+                        <button id="model-selector-btn" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs text-gray-700 hover:border-gray-400 hover:shadow-sm transition-all group">
+                            <span id="model-icon" class="w-2 h-2 rounded-full bg-orange-500"></span>
                             <span id="model-label">Loading...</span>
-                            <i class="fas fa-chevron-down text-gray-400 group-hover:text-violet-500 transition-colors"></i>
+                            <i class="fas fa-chevron-down text-gray-400 group-hover:text-gray-600 transition-colors"></i>
                         </button>
                         
                         <!-- Dropdown Menu -->
@@ -969,14 +1014,14 @@ async def get_chat_page():
                 <div class="relative">
                     <textarea 
                         id="message-input" 
-                        class="w-full p-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm overflow-y-auto"
+                        class="w-full p-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent text-sm overflow-y-auto"
                         placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
                         style="min-height: 80px; max-height: 160px;"
                         rows="3"
                     ></textarea>
                     
                     <!-- Send Button inside textarea -->
-                    <button id="send-btn" class="absolute bottom-3 right-3 w-8 h-8 bg-violet-600 hover:bg-violet-700 text-white rounded-lg flex items-center justify-center transition-colors shadow-sm">
+                    <button id="send-btn" class="absolute bottom-3 right-3 w-8 h-8 bg-gray-800 hover:bg-orange-500 text-white rounded-lg flex items-center justify-center transition-colors shadow-sm">
                         <i id="send-icon" class="fas fa-paper-plane text-xs"></i>
                         <i id="stop-icon" class="fas fa-stop text-xs hidden"></i>
                     </button>
@@ -1012,7 +1057,7 @@ async def get_chat_page():
         </div>
         
         <!-- Config Panel (Right) -->
-        <div id="right-sidebar" class="w-96 bg-white border-l border-gray-200 flex flex-col transition-all duration-300 relative">
+        <div id="right-sidebar" class="w-96 sidebar-bg border-l flex flex-col transition-all duration-300 relative">
             <div class="p-4 border-b border-gray-200 flex items-center justify-between">
                 <h2 class="font-semibold text-gray-900 flex items-center gap-2">
                     <i class="fas fa-sliders"></i>
@@ -1025,7 +1070,7 @@ async def get_chat_page():
             
             <div class="flex-1 overflow-y-auto p-4 space-y-4">
                 <!-- System Status -->
-                <div class="sidebar-card">
+                <div class="card">
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                         <i class="fas fa-server text-gray-400"></i>
                         System Status
@@ -1033,21 +1078,21 @@ async def get_chat_page():
                     <div class="space-y-2">
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-600">Kimi Agent</span>
-                            <span id="status-kimi" class="status-badge offline">
+                            <span id="status-kimi" class="status-offline px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1.5">
                                 <i class="fas fa-circle text-xs"></i>
                                 Checking...
                             </span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-600">Web UI</span>
-                            <span class="status-badge online">
+                            <span class="status-online px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1.5">
                                 <i class="fas fa-circle text-xs"></i>
                                 Online
                             </span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-600">Telegram Bot</span>
-                            <span id="status-telegram" class="status-badge {'online' if telegram_enabled else 'offline'}">
+                            <span id="status-telegram" class="{'status-online' if telegram_enabled else 'status-offline'} px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1.5">
                                 <i class="fas fa-circle text-xs"></i>
                                 {'Enabled' if telegram_enabled else 'Disabled'}
                             </span>
@@ -1056,7 +1101,7 @@ async def get_chat_page():
                 </div>
                 
                 <!-- Session Info -->
-                <div class="sidebar-card">
+                <div class="card">
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                         <i class="fas fa-clock-rotate-left text-gray-400"></i>
                         Current Session
@@ -1068,13 +1113,36 @@ async def get_chat_page():
                         </div>
                         <div class="text-sm">
                             <span class="text-gray-500">Memory:</span>
-                            <span id="memory-status" class="font-medium text-gray-900 ml-1">Active</span>
+                            <span id="memory-status" class="font-medium text-teal-600 ml-1">Active</span>
                         </div>
                     </div>
                 </div>
                 
+                <!-- Theme Settings -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                        <i class="fas fa-palette text-gray-400"></i>
+                        Theme
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Mode</span>
+                            <button id="theme-toggle-btn" onclick="toggleTheme()" 
+                                class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                style="background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); border: 1px solid hsl(var(--border));">
+                                <i class="fas fa-sun"></i>
+                                <span id="theme-label">Light</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Deckard theme
+                        </p>
+                    </div>
+                </div>
+                
                 <!-- Actions -->
-                <div class="sidebar-card">
+                <div class="card">
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                         <i class="fas fa-bolt text-gray-400"></i>
                         Actions
@@ -1088,46 +1156,46 @@ async def get_chat_page():
                 </div>
                 
                 <!-- Provider Status Table -->
-                <div class="sidebar-card">
+                <div class="card">
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                         <i class="fas fa-server text-gray-400"></i>
                         Provider Status
                     </h3>
                     <div class="space-y-2 text-xs">
-                        <div class="flex items-center justify-between p-2 bg-green-50 rounded border border-green-200">
+                        <div class="provider-online flex items-center justify-between p-2.5 rounded-lg">
                             <div class="flex items-center gap-2">
-                                <i class="fas fa-circle text-green-500 text-[8px]"></i>
-                                <span class="font-medium text-green-900">Kimi</span>
+                                <i class="fas fa-circle text-[6px] icon-accent"></i>
+                                <span class="text-xs font-medium">Kimi</span>
                             </div>
-                            <span class="text-green-600 font-medium">✓ Online</span>
+                            <span class="text-[10px]" style="color: hsl(var(--success));">Active</span>
                         </div>
-                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded {'opacity-50' if not os.getenv('ANTHROPIC_API_KEY') else 'border border-green-200 bg-green-50'}">
+                        <div class="flex items-center justify-between p-2.5 rounded-lg border border-subtle {'opacity-50' if not os.getenv('ANTHROPIC_API_KEY') else 'provider-online'}">
                             <div class="flex items-center gap-2">
-                                <i class="fas fa-circle {'text-green-500' if os.getenv('ANTHROPIC_API_KEY') else 'text-gray-300'} text-[8px]"></i>
-                                <span class="{'font-medium text-green-900' if os.getenv('ANTHROPIC_API_KEY') else ''}">Anthropic</span>
+                                <i class="fas fa-circle text-[6px] {'icon-accent' if os.getenv('ANTHROPIC_API_KEY') else 'text-tertiary'}"></i>
+                                <span class="text-xs {'font-medium' if os.getenv('ANTHROPIC_API_KEY') else 'text-secondary'}">Anthropic</span>
                             </div>
-                            <span class="{'text-green-600 font-medium' if os.getenv('ANTHROPIC_API_KEY') else 'text-gray-400'}">{'✓ Online' if os.getenv('ANTHROPIC_API_KEY') else 'Not set'}</span>
+                            <span class="text-[10px] {'icon-accent' if os.getenv('ANTHROPIC_API_KEY') else 'text-tertiary'}">{'Active' if os.getenv('ANTHROPIC_API_KEY') else 'Not set'}</span>
                         </div>
-                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded {'opacity-50' if not os.getenv('OPENAI_API_KEY') else 'border border-green-200 bg-green-50'}">
+                        <div class="flex items-center justify-between p-2.5 rounded-lg border border-subtle {'opacity-50' if not os.getenv('OPENAI_API_KEY') else 'provider-online'}">
                             <div class="flex items-center gap-2">
-                                <i class="fas fa-circle {'text-green-500' if os.getenv('OPENAI_API_KEY') else 'text-gray-300'} text-[8px]"></i>
-                                <span class="{'font-medium text-green-900' if os.getenv('OPENAI_API_KEY') else ''}">OpenAI</span>
+                                <i class="fas fa-circle text-[6px] {'icon-accent' if os.getenv('OPENAI_API_KEY') else 'text-tertiary'}"></i>
+                                <span class="text-xs {'font-medium' if os.getenv('OPENAI_API_KEY') else 'text-secondary'}">OpenAI</span>
                             </div>
-                            <span class="{'text-green-600 font-medium' if os.getenv('OPENAI_API_KEY') else 'text-gray-400'}">{'✓ Online' if os.getenv('OPENAI_API_KEY') else 'Not set'}</span>
+                            <span class="text-[10px] {'icon-accent' if os.getenv('OPENAI_API_KEY') else 'text-tertiary'}">{'Active' if os.getenv('OPENAI_API_KEY') else 'Not set'}</span>
                         </div>
-                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded {'opacity-50' if not os.getenv('GOOGLE_API_KEY') else 'border border-green-200 bg-green-50'}">
+                        <div class="flex items-center justify-between p-2.5 rounded-lg border border-subtle {'opacity-50' if not os.getenv('GOOGLE_API_KEY') else 'provider-online'}">
                             <div class="flex items-center gap-2">
-                                <i class="fas fa-circle {'text-green-500' if os.getenv('GOOGLE_API_KEY') else 'text-gray-300'} text-[8px]"></i>
-                                <span class="{'font-medium text-green-900' if os.getenv('GOOGLE_API_KEY') else ''}">Google</span>
+                                <i class="fas fa-circle text-[6px] {'icon-accent' if os.getenv('GOOGLE_API_KEY') else 'text-tertiary'}"></i>
+                                <span class="text-xs {'font-medium' if os.getenv('GOOGLE_API_KEY') else 'text-secondary'}">Google</span>
                             </div>
-                            <span class="{'text-green-600 font-medium' if os.getenv('GOOGLE_API_KEY') else 'text-gray-400'}">{'✓ Online' if os.getenv('GOOGLE_API_KEY') else 'Not set'}</span>
+                            <span class="text-[10px] {'icon-accent' if os.getenv('GOOGLE_API_KEY') else 'text-tertiary'}">{'Active' if os.getenv('GOOGLE_API_KEY') else 'Not set'}</span>
                         </div>
-                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded {'opacity-50' if not os.getenv('OPENROUTER_API_KEY') else 'border border-green-200 bg-green-50'}">
+                        <div class="flex items-center justify-between p-2.5 rounded-lg border border-subtle {'opacity-50' if not os.getenv('OPENROUTER_API_KEY') else 'provider-online'}">
                             <div class="flex items-center gap-2">
-                                <i class="fas fa-circle {'text-green-500' if os.getenv('OPENROUTER_API_KEY') else 'text-gray-300'} text-[8px]"></i>
-                                <span class="{'font-medium text-green-900' if os.getenv('OPENROUTER_API_KEY') else ''}">OpenRouter</span>
+                                <i class="fas fa-circle text-[6px] {'icon-accent' if os.getenv('OPENROUTER_API_KEY') else 'text-tertiary'}"></i>
+                                <span class="text-xs {'font-medium' if os.getenv('OPENROUTER_API_KEY') else 'text-secondary'}">OpenRouter</span>
                             </div>
-                            <span class="{'text-green-600 font-medium' if os.getenv('OPENROUTER_API_KEY') else 'text-gray-400'}">{'✓ Online' if os.getenv('OPENROUTER_API_KEY') else 'Not set'}</span>
+                            <span class="text-[10px] {'icon-accent' if os.getenv('OPENROUTER_API_KEY') else 'text-tertiary'}">{'Active' if os.getenv('OPENROUTER_API_KEY') else 'Not set'}</span>
                         </div>
                     </div>
                     <p class="text-[10px] text-gray-400 mt-2">
@@ -1137,7 +1205,7 @@ async def get_chat_page():
                 </div>
                 
                 <!-- Provider Settings -->
-                <div class="sidebar-card">
+                <div class="card">
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                         <i class="fas fa-plug text-gray-400"></i>
                         Configure Provider
@@ -1190,7 +1258,7 @@ async def get_chat_page():
                         </div>
                         
                         <div class="flex gap-2">
-                            <button onclick="saveProviderSettings()" class="btn btn-primary flex-1 text-xs py-1.5">
+                            <button onclick="saveProviderSettings()" class="btn-outline flex-1 text-xs py-1.5">
                                 <i class="fas fa-save mr-1"></i>Save
                             </button>
                             <button onclick="testProviderConnection()" class="btn btn-secondary flex-1 text-xs py-1.5">
@@ -1201,7 +1269,7 @@ async def get_chat_page():
                 </div>
                 
                 <!-- Telegram Settings -->
-                <div class="sidebar-card">
+                <div class="card">
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                         <i class="fab fa-telegram text-gray-400"></i>
                         Telegram Bot
@@ -1223,18 +1291,18 @@ async def get_chat_page():
                         </div>
                         
                         <div class="flex gap-2 pt-2">
-                            <button onclick="saveTelegramSettings()" class="btn btn-secondary flex-1 text-xs py-1.5">
+                            <button onclick="saveTelegramSettings()" class="btn-secondary flex-1 text-xs py-1.5">
                                 <i class="fas fa-save mr-1"></i>Save
                             </button>
-                            <button onclick="launchTelegramBot()" id="telegram-launch-btn" class="btn btn-primary flex-1 text-xs py-1.5 bg-blue-600 hover:bg-blue-700">
-                                <i class="fas fa-play mr-1"></i>Launch
+                            <button onclick="launchTelegramBot()" id="telegram-launch-btn" class="btn-outline flex-1 text-xs py-1.5">
+                                <i class="fas fa-play mr-1 text-orange-500"></i>Launch
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Remote Access (Ngrok) -->
-                <div class="sidebar-card">
+                <div class="card">
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                         <i class="fas fa-globe text-gray-400"></i>
                         Remote Access (Ngrok)
@@ -1452,7 +1520,7 @@ async def get_chat_page():
         
         function setButtonSuccess(btn, text = 'Saved!') {{
             btn.innerHTML = `<i class="fas fa-check mr-1"></i>${{text}}`;
-            btn.classList.remove('btn-primary', 'btn-secondary', 'bg-violet-600', 'bg-blue-600');
+            btn.classList.remove('btn-primary', 'btn-secondary', 'bg-gray-700', 'bg-blue-600');
             btn.classList.add('bg-green-500', 'text-white');
             
             // Flash effect
@@ -1465,7 +1533,7 @@ async def get_chat_page():
         
         function setButtonError(btn, text = 'Failed') {{
             btn.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i>${{text}}`;
-            btn.classList.remove('btn-primary', 'btn-secondary', 'bg-violet-600', 'bg-blue-600');
+            btn.classList.remove('btn-primary', 'btn-secondary', 'bg-gray-700', 'bg-blue-600');
             btn.classList.add('bg-red-500', 'text-white');
             
             setTimeout(() => restoreButton(btn), 2000);
@@ -1558,13 +1626,21 @@ async def get_chat_page():
                 btn.className = classes;
             }});
             
-            // Refresh iframes when switching to them
+            // Refresh iframes when switching to them and sync theme
+            const currentTheme = localStorage.getItem(THEME_KEY) || DEFAULT_THEME;
             if (tabName === 'graph') {{
                 const iframe = document.getElementById('iframe-graph');
-                if (iframe && iframe.contentWindow) iframe.contentWindow.location.reload();
+                if (iframe && iframe.contentWindow) {{
+                    iframe.contentWindow.location.reload();
+                    // Send theme after a short delay to ensure iframe is loaded
+                    setTimeout(() => syncThemeWithIframes(currentTheme), 500);
+                }}
             }} else if (tabName === 'episodic') {{
                 const iframe = document.getElementById('iframe-episodic');
-                if (iframe && iframe.contentWindow) iframe.contentWindow.location.reload();
+                if (iframe && iframe.contentWindow) {{
+                    iframe.contentWindow.location.reload();
+                    setTimeout(() => syncThemeWithIframes(currentTheme), 500);
+                }}
             }}
         }}
         
@@ -1851,7 +1927,7 @@ async def get_chat_page():
             if (confirm('Reset session? This will clear the conversation history.')) {{
                 chatMessages.innerHTML = `
                     <div class="text-center py-12">
-                        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-2xl">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-500 flex items-center justify-center text-white text-2xl">
                             <i class="fas fa-wand-magic-sparkles"></i>
                         </div>
                         <h2 class="text-xl font-semibold text-gray-900 mb-2">Session Reset</h2>
@@ -1972,7 +2048,7 @@ async def get_chat_page():
 
                 if (status.enabled) {{
                     badge.innerHTML = '<i class="fas fa-circle text-[6px] mr-1"></i>Online';
-                    badge.className = 'ml-auto text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-600';
+                    badge.className = 'ml-auto text-[10px] px-2 py-0.5 rounded-full text-teal-600 border border-teal-400';
                     toggleBtn.textContent = 'Stop Tunnel';
                     toggleBtn.className = 'btn btn-secondary flex-1 text-xs py-1.5';
                     if (urlContainer) {{
@@ -2126,20 +2202,20 @@ async def get_chat_page():
                     models.forEach(model => {{
                         const isSelected = (provider === currentProvider && model === currentModel);
                         const shortName = model.split('/').pop();
-                        const providerColor = provider === 'kimi' ? 'bg-violet-500' : 
+                        const providerColor = provider === 'kimi' ? 'bg-orange-500' : 
                                             provider === 'custom' ? 'bg-blue-500' : 
                                             provider === 'openai' ? 'bg-green-500' : 
                                             provider === 'anthropic' ? 'bg-orange-500' : 'bg-gray-500';
                         
                         html += `
-                            <button class="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left ${{isSelected ? 'bg-violet-50' : ''}}" 
+                            <button class="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left ${{isSelected ? 'bg-gray-100' : ''}}" 
                                     onclick="selectModel('${{provider}}', '${{model}}', '${{shortName}}', '${{providerLabel}}')">
                                 <span class="w-2 h-2 rounded-full ${{providerColor}}"></span>
                                 <div class="flex-1">
                                     <div class="text-sm font-medium text-gray-700">${{shortName}}</div>
                                     <div class="text-xs text-gray-400">${{providerLabel}}</div>
                                 </div>
-                                ${{isSelected ? '<i class="fas fa-check text-violet-500 text-xs"></i>' : ''}}
+                                ${{isSelected ? '<i class="fas fa-check text-orange-500 text-xs"></i>' : ''}}
                             </button>
                         `;
                         
@@ -2154,14 +2230,14 @@ async def get_chat_page():
                     const shortName = modelToUse;
                     
                     html += `
-                        <button class="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left ${{isSelected ? 'bg-violet-50' : ''}}" 
+                        <button class="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left ${{isSelected ? 'bg-gray-100' : ''}}" 
                                 onclick="selectModel('custom', '${{modelToUse}}', '${{shortName}}', 'Custom')">
                             <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                             <div class="flex-1">
                                 <div class="text-sm font-medium text-gray-700">${{shortName}}</div>
                                 <div class="text-xs text-gray-400">Custom</div>
                             </div>
-                            ${{isSelected ? '<i class="fas fa-check text-violet-500 text-xs"></i>' : ''}}
+                            ${{isSelected ? '<i class="fas fa-check text-orange-500 text-xs"></i>' : ''}}
                         </button>
                     `;
                     
@@ -2184,7 +2260,7 @@ async def get_chat_page():
             const icon = document.getElementById('model-icon');
             if (label) label.textContent = shortName;
             
-            const providerColor = provider === 'kimi' ? 'bg-violet-500' : 
+            const providerColor = provider === 'kimi' ? 'bg-orange-500' : 
                                 provider === 'custom' ? 'bg-blue-500' : 
                                 provider === 'openai' ? 'bg-green-500' : 
                                 provider === 'anthropic' ? 'bg-orange-500' : 'bg-gray-500';
@@ -2206,12 +2282,12 @@ async def get_chat_page():
                 // Remove checkmark from all
                 const check = btn.querySelector('.fa-check');
                 if (check) check.remove();
-                btn.classList.remove('bg-violet-50');
+                btn.classList.remove('bg-gray-100');
                 
                 // Add checkmark to selected
                 if (isSelected) {{
-                    btn.classList.add('bg-violet-50');
-                    btn.innerHTML += '<i class="fas fa-check text-violet-500 text-xs ml-auto"></i>';
+                    btn.classList.add('bg-gray-100');
+                    btn.innerHTML += '<i class="fas fa-check text-orange-500 text-xs ml-auto"></i>';
                 }}
             }});
         }}
@@ -2455,16 +2531,16 @@ async def get_chat_page():
                 const isCurrent = s.id === (currentSessionId || '');
                 const date = new Date(s.updated_at).toLocaleDateString();
                 const templateBadge = s.template && s.template !== 'default' 
-                    ? `<span class="ml-1 px-1.5 py-0.5 bg-violet-100 text-violet-600 rounded text-[10px]">${{s.template}}</span>` 
+                    ? `<span class="ml-1 px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded text-[10px]">${{s.template}}</span>` 
                     : '';
                 // context_limit removed - no message limit
                 const contextBadge = '';
                 return `
-                    <div class="group p-2 rounded-lg border ${{isCurrent ? 'border-violet-500 bg-violet-50' : 'border-gray-200 hover:border-gray-300'}} cursor-pointer transition-colors"
+                    <div class="group p-2 rounded-lg border ${{isCurrent ? 'border-l-2 border-orange-400 bg-gray-100' : 'border-gray-200 hover:border-gray-300'}} cursor-pointer transition-colors"
                          onclick="loadSession('${{s.id}}')">
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-medium text-gray-900 truncate flex-1">${{s.name}}${{templateBadge}}</span>
-                            ${{isCurrent ? '<i class="fas fa-check text-violet-500 text-xs"></i>' : ''}}
+                            ${{isCurrent ? '<i class="fas fa-check text-orange-500 text-xs"></i>' : ''}}
                         </div>
                         <div class="flex items-center justify-between mt-1">
                             <span class="text-xs text-gray-500">${{s.message_count}} msgs · ${{date}}${{contextBadge}}</span>
@@ -2546,7 +2622,7 @@ async def get_chat_page():
                             <button onclick="closeNewSessionModal()" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                                 Cancel
                             </button>
-                            <button onclick="submitNewSession()" class="flex-1 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700">
+                            <button onclick="submitNewSession()" class="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800">
                                 Create
                             </button>
                         </div>
@@ -2607,7 +2683,7 @@ async def get_chat_page():
             ['fast', 'balanced', 'deep'].forEach(m => {{
                 const btn = document.getElementById(`new-mode-${{m}}`);
                 if (m === mode) {{
-                    btn.className = 'flex-1 px-3 py-2 text-xs bg-violet-600 text-white border border-violet-600 rounded-lg';
+                    btn.className = 'flex-1 px-3 py-2 text-xs bg-gray-700 text-white border border-gray-700 rounded-lg';
                 }} else {{
                     btn.className = 'flex-1 px-3 py-2 text-xs border border-gray-300 rounded-lg hover:bg-gray-50';
                 }}
@@ -2674,12 +2750,12 @@ async def get_chat_page():
                     // Clear chat
                     chatMessages.innerHTML = `
                         <div class="text-center py-12">
-                            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-2xl">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-500 flex items-center justify-center text-white text-2xl">
                                 <i class="fas fa-wand-magic-sparkles"></i>
                             </div>
                             <h2 class="text-xl font-semibold text-gray-900 mb-2">${{data.session.name}}</h2>
                             <p class="text-gray-500">Start a new conversation.</p>
-                            ${{data.session.template && data.session.template !== 'default' ? `<p class="text-sm text-violet-600 mt-2"><i class="fas fa-user-circle mr-1"></i>Agent: ${{data.session.template}}</p>` : ''}}
+                            ${{data.session.template && data.session.template !== 'default' ? `<p class="text-sm text-gray-600 mt-2"><i class="fas fa-user-circle mr-1"></i>Agent: ${{data.session.template}}</p>` : ''}}
                             <p class="text-xs text-gray-400 mt-1">No message limit</p>
                         </div>
                     `;
@@ -2720,7 +2796,7 @@ async def get_chat_page():
                 <div id="fork-session-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div class="bg-white rounded-lg p-6 w-[400px] max-w-full shadow-xl">
                         <div class="flex items-center gap-3 mb-2">
-                            <div class="w-8 h-8 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center">
+                            <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
                                 <i class="fas fa-code-branch"></i>
                             </div>
                             <h3 class="text-lg font-semibold text-gray-900">Fork Context to Agent</h3>
@@ -2730,7 +2806,7 @@ async def get_chat_page():
                         <!-- Agent Template -->
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Target Agent Template</label>
-                            <select id="fork-session-template" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none">
+                            <select id="fork-session-template" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 outline-none">
                                 <option value="default">Default Assistant</option>
                                 ${{templateOptions}}
                             </select>
@@ -2739,7 +2815,7 @@ async def get_chat_page():
                         <!-- Actions -->
                         <div class="flex justify-end gap-3 mt-6">
                             <button onclick="closeForkModal()" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium">Cancel</button>
-                            <button onclick="submitForkSession()" class="px-4 py-2 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 font-medium transition-colors shadow-sm">
+                            <button onclick="submitForkSession()" class="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 font-medium transition-colors shadow-sm">
                                 Create Fork
                             </button>
                         </div>
@@ -2804,7 +2880,7 @@ async def get_chat_page():
                             // Otherwise, render system notification bubble natively
                             const systemDiv = document.createElement('div');
                             systemDiv.className = 'flex justify-center my-4';
-                            systemDiv.innerHTML = `<div class="bg-violet-50 text-violet-700 px-4 py-2 rounded-full text-xs font-medium border border-violet-100">${{content}}</div>`;
+                            systemDiv.innerHTML = `<div class="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-xs font-medium border border-gray-200">${{content}}</div>`;
                             chatMessages.appendChild(systemDiv);
                         }}
                     }});
@@ -2866,7 +2942,7 @@ async def get_chat_page():
                             // Otherwise, render system notification bubble natively
                             const systemDiv = document.createElement('div');
                             systemDiv.className = 'flex justify-center my-4';
-                            systemDiv.innerHTML = `<div class="bg-violet-50 text-violet-700 px-4 py-2 rounded-full text-xs font-medium border border-violet-100">${{content}}</div>`;
+                            systemDiv.innerHTML = `<div class="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-xs font-medium border border-gray-200">${{content}}</div>`;
                             chatMessages.appendChild(systemDiv);
                         }}
                     }});
@@ -3232,7 +3308,7 @@ async def get_chat_page():
             const statusConfig = {{
                 'offline': {{ class: 'bg-gray-100 text-gray-400', icon: 'fa-circle', text: 'Offline' }},
                 'configured': {{ class: 'bg-yellow-100 text-yellow-600', icon: 'fa-check', text: 'Saved' }},
-                'online': {{ class: 'bg-green-100 text-green-600', icon: 'fa-check-circle', text: 'Online' }},
+                'online': {{ class: 'text-teal-600 border border-teal-400', icon: 'fa-check-circle', text: 'Online' }},
                 'error': {{ class: 'bg-red-100 text-red-600', icon: 'fa-exclamation-circle', text: 'Error' }},
                 'launching': {{ class: 'bg-blue-100 text-blue-600', icon: 'fa-spinner fa-spin', text: 'Launching' }}
             }};
@@ -3810,7 +3886,7 @@ async def get_chat_page():
                     const description = (m.summary || m.user_message || 'Interaction recorded').substring(0, 60);
                     
                     return `
-                        <div class="p-2 bg-white border border-pink-200 rounded hover:bg-pink-50">
+                        <div class="p-2 bg-white border border-gray-200 rounded hover:bg-gray-50">
                             <div class="flex items-center gap-2 mb-1">
                                 <i class="fas ${{sentimentIcon}} ${{sentimentColor}}"></i>
                                 <span class="font-medium text-gray-700">${{title}}</span>
@@ -3844,7 +3920,7 @@ async def get_chat_page():
             const content = document.getElementById('semantic-memory-details');
             const summary = document.getElementById('semantic-memory-summary');
             
-            content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-pink-500"></i><p class="mt-2 text-gray-500">Loading memories...</p></div>';
+            content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-500"></i><p class="mt-2 text-gray-500">Loading memories...</p></div>';
             
             // Show session info in header
             const sessionName = document.getElementById('current-session-name')?.textContent || 'Current Session';
@@ -3881,12 +3957,12 @@ async def get_chat_page():
                 if (data.topics && data.topics.length > 0) {{
                     html += `
                         <div class="mb-6">
-                            <h3 class="font-semibold text-pink-700 mb-3 flex items-center gap-2">
+                            <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                 <i class="fas fa-tags"></i> Topics
                             </h3>
                             <div class="flex flex-wrap gap-2">
                                 ${{data.topics.map(t => `
-                                    <span class="px-2 py-1 bg-pink-50 text-pink-700 rounded-full text-xs">${{t}}</span>
+                                    <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">${{t}}</span>
                                 `).join('')}}
                             </div>
                         </div>
@@ -4131,7 +4207,7 @@ async def get_chat_page():
             
             memories.forEach(m => {{
                 const div = document.createElement('div');
-                div.className = 'p-2 bg-white border border-gray-200 rounded-lg text-xs group hover:border-violet-300 transition-colors';
+                div.className = 'p-2 bg-white border border-gray-200 rounded-lg text-xs group hover:border-gray-400 transition-colors';
                 
                 const content = m.content || m.text || 'No content';
                 const preview = content.length > 60 ? content.substring(0, 60) + '...' : content;
@@ -4203,7 +4279,95 @@ async def get_chat_page():
             loadSettings();
             loadSessions();
             checkTelegramStatus();
+            initTheme();
         }});
+        
+        // THEME MANAGEMENT
+        const THEME_KEY = 'klaus-theme';
+        const DEFAULT_THEME = 'deckard-light';
+        const AVAILABLE_THEMES = ['deckard-light', 'deckard-dark'];
+        
+        function initTheme() {{
+            const savedTheme = localStorage.getItem(THEME_KEY) || DEFAULT_THEME;
+            applyTheme(savedTheme);
+            updateThemeUI(savedTheme);
+        }}
+        
+        function applyTheme(themeName) {{
+            // Remove all theme classes
+            document.documentElement.classList.remove(...AVAILABLE_THEMES.map(t => `theme-${{t}}`));
+            // Add selected theme
+            document.documentElement.classList.add(`theme-${{themeName}}`);
+            // Update meta theme-color
+            const metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) {{
+                metaTheme.content = themeName.includes('dark') ? '#161412' : '#F5F3EF';
+            }}
+            // Sync theme with iframes
+            syncThemeWithIframes(themeName);
+        }}
+        
+        function syncThemeWithIframes(themeName) {{
+            // Send theme to all iframes
+            const iframes = ['iframe-graph', 'iframe-episodic'];
+            iframes.forEach(id => {{
+                const iframe = document.getElementById(id);
+                if (iframe && iframe.contentWindow) {{
+                    iframe.contentWindow.postMessage({{ type: 'theme-change', theme: themeName }}, '*');
+                }}
+            }});
+        }}
+        
+        function toggleTheme() {{
+            const currentTheme = localStorage.getItem(THEME_KEY) || DEFAULT_THEME;
+            const newTheme = currentTheme === 'deckard-light' ? 'deckard-dark' : 'deckard-light';
+            applyTheme(newTheme);
+            localStorage.setItem(THEME_KEY, newTheme);
+            updateThemeUI(newTheme);
+            // Sync with backend
+            syncThemeWithBackend(newTheme);
+        }}
+        
+        function updateThemeUI(themeName) {{
+            const toggleBtn = document.getElementById('theme-toggle-btn');
+            const themeLabel = document.getElementById('theme-label');
+            if (toggleBtn) {{
+                toggleBtn.innerHTML = themeName.includes('dark') ? 
+                    '<i class="fas fa-moon"></i>' : 
+                    '<i class="fas fa-sun"></i>';
+            }}
+            if (themeLabel) {{
+                themeLabel.textContent = themeName === 'deckard-light' ? 'Light' : 'Dark';
+            }}
+        }}
+        
+        async function syncThemeWithBackend(themeName) {{
+            try {{
+                await fetch('/api/settings/theme', {{
+                    method: 'POST',
+                    headers: {{'Content-Type': 'application/json'}},
+                    body: JSON.stringify({{theme: themeName}})
+                }});
+            }} catch (e) {{
+                console.log('Theme sync failed (backend may be unavailable)');
+            }}
+        }}
+        
+        async function loadThemeFromBackend() {{
+            try {{
+                const response = await fetch('/api/settings/theme');
+                if (response.ok) {{
+                    const data = await response.json();
+                    if (data.theme && AVAILABLE_THEMES.includes(data.theme)) {{
+                        applyTheme(data.theme);
+                        localStorage.setItem(THEME_KEY, data.theme);
+                        updateThemeUI(data.theme);
+                    }}
+                }}
+            }} catch (e) {{
+                console.log('Theme load from backend failed, using localStorage');
+            }}
+        }}
     </script>
 </body>
 </html>"""
@@ -4221,7 +4385,7 @@ async def get_manifest():
         "start_url": "/",
         "display": "standalone",
         "background_color": "#ffffff",
-        "theme_color": "#7c3aed",
+        "theme_color": "#F26B3A",
         "icons": [
             {
                 "src": "https://cdn-icons-png.flaticon.com/512/2103/2103633.png",
@@ -5383,6 +5547,45 @@ async def update_settings(request: Request):
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=400)
 
+
+# THEME SETTINGS
+THEME_SETTINGS_FILE = Path("/app/workspace/web_ui_data/theme_settings.json")
+
+def load_theme_settings() -> dict:
+    """Load theme settings from file."""
+    if THEME_SETTINGS_FILE.exists():
+        try:
+            with open(THEME_SETTINGS_FILE) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"theme": "deckard-light"}
+
+def save_theme_settings(theme_data: dict):
+    """Save theme settings to file."""
+    THEME_SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(THEME_SETTINGS_FILE, 'w') as f:
+        json.dump(theme_data, f)
+
+@app.get("/api/settings/theme")
+async def get_theme():
+    """Get current theme."""
+    theme_data = load_theme_settings()
+    return JSONResponse(theme_data)
+
+@app.post("/api/settings/theme")
+async def set_theme(request: Request):
+    """Set theme."""
+    try:
+        data = await request.json()
+        theme = data.get("theme", "deckard-light")
+        if theme not in ["deckard-light", "deckard-dark"]:
+            return JSONResponse({"error": "Invalid theme"}, status_code=400)
+        save_theme_settings({"theme": theme})
+        return JSONResponse({"status": "ok", "theme": theme})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=400)
+
 @app.get("/api/settings/providers")
 async def get_providers():
     """Get available providers and models (only those with API keys)."""
@@ -6437,26 +6640,44 @@ async def get_semantic_memory_stats():
 
 @app.get("/api/memory/stats")
 async def get_memory_stats():
-    """Get memory statistics."""
-    global hybrid_memory
-    
-    if not hybrid_memory:
-        return JSONResponse({
-            "sqlite": {"total": 0, "categories": {}},
-            "graph": {"nodes": 0, "relationships": 0},
-            "graph_available": False,
-            "message": "Hybrid memory not available"
-        })
-    
+    """Get memory statistics from cognitive memory."""
     try:
-        stats = hybrid_memory.get_stats()
-        return JSONResponse(stats)
+        from core.cognitive_memory import get_cognitive_memory_manager
+        
+        manager = get_cognitive_memory_manager()
+        kg = manager.knowledge_graph
+        
+        # Count entities by type
+        entities_by_type = {}
+        for ent in kg.entities.values():
+            t = ent.type
+            entities_by_type[t] = entities_by_type.get(t, 0) + 1
+        
+        # Count relationships
+        rel_count = len(kg.relationships)
+        
+        # Count episodes
+        episode_count = len(manager.episodic_memories)
+        
+        return JSONResponse({
+            "cognitive_memory": {
+                "entities": len(kg.entities),
+                "entities_by_type": entities_by_type,
+                "relationships": rel_count,
+                "episodes": episode_count
+            },
+            "graph": {
+                "nodes": len(kg.entities),
+                "relationships": rel_count
+            },
+            "graph_available": True
+        })
     except Exception as e:
         return JSONResponse({
-            "sqlite": {"total": 0, "categories": {}},
+            "cognitive_memory": {"entities": 0, "relationships": 0, "episodes": 0},
             "graph": {"nodes": 0, "relationships": 0},
             "graph_available": False,
-            "message": str(e)
+            "error": str(e)
         })
 
 @app.delete("/api/memory/{memory_id}")
@@ -6515,119 +6736,70 @@ async def search_memories(request: Request):
 
 @app.get("/api/memory/graph-data")
 async def get_memory_graph_data():
-    """Fetch nodes and edges directly from the Kuzu Knowledge Graph."""
-    global hybrid_memory
-    
-    if not hybrid_memory or not getattr(hybrid_memory, "_graph_conn", None):
-        return JSONResponse({"nodes": [], "edges": [], "error": "Kuzu Graph not available"})
-        
+    """Fetch nodes and edges from cognitive memory knowledge graph (JSON-based)."""
     try:
+        from core.cognitive_memory import get_cognitive_memory_manager
+        
+        manager = get_cognitive_memory_manager()
+        kg = manager.knowledge_graph
+        
         nodes = []
         edges = []
         
-        # 1. Memories
-        res = hybrid_memory._graph_conn.execute("MATCH (m:Memory) RETURN m.id, m.content, m.category")
-        while res.has_next():
-            row = res.get_next()
-            content = str(row[1] or '')
-            cat = row[2] or 'general'
+        # Colors for vis.js
+        colors = {
+            'Person': {'background': '#F26B3A', 'border': '#D45A2F'},
+            'Company': {'background': '#3b82f6', 'border': '#2563eb'},
+            'Technology': {'background': '#10b981', 'border': '#059669'},
+            'Topic': {'background': '#10b981', 'border': '#059669'},
+            'Project': {'background': '#ec4899', 'border': '#db2777'},
+            'Conversation': {'background': '#6b7280', 'border': '#4b5563'},
+            'Entity': {'background': '#f59e0b', 'border': '#d97706'}
+        }
+        
+        # 1. Entities -> vis.js nodes
+        for entity in kg.entities.values():
+            node_color = colors.get(entity.type, colors['Entity'])
             nodes.append({
-                "id": f"mem-{row[0]}",
-                "label": content[:30] + "..." if len(content) > 30 else content,
-                "title": content,
-                "group": "Memory",
-                "category": cat,
-                "color": {'background': '#8b5cf6', 'border': '#7c3aed'},
+                "id": entity.id,
+                "label": entity.name,
+                "title": f"{entity.type}: {entity.name}",
+                "group": entity.type,
+                "color": node_color,
+                "font": {'color': 'white', 'size': 11}
+            })
+        
+        # 2. Episodes/Conversations as nodes
+        for episode in manager.episodic_memories:
+            summary = episode.summary[:30] + "..." if len(episode.summary) > 30 else episode.summary
+            nodes.append({
+                "id": episode.memory_id,
+                "label": summary,
+                "title": f"Conversation: {episode.summary}",
+                "group": "Conversation",
+                "color": colors['Conversation'],
                 "shape": 'box',
-                "font": {'color': 'white', 'size': 12},
-                "data": {"content": content, "category": cat}
+                "font": {'color': 'white', 'size': 10}
             })
-            
-        # 2. Topics
-        res = hybrid_memory._graph_conn.execute("MATCH (t:Topic) RETURN t.name")
-        while res.has_next():
-            row = res.get_next()
-            t_name = row[0]
-            nodes.append({
-                "id": f"top-{t_name}",
-                "label": t_name,
-                "title": f"Topic: {t_name}",
-                "group": "Topic",
-                "color": {'background': '#10b981', 'border': '#059669'},
-                "font": {'color': 'white', 'size': 11}
-            })
-            
-        # 3. Entities
-        res = hybrid_memory._graph_conn.execute("MATCH (e:Entity) RETURN e.name")
-        while res.has_next():
-            row = res.get_next()
-            e_name = row[0]
-            nodes.append({
-                "id": f"ent-{e_name}",
-                "label": e_name,
-                "title": f"Entity: {e_name}",
-                "group": "Entity",
-                "color": {'background': '#f59e0b', 'border': '#d97706'},
-                "font": {'color': 'white', 'size': 11}
-            })
-            
-        # 4. HAS_TOPIC Edges
-        res = hybrid_memory._graph_conn.execute("MATCH (m:Memory)-[r:HAS_TOPIC]->(t:Topic) RETURN m.id, t.name")
-        while res.has_next():
-            row = res.get_next()
+        
+        # 3. Relationships -> vis.js edges
+        for rel in kg.relationships.values():
             edges.append({
-                "from": f"mem-{row[0]}",
-                "to": f"top-{row[1]}",
-                "label": "TOPIC",
+                "from": rel.source_id,
+                "to": rel.target_id,
+                "label": rel.type,
                 "arrows": "to",
                 "color": {'color': '#9ca3af'}
             })
-            
-        # 5. MENTIONS Edges
-        res = hybrid_memory._graph_conn.execute("MATCH (m:Memory)-[r:MENTIONS]->(e:Entity) RETURN m.id, e.name")
-        while res.has_next():
-            row = res.get_next()
-            edges.append({
-                "from": f"mem-{row[0]}",
-                "to": f"ent-{row[1]}",
-                "label": "MENTIONS",
-                "arrows": "to",
-                "color": {'color': '#fbbf24'}
-            })
-            
-        # 6. FLOWS_INTO Temporal Edges
-        try:
-            res = hybrid_memory._graph_conn.execute("MATCH (m1:Memory)-[r:FLOWS_INTO]->(m2:Memory) RETURN m1.id, m2.id")
-            while res.has_next():
-                row = res.get_next()
-                edges.append({
-                    "from": f"mem-{row[0]}",
-                    "to": f"mem-{row[1]}",
-                    "label": "FLOWS_INTO",
-                    "arrows": "to",
-                    "dashes": True,
-                    "color": {'color': '#3b82f6'},
-                    "width": 2
-                })
-        except Exception:
-            pass # Maybe schema missing during startup 
-            
-        # 7. RELATED_TO Semantic Edges
-        try:
-            res = hybrid_memory._graph_conn.execute("MATCH (m1:Memory)-[r:RELATED_TO]->(m2:Memory) RETURN m1.id, m2.id, r.score")
-            while res.has_next():
-                row = res.get_next()
-                score = float(row[2] or 0)
-                edges.append({
-                    "from": f"mem-{row[0]}",
-                    "to": f"mem-{row[1]}",
-                    "label": f"RELATED ({score:.2f})",
-                    "arrows": "to",
-                    "color": {'color': '#d8b4fe'}
-                })
-        except Exception:
-            pass
-
+        
+        # 4. Filter out orphan nodes (no connections)
+        connected_ids = set()
+        for edge in edges:
+            connected_ids.add(edge["from"])
+            connected_ids.add(edge["to"])
+        
+        nodes = [n for n in nodes if n["id"] in connected_ids]
+        
         return JSONResponse({"nodes": nodes, "edges": edges})
         
     except Exception as e:
@@ -6896,18 +7068,64 @@ async def trigger_backfill_embeddings():
 async def trigger_scrub_graph():
     """Manually trigger a deep clean and rebuild of the Knowledge Graph."""
     try:
-        global hybrid_memory
-        if not hybrid_memory:
-            return JSONResponse({"status": "error", "message": "Memory store not initialized"}, status_code=500)
+        from core.cognitive_memory import get_cognitive_memory_manager
+        
+        manager = get_cognitive_memory_manager()
+        
+        # Remove orphaned relationships (pointing to non-existent episodes)
+        kg = manager.knowledge_graph
+        kg_file = manager.data_dir / "knowledge_graph.json"
+        with open(kg_file) as f:
+            data = json.load(f)
+        
+        ep_ids = {ep.memory_id for ep in manager.episodic_memories}
+        
+        clean_rels = {}
+        removed = 0
+        for rel_id, rel in data.get('relationships', {}).items():
+            source = rel.get('source_id', '')
+            target = rel.get('target_id', '')
             
-        count = hybrid_memory.scrub_and_rebuild_graph()
+            # Skip if references removed episode
+            if source.startswith('ep_') and source not in ep_ids:
+                removed += 1
+                continue
+            if target.startswith('ep_') and target not in ep_ids:
+                removed += 1
+                continue
+            
+            clean_rels[rel_id] = rel
+        
+        data['relationships'] = clean_rels
+        
+        # Remove orphan entities
+        connected = set()
+        for rel in clean_rels.values():
+            connected.add(rel.get('source_id'))
+            connected.add(rel.get('target_id'))
+        
+        clean_entities = {}
+        for ent_id, ent in data.get('entities', {}).items():
+            if ent_id in connected:
+                clean_entities[ent_id] = ent
+        
+        data['entities'] = clean_entities
+        
+        with open(kg_file, 'w') as f:
+            json.dump(data, f, indent=2)
+        
+        # Reload
+        manager._load()
+        
         return JSONResponse({
             "status": "ok",
-            "reingested_count": count,
-            "message": f"Graph scrubbed and rebuilt. Re-ingested {count} relevant memories."
+            "removed_relationships": removed,
+            "entities_remaining": len(clean_entities),
+            "message": f"Graph scrubbed. Removed {removed} orphan relationships."
         })
     except Exception as e:
-        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+        import traceback
+        return JSONResponse({"status": "error", "message": str(e), "traceback": traceback.format_exc()}, status_code=500)
 
 
 @app.get("/api/cognitive-memory/entity/{entity_id}")
@@ -7341,7 +7559,7 @@ async def memory_graph_page():
                         <i class="fas fa-arrow-left"></i>
                     </a>
                     <h1 class="text-xl font-semibold text-gray-900">
-                        <i class="fas fa-project-diagram text-violet-500 mr-2"></i>
+                        <i class="fas fa-project-diagram text-gray-500 mr-2"></i>
                         Memory Graph Explorer
                     </h1>
                 </div>
@@ -7349,7 +7567,7 @@ async def memory_graph_page():
                     <div id="stats" class="text-sm text-gray-500">
                         Loading stats...
                     </div>
-                    <button onclick="loadGraph()" class="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors">
+                    <button onclick="loadGraph()" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors">
                         <i class="fas fa-sync-alt mr-2"></i>Refresh
                     </button>
                 </div>
@@ -7411,7 +7629,7 @@ async def memory_graph_page():
         
         // Color scheme
         const colors = {
-            Memory: { background: '#8b5cf6', border: '#7c3aed' },
+            Memory: { background: '#F26B3A', border: '#D45A2F' },
             Topic: { background: '#10b981', border: '#059669' },
             Entity: { background: '#f59e0b', border: '#d97706' },
             Category: { background: '#3b82f6', border: '#2563eb' }
@@ -7460,7 +7678,7 @@ async def memory_graph_page():
             }
             
             container.innerHTML = memories.map(m => `
-                <div class="memory-card p-3 bg-gray-50 rounded-lg cursor-pointer border border-gray-200 hover:border-violet-300"
+                <div class="memory-card p-3 bg-gray-50 rounded-lg cursor-pointer border border-gray-200 hover:border-gray-400"
                      onclick="highlightMemory('${m.id}')">
                     <div class="text-sm text-gray-700 line-clamp-2">${escapeHtml(m.content || m.text || 'No content')}</div>
                     <div class="mt-2 flex items-center gap-2">
@@ -7662,11 +7880,11 @@ async def episodic_memories_page():
         <header class="mb-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <h1 class="text-2xl font-bold text-gray-900"><i class="fas fa-list-ul text-pink-500 mr-2"></i>Episodic Memories</h1>
+                    <h1 class="text-2xl font-bold text-gray-900"><i class="fas fa-list-ul text-gray-500 mr-2"></i>Episodic Memories</h1>
                     <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium">VAD + Embeddings</span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="loadMemories()" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700"><i class="fas fa-sync-alt mr-2"></i>Refresh</button>
+                    <button onclick="loadMemories()" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800"><i class="fas fa-sync-alt mr-2"></i>Refresh</button>
                 </div>
             </div>
         </header>
@@ -7708,7 +7926,7 @@ async def episodic_memories_page():
         let allMemories = [];
         async function loadMemories() {
             const container = document.getElementById("memories-container");
-            container.innerHTML = '<div class="text-center py-12"><i class="fas fa-spinner fa-spin text-2xl text-pink-500"></i></div>';
+            container.innerHTML = '<div class="text-center py-12"><i class="fas fa-spinner fa-spin text-2xl text-gray-500"></i></div>';
             try {
                 const includeArchived = document.getElementById("show-archived").checked;
                 const url = `/api/cognitive-memory/episodes?${includeArchived ? "include_archived=true" : ""}&limit=100`;
@@ -7750,7 +7968,7 @@ async def episodic_memories_page():
                             <p class="text-gray-900 font-medium mb-2">${m.summary}</p>
                             <div class="flex flex-wrap gap-2 mb-3">${m.technologies.map(t => `<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">${t}</span>`).join("")}${m.topics.map(t => `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">${t}</span>`).join("")}</div>
                             <button onclick="showMemoryInGraph('${m.memory_id}', '${(m.user_message || '').replace(/'/g, "\\'")}')" 
-                                    class="text-xs text-pink-600 hover:text-pink-800 flex items-center gap-1">
+                                    class="text-xs text-gray-600 hover:text-gray-800 flex items-center gap-1">
                                 <i class="fas fa-project-diagram"></i> Show in Graph
                             </button>
                         </div>
@@ -7874,7 +8092,7 @@ async def episodic_memories_page():
 async def cognitive_memory_graph_page():
     """Serve the NEW Cognitive Memory Graph visualization page."""
     html_content = """<!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="theme-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7883,42 +8101,49 @@ async def cognitive_memory_graph_page():
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/themes.css" rel="stylesheet">
     <style>
         * { font-family: 'Inter', sans-serif; }
-        #graph-container { width: 100%; height: 100%; min-height: 400px; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #f9fafb; }
+        #graph-container { width: 100%; height: 100%; min-height: 400px; border: 1px solid var(--border-subtle, #e5e7eb); border-radius: 0.5rem; background: var(--bg-primary, #f9fafb); }
     </style>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('deckard-theme') || 'light';
+            document.documentElement.className = saved === 'dark' ? 'theme-deckard-dark' : 'theme-deckard-light';
+        })();
+    </script>
 </head>
-<body class="bg-gray-50 h-[100dvh]">
+<body class="main-bg h-[100dvh]">
     <div class="h-full flex flex-col">
-        <header class="bg-white border-b border-gray-200 px-4 md:px-6 py-4">
+        <header class="card border-b border-[var(--border-subtle)] px-4 md:px-6 py-4">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
-                    <h1 class="text-xl font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-brain text-pink-500 mr-2"></i>Cognitive Memory Graph
+                    <h1 class="text-xl font-semibold text-primary flex items-center">
+                        <i class="fas fa-brain text-secondary mr-2"></i>Cognitive Memory Graph
                     </h1>
-                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">NEW</span>
+                    
                 </div>
                 <div class="flex items-center justify-between w-full md:w-auto gap-3">
-                    <div id="stats" class="text-sm text-gray-500 flex-1 text-center md:text-right">Loading...</div>
-                    <button onclick="loadGraph()" class="px-3 py-1.5 md:px-4 md:py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 whitespace-nowrap">
+                    <div id="stats" class="text-sm text-secondary flex-1 text-center md:text-right">Loading...</div>
+                    <button onclick="loadGraph()" class="btn-secondary whitespace-nowrap">
                         <i class="fas fa-sync-alt mr-1 md:mr-2"></i>Refresh
                     </button>
                 </div>
             </div>
         </header>
         <div class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
-            <div class="w-full md:w-80 h-1/3 md:h-full bg-white border-b md:border-r border-gray-200 flex flex-col shrink-0">
-                <div class="p-3 md:p-4 border-b border-gray-200 shrink-0">
-                    <h2 class="font-medium text-gray-900 mb-2 md:mb-3">Entities</h2>
+            <div class="w-full md:w-80 h-1/3 md:h-full card border-b md:border-r border-[var(--border-subtle)] flex flex-col shrink-0">
+                <div class="p-3 md:p-4 border-b border-[var(--border-subtle)] shrink-0">
+                    <h2 class="font-medium text-primary mb-2 md:mb-3">Entities</h2>
                     <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary"></i>
                         <input type="text" id="entity-search" placeholder="Filter entities..." 
-                               class="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                               class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] text-primary focus:ring-2 focus:ring-[var(--accent-orange)] focus:border-[var(--accent-orange)]"
                                oninput="filterEntities()">
                     </div>
                 </div>
                 <div id="entity-list" class="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 min-h-0">
-                    <div class="text-center text-gray-400 py-4 md:py-8">Loading...</div>
+                    <div class="text-center text-secondary py-4 md:py-8">Loading...</div>
                 </div>
             </div>
             <div class="flex-1 flex flex-col p-2 md:p-6 min-h-0 relative">
@@ -7929,7 +8154,7 @@ async def cognitive_memory_graph_page():
     <script>
         let network = null;
         const colors = {
-            Person: { background: '#8b5cf6', border: '#7c3aed' },
+            Person: { background: '#F26B3A', border: '#D45A2F' },
             Company: { background: '#3b82f6', border: '#2563eb' },
             Technology: { background: '#10b981', border: '#059669' },
             Topic: { background: '#f59e0b', border: '#d97706' },
@@ -8057,6 +8282,16 @@ async def cognitive_memory_graph_page():
         }
         
         document.addEventListener('DOMContentLoaded', loadGraph);
+        
+        // Listen for theme changes from parent window
+        window.addEventListener('message', (event) => {{
+            if (event.data && event.data.type === 'theme-change') {{
+                const themeName = event.data.theme;
+                document.documentElement.className = themeName === 'deckard-dark' ? 'theme-deckard-dark' : 'theme-deckard-light';
+                // Also update localStorage so theme persists on refresh
+                localStorage.setItem('deckard-theme', themeName === 'deckard-dark' ? 'dark' : 'light');
+            }}
+        }});
     </script>
 </body>
 </html>"""
@@ -8110,7 +8345,7 @@ async def admin_page():
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Kimi Agent</p>
-                        <p class="font-semibold text-green-600">Online</p>
+                        <p class="font-semibold text-teal-600">Online</p>
                     </div>
                 </div>
             </div>
@@ -8127,12 +8362,12 @@ async def admin_page():
             </div>
             <div class="bg-white rounded-lg shadow-sm p-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center">
-                        <i class="fas fa-brain text-violet-600"></i>
+                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-brain text-gray-600"></i>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Web UI</p>
-                        <p class="font-semibold text-violet-600">Active</p>
+                        <p class="font-semibold text-gray-600">Active</p>
                     </div>
                 </div>
             </div>
@@ -8143,7 +8378,7 @@ async def admin_page():
             <!-- Agent Identity -->
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">
-                    <i class="fas fa-user-circle mr-2 text-violet-500"></i>Agent Identity
+                    <i class="fas fa-user-circle mr-2 text-gray-500"></i>Agent Identity
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -8160,7 +8395,7 @@ async def admin_page():
                     </div>
                 </div>
                 <div class="mt-4 flex justify-end">
-                    <button onclick="saveAgentConfig()" class="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700">
+                    <button onclick="saveAgentConfig()" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800">
                         <i class="fas fa-save mr-2"></i>Save Identity
                     </button>
                 </div>
