@@ -7075,6 +7075,207 @@ async def delete_uploaded_file(filename: str):
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
+# ============================================================================
+# WORKSPACE FILE MANAGER API
+# ============================================================================
+
+WORKSPACE_ROOT = Path("/app/workspace")
+
+class WorkspacePathRequest(BaseModel):
+    path: str = ""  # Relative path from workspace root
+
+class WorkspaceWriteRequest(BaseModel):
+    path: str
+    content: str
+    create_dirs: bool = True
+
+def get_secure_workspace_path(relative_path: str) -> tuple[Path, bool]:
+    """
+    Resolve and validate workspace path.
+    Returns (resolved_path, is_valid)
+    """
+    try:
+        # Normalize path - remove leading slashes and dots
+        relative_path = relative_path.strip().lstrip('/').lstrip('.')
+        if not relative_path:
+            relative_path = "."
+        
+        # Resolve the full path
+        resolved = (WORKSPACE_ROOT / relative_path).resolve()
+        root_resolved = WORKSPACE_ROOT.resolve()
+        
+        # Security check: must be within workspace
+        if not str(resolved).startswith(str(root_resolved)):
+            return (resolved, False)
+        
+        return (resolved, True)
+    except Exception:
+        return (WORKSPACE_ROOT, False)
+
+@app.get("/api/workspace/list")
+async def workspace_list(path: str = ""):
+    """List files and directories in workspace."""
+    try:
+        target_path, is_valid = get_secure_workspace_path(path)
+        if not is_valid:
+            return JSONResponse({"error": "Invalid path - access denied"}, status_code=403)
+        
+        if not target_path.exists():
+            return JSONResponse({"error": "Path not found"}, status_code=404)
+        
+        if target_path.is_file():
+            # Return file info
+            stat = target_path.stat()
+            return JSONResponse({
+                "type": "file",
+                "name": target_path.name,
+                "path": str(target_path.relative_to(WORKSPACE_ROOT)),
+                "size": stat.st_size,
+                "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                "is_text": target_path.suffix.lower() in ['.md', '.txt', '.py', '.js', '.json', '.yaml', '.yml', '.csv', '.html', '.css', '.sh', '.env', '.ini', '.cfg']
+            })
+        
+        # List directory contents
+        items = []
+        for item in sorted(target_path.iterdir(), key=lambda x: (x.is_file(), x.name.lower())):
+            try:
+                stat = item.stat()
+                rel_path = str(item.relative_to(WORKSPACE_ROOT))
+                items.append({
+                    "name": item.name,
+                    "path": rel_path,
+                    "type": "directory" if item.is_dir() else "file",
+                    "size": stat.st_size if item.is_file() else None,
+                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat()
+                })
+            except (OSError, PermissionError):
+                continue
+        
+        return JSONResponse({
+            "type": "directory",
+            "path": str(target_path.relative_to(WORKSPACE_ROOT)) if target_path != WORKSPACE_ROOT else "",
+            "items": items
+        })
+    
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.get("/api/workspace/read")
+async def workspace_read(path: str):
+    """Read a file from workspace."""
+    try:
+        file_path, is_valid = get_secure_workspace_path(path)
+        if not is_valid:
+            return JSONResponse({"error": "Invalid path - access denied"}, status_code=403)
+        
+        if not file_path.exists():
+            return JSONResponse({"error": "File not found"}, status_code=404)
+        
+        if file_path.is_dir():
+            return JSONResponse({"error": "Path is a directory, use /api/workspace/list"}, status_code=400)
+        
+        # Check file size (max 10MB for web reading)
+        file_size = file_path.stat().st_size
+        if file_size > 10 * 1024 * 1024:
+            return JSONResponse({"error": "File too large (max 10MB)"}, status_code=413)
+        
+        # Try to read as text
+        try:
+            content = file_path.read_text(encoding='utf-8')
+            return JSONResponse({
+                "path": str(file_path.relative_to(WORKSPACE_ROOT)),
+                "content": content,
+                "size": file_size,
+                "encoding": "utf-8"
+            })
+        except UnicodeDecodeError:
+            # Binary file - return metadata only
+            return JSONResponse({
+                "path": str(file_path.relative_to(WORKSPACE_ROOT)),
+                "content": None,
+                "size": file_size,
+                "error": "Binary file - cannot display content"
+            })
+    
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/workspace/write")
+async def workspace_write(request: WorkspaceWriteRequest):
+    """Write/create a file in workspace."""
+    try:
+        file_path, is_valid = get_secure_workspace_path(request.path)
+        if not is_valid:
+            return JSONResponse({"error": "Invalid path - access denied"}, status_code=403)
+        
+        # Create parent directories if requested
+        if request.create_dirs:
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Write file
+        file_path.write_text(request.content, encoding='utf-8')
+        
+        return JSONResponse({
+            "status": "ok",
+            "message": f"File saved: {file_path.relative_to(WORKSPACE_ROOT)}",
+            "path": str(file_path.relative_to(WORKSPACE_ROOT)),
+            "size": file_path.stat().st_size
+        })
+    
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.delete("/api/workspace/delete")
+async def workspace_delete(path: str, recursive: bool = False):
+    """Delete a file or directory from workspace."""
+    try:
+        target_path, is_valid = get_secure_workspace_path(path)
+        if not is_valid:
+            return JSONResponse({"error": "Invalid path - access denied"}, status_code=403)
+        
+        if not target_path.exists():
+            return JSONResponse({"error": "Path not found"}, status_code=404)
+        
+        # Prevent deleting critical system files
+        critical_paths = ['memory', 'web_ui_data', 'SOUL.md', 'USER.md']
+        rel_path = str(target_path.relative_to(WORKSPACE_ROOT))
+        if rel_path in critical_paths or rel_path.split('/')[0] in critical_paths:
+            return JSONResponse({"error": "Cannot delete critical system paths"}, status_code=403)
+        
+        if target_path.is_dir():
+            if recursive:
+                import shutil
+                shutil.rmtree(target_path)
+                return JSONResponse({"status": "ok", "message": f"Directory deleted: {rel_path}"})
+            else:
+                target_path.rmdir()  # Only works if empty
+                return JSONResponse({"status": "ok", "message": f"Empty directory deleted: {rel_path}"})
+        else:
+            target_path.unlink()
+            return JSONResponse({"status": "ok", "message": f"File deleted: {rel_path}"})
+    
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/workspace/mkdir")
+async def workspace_mkdir(path: str):
+    """Create a directory in workspace."""
+    try:
+        dir_path, is_valid = get_secure_workspace_path(path)
+        if not is_valid:
+            return JSONResponse({"error": "Invalid path - access denied"}, status_code=403)
+        
+        dir_path.mkdir(parents=True, exist_ok=True)
+        
+        return JSONResponse({
+            "status": "ok",
+            "message": f"Directory created: {dir_path.relative_to(WORKSPACE_ROOT)}",
+            "path": str(dir_path.relative_to(WORKSPACE_ROOT))
+        })
+    
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 @app.get("/api/session/current")
 async def get_current_session():
     """Get current session info."""
