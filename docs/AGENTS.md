@@ -1,4 +1,4 @@
-# Agent Guide - For AI Assistants (v2.1.0)
+# Agent Guide - For AI Assistants (v1.0.0)
 
 > This file is for YOU (the AI agent). Read this to understand your environment after initialization.
 
@@ -262,4 +262,4 @@ Then: Respond according to your identity and user's preferences.
 
 *This guide helps you operate effectively after initialization. You are not Klaus/Mozart/etc. unless SOUL.md says so. You are whoever the user configured during setup.*
 
-*Version: 2.1.0 - Multi-Provider, Web UI, Hybrid Memory*
+*Version: 1.0.0 - Multi-Provider, Web UI, Hybrid Memory*

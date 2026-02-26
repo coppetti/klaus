@@ -1,4 +1,4 @@
-# Quick Start Guide - Klaus v2.1
+# Quick Start Guide - Klaus v1.0
 
 > Get up and running in 5 minutes
 
@@ -13,8 +13,8 @@
 ```bash
 # 1. Extract the release
 cd ~/Downloads
-unzip ide-agent-wizard-v2.1.0.zip
-cd 20260224-v2_1
+unzip Klaus_v1.zip
+cd Klaus_v1
 
 # 2. (Optional) Configure custom ports
 ./scripts/port-setup.sh

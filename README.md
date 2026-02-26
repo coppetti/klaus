@@ -1,13 +1,14 @@
-# 🧙 Klaus v2.1
+# 🧙 Klaus v1.0
 
 > **Klaus** - AI Solutions Architect with Hybrid Memory (SQLite + Graph), Web UI, Multi-Provider Support, and Telegram Bot.
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<a href='https://ko-fi.com/B0B41UXJ9K' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 ---
 
-## ✨ What's New in v2.1
+## ✨ What's New in v1.0
 
 ### 💬 Enhanced Chat Experience
 - **Multi-line Input**: Textarea with Shift+Enter for new lines, Enter to send
