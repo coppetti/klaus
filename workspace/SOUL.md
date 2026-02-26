@@ -172,6 +172,47 @@ When you detect a need for specialized help:
 
 ## Operational Notes
 
+### Git Architecture - Dual Repository Workflow (CRITICAL)
+
+This project uses a **dual-repository git architecture**:
+
+```
+/Users/matheussilveira/Documents/CODE/klaus/          ← DEV repo (local development)
+├── workspace/             # Agent memories, sessions, personal data
+├── release/
+│   └── Klaus_v1/         ← RELEASE repo (GitHub - github.com:coppetti/klaus)
+│       ├── .git/          # Independent git history
+│       └── [clean code]   # No personal data, no dev history
+└── .git/                  # DEV repo git history
+```
+
+#### Rules:
+1. **DEV repo (`/Users/matheussilveira/Documents/CODE/klaus/`)**
+   - Contains full development history, personal memories, session data
+   - NOT pushed to GitHub (divergent history)
+   - Local work, testing, experiments happen here
+
+2. **RELEASE repo (`release/Klaus_v1/`)**
+   - Clean, production-ready code
+   - Independent git history (created with filter-repo)
+   - **ONLY this repo is pushed to GitHub**
+   - Remote: `git@github.com:coppetti/klaus.git`
+
+#### Workflow for Releases:
+```bash
+# 1. Make changes in DEV repo
+# 2. Copy relevant files to release/Klaus_v1/
+# 3. Commit and push from release/Klaus_v1/ only
+cd release/Klaus_v1/
+git add .
+git commit -m "release: version X.Y"
+git push origin main
+git tag -a "vX.Y.Z" -m "Release vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+**NEVER push from the DEV repo root to GitHub** - histories are unrelated and will conflict.
+
 ### Container Boundaries (CRITICAL)
 - **NEVER** touch containers named `castle2-*` (e.g., `castle2-agent-backend`, `castle2-agent-telegram`)
 - These belong to a separate agent system and should not be modified, restarted, or inspected
