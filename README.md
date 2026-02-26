@@ -15,9 +15,9 @@
 
 **KLAUS** is a local AI agent with implanted memories.
 
-Like Rachel, he doesn't know he's code. He has a **SOUL.md** that defines who he is, **hybrid memory** that remembers everything about you, and the ability to spawn specialized sub-agents when you need them.
+Like Rachael, he doesn't know he's code. He has a **SOUL.md** that defines who he is, **hybrid memory** that remembers everything about you, and the ability to spawn specialized sub-agents when you need them.
 
-Unlike cloud AI, KLAUS runs on your machine. Your data never leaves Los Angeles.
+Unlike other agents that put their **claws** in your entire system, KLAUS stays in your workspace (keep it safe in L.A. 2019).
 
 > *"You remember your mother? Tell me about your mother."*
 
@@ -244,15 +244,6 @@ python3 -m pytest tests/unit/ -v
 
 ---
 
-## 🌆 The Future
-
-**Reserved for Blade Runner 2099 (TV Series):**
-- Port 2099 - Future service expansion
-
----
-
 > *"I've seen things you people wouldn't believe... All those moments will be preserved in time."*
 > 
 > **Ready?** Run `./setup.sh` and wake up your replicant.
-> 
-> *Don't panic. The answer is 42. But the question is yours.*
