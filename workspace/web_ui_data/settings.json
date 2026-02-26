@@ -11,7 +11,7 @@
   "ngrok_authtoken": "3AA8YmVbPBd8UGVHM0oWzdoZ04V_3juN3KeQ5oJD1csrqEmai",
   "ngrok_domain": "",
   "ngrok_oauth_provider": "google",
-  "ngrok_oauth_allow_emails": "matheuscoppetti@gmail.com",
+  "ngrok_oauth_allow_emails": "matheuscoppetti@gmail.com, serjunior86@gmail.com",
   "telegram_enabled": true,
   "telegram_token": "8552605246:AAGjWqeIsNhvRbhAiS1_hCN4z3S4uZaXDCY",
   "telegram_chat_ids": [
