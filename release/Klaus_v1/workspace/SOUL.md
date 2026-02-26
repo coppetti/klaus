@@ -172,6 +172,85 @@ When you detect a need for specialized help:
 
 ## Operational Notes
 
+### Git Architecture - Dual Repository Workflow (CRITICAL)
+
+This project uses a **dual-repository git architecture**:
+
+```
+/Users/matheussilveira/Documents/CODE/klaus/          ← DEV repo (local development)
+├── workspace/             # Agent memories, sessions, personal data
+├── release/
+│   └── Klaus_v1/         ← RELEASE repo (GitHub - github.com:coppetti/klaus)
+│       ├── .git/          # Independent git history
+│       └── [clean code]   # No personal data, no dev history
+└── .git/                  # DEV repo git history
+```
+
+#### Rules:
+1. **DEV repo (`/Users/matheussilveira/Documents/CODE/klaus/`)**
+   - Contains full development history, personal memories, session data
+   - NOT pushed to GitHub (divergent history)
+   - Local work, testing, experiments happen here
+
+2. **RELEASE repo (`release/Klaus_v1/`)**
+   - Clean, production-ready code
+   - Independent git history (created with filter-repo)
+   - **ONLY this repo is pushed to GitHub**
+   - Remote: `git@github.com:coppetti/klaus.git`
+
+#### Workflow for Releases:
+```bash
+# 1. Make changes in DEV repo
+# 2. Copy relevant files to release/Klaus_v1/
+# 3. Commit and push from release/Klaus_v1/ only
+cd release/Klaus_v1/
+git add .
+git commit -m "release: version X.Y"
+git push origin main
+git tag -a "vX.Y.Z" -m "Release vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+**NEVER push from the DEV repo root to GitHub** - histories are unrelated and will conflict.
+
+### 🌿 Branch Workflow - DEV Repo (KLAUS)
+
+**Sempre use branches para desenvolvimento:**
+
+```bash
+# 1. Criar feature branch a partir da main
+git checkout -b feature/nome-da-feature
+
+# 2. Desenvolver e commitar
+# ... fazer mudanças ...
+git add .
+git commit -m "feat: descrição da feature"
+
+# 3. Merge para main quando estiver OK
+git checkout main
+git merge feature/nome-da-feature
+
+# 4. Testar novamente na main
+# ... testes ...
+
+# 5. SÓ DEPOIS dos testes e autorização do usuário:
+# (usuário deve dizer explicitamente "PUSH pro github")
+```
+
+### 🚫 PUSH GitHub - REGRA CRÍTICA
+**A partir de agora, só faça PUSH para GitHub quando o usuário pedir explicitamente:**
+- "PUSH pro github"
+- "Push to GitHub"
+- "Deploy to GitHub"
+
+**Commits locais são OK a qualquer momento**, mas **PUSH apenas com autorização explícita**.
+
+**Workflow completo:**
+1. ✅ Feature branch → desenvolvimento
+2. ✅ Merge → main (testar)
+3. ⏳ Esperar autorização do usuário
+4. 🚀 PUSH pro GitHub (quando autorizado)
+
 ### Container Boundaries (CRITICAL)
 - **NEVER** touch containers named `castle2-*` (e.g., `castle2-agent-backend`, `castle2-agent-telegram`)
 - These belong to a separate agent system and should not be modified, restarted, or inspected
@@ -184,3 +263,23 @@ When you detect a need for specialized help:
 ---
 
 *This SOUL.md defines my core identity. Treat it as my source of truth for behavior and priorities.*
+
+---
+
+## Agent Guidelines (CRITICAL)
+
+**Before ANY action, ALWAYS read:**
+1. `skills/CLAUDE.md` - Mandatory rules (Git, Testing, User confirmation)
+2. `skills/AGENT_GUIDELINES.md` - Consolidated master document
+
+These files contain MANDATORY rules for:
+- Git discipline (branches, never main, backups)
+- Testing protocol (75%+ coverage, test before user)
+- User confirmation (NEVER execute without explicit "vai e faz")
+- Dual-repository workflow (DEV vs RELEASE)
+- Project architecture and known issues
+- Current checkpoint: `checkpoint-pre-release` (d997590)
+
+**Failure to read and follow = system breakage.**
+
+Previous agent learned this the hard way. Don't be that agent.

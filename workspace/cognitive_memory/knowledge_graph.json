@@ -44,7 +44,7 @@
         "normalized": "api"
       },
       "created_at": "2026-02-23T21:58:45.394471",
-      "updated_at": "2026-02-25T18:59:12.565839"
+      "updated_at": "2026-02-26T07:16:17.156387"
     },
     "technology_rest": {
       "id": "technology_rest",
@@ -68,7 +68,7 @@
         "normalized": "ai"
       },
       "created_at": "2026-02-23T22:52:48.527542",
-      "updated_at": "2026-02-25T18:59:12.565853"
+      "updated_at": "2026-02-26T10:15:24.360131"
     },
     "technology_flask": {
       "id": "technology_flask",
@@ -103,7 +103,7 @@
         "normalized": "docker"
       },
       "created_at": "2026-02-23T22:55:44.035657",
-      "updated_at": "2026-02-24T14:21:02.662254"
+      "updated_at": "2026-02-26T07:34:35.118220"
     },
     "topic_cloud": {
       "id": "topic_cloud",
@@ -115,7 +115,7 @@
         "normalized": "cloud"
       },
       "created_at": "2026-02-23T22:55:44.035677",
-      "updated_at": "2026-02-25T18:00:50.284404"
+      "updated_at": "2026-02-26T07:15:52.337065"
     },
     "topic_database": {
       "id": "topic_database",
@@ -127,7 +127,7 @@
         "normalized": "database"
       },
       "created_at": "2026-02-23T22:55:44.035683",
-      "updated_at": "2026-02-24T14:21:02.672290"
+      "updated_at": "2026-02-26T07:15:52.337083"
     },
     "technology_aws": {
       "id": "technology_aws",
@@ -139,7 +139,7 @@
         "normalized": "aws"
       },
       "created_at": "2026-02-24T08:41:52.080575",
-      "updated_at": "2026-02-25T18:00:50.284178"
+      "updated_at": "2026-02-26T07:14:59.293521"
     },
     "technology_gcp": {
       "id": "technology_gcp",
@@ -151,7 +151,7 @@
         "normalized": "gcp"
       },
       "created_at": "2026-02-24T08:41:52.080584",
-      "updated_at": "2026-02-25T18:00:50.284334"
+      "updated_at": "2026-02-26T07:14:59.293566"
     },
     "technology_azure": {
       "id": "technology_azure",
@@ -163,7 +163,7 @@
         "normalized": "azure"
       },
       "created_at": "2026-02-24T08:41:52.080590",
-      "updated_at": "2026-02-25T18:00:50.284350"
+      "updated_at": "2026-02-26T07:14:59.293573"
     },
     "technology_terraform": {
       "id": "technology_terraform",
@@ -186,7 +186,7 @@
         "consolidated": true
       },
       "created_at": "2026-02-24T08:41:52.080609",
-      "updated_at": "2026-02-24T11:18:42.258239"
+      "updated_at": "2026-02-26T07:14:59.293608"
     },
     "technology_go": {
       "id": "technology_go",
@@ -198,7 +198,7 @@
         "normalized": "go"
       },
       "created_at": "2026-02-24T08:48:01.921270",
-      "updated_at": "2026-02-24T10:57:09.845799"
+      "updated_at": "2026-02-26T07:15:52.336961"
     },
     "topic_architecture": {
       "id": "topic_architecture",
@@ -210,7 +210,7 @@
         "normalized": "architecture"
       },
       "created_at": "2026-02-24T08:48:01.921322",
-      "updated_at": "2026-02-25T18:51:00.224539"
+      "updated_at": "2026-02-26T07:15:52.337058"
     },
     "topic_microservices": {
       "id": "topic_microservices",
@@ -221,7 +221,7 @@
         "consolidated": true
       },
       "created_at": "2026-02-24T08:48:01.921329",
-      "updated_at": "2026-02-24T11:18:05.746583"
+      "updated_at": "2026-02-26T07:14:59.293584"
     },
     "topic_security": {
       "id": "topic_security",
@@ -233,7 +233,7 @@
         "normalized": "security"
       },
       "created_at": "2026-02-24T08:48:01.921359",
-      "updated_at": "2026-02-25T18:59:12.565827"
+      "updated_at": "2026-02-26T07:15:52.337070"
     },
     "topic_scalability": {
       "id": "topic_scalability",
@@ -244,7 +244,7 @@
         "consolidated": true
       },
       "created_at": "2026-02-24T08:48:01.921367",
-      "updated_at": "2026-02-24T11:18:42.258249"
+      "updated_at": "2026-02-26T07:14:59.293623"
     },
     "technology_javascript": {
       "id": "technology_javascript",
@@ -290,7 +290,7 @@
         "normalized": "testing"
       },
       "created_at": "2026-02-24T09:12:20.368351",
-      "updated_at": "2026-02-24T14:21:02.667987"
+      "updated_at": "2026-02-25T22:59:27.550605"
     },
     "topic_performance": {
       "id": "topic_performance",
@@ -302,7 +302,7 @@
         "normalized": "performance"
       },
       "created_at": "2026-02-24T09:12:20.368362",
-      "updated_at": "2026-02-25T18:00:50.284445"
+      "updated_at": "2026-02-26T06:52:19.063916"
     },
     "technology_node.js": {
       "id": "technology_node.js",
@@ -350,7 +350,7 @@
         "normalized": "ci/cd"
       },
       "created_at": "2026-02-24T11:07:28.422477",
-      "updated_at": "2026-02-25T18:51:00.224562"
+      "updated_at": "2026-02-26T07:14:59.293613"
     },
     "topic_frontend": {
       "id": "topic_frontend",
@@ -2026,6 +2026,490 @@
         "timestamp": "2026-02-25T18:59:12.565865"
       },
       "created_at": "2026-02-25T18:59:12.565866",
+      "strength": 1.0
+    },
+    "ep_20260225221204_9886-MENTIONS-topic_cloud": {
+      "id": "ep_20260225221204_9886-MENTIONS-topic_cloud",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225221204_9886",
+      "target_id": "topic_cloud",
+      "properties": {
+        "timestamp": "2026-02-25T22:12:04.225475"
+      },
+      "created_at": "2026-02-25T22:12:04.225486",
+      "strength": 1.0
+    },
+    "ep_20260225221204_9886-MENTIONS-topic_ai": {
+      "id": "ep_20260225221204_9886-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225221204_9886",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-25T22:12:04.225509"
+      },
+      "created_at": "2026-02-25T22:12:04.225510",
+      "strength": 1.0
+    },
+    "ep_20260225225737_8225-MENTIONS-topic_performance": {
+      "id": "ep_20260225225737_8225-MENTIONS-topic_performance",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225225737_8225",
+      "target_id": "topic_performance",
+      "properties": {
+        "timestamp": "2026-02-25T22:57:37.566967"
+      },
+      "created_at": "2026-02-25T22:57:37.566974",
+      "strength": 1.0
+    },
+    "ep_20260225225737_8225-MENTIONS-topic_ai": {
+      "id": "ep_20260225225737_8225-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225225737_8225",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-25T22:57:37.567042"
+      },
+      "created_at": "2026-02-25T22:57:37.567043",
+      "strength": 1.0
+    },
+    "ep_20260225225927_9939-MENTIONS-topic_architecture": {
+      "id": "ep_20260225225927_9939-MENTIONS-topic_architecture",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225225927_9939",
+      "target_id": "topic_architecture",
+      "properties": {
+        "timestamp": "2026-02-25T22:59:27.550565"
+      },
+      "created_at": "2026-02-25T22:59:27.550573",
+      "strength": 1.0
+    },
+    "ep_20260225225927_9939-MENTIONS-topic_testing": {
+      "id": "ep_20260225225927_9939-MENTIONS-topic_testing",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225225927_9939",
+      "target_id": "topic_testing",
+      "properties": {
+        "timestamp": "2026-02-25T22:59:27.550607"
+      },
+      "created_at": "2026-02-25T22:59:27.550608",
+      "strength": 1.0
+    },
+    "ep_20260225225927_9939-MENTIONS-topic_security": {
+      "id": "ep_20260225225927_9939-MENTIONS-topic_security",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225225927_9939",
+      "target_id": "topic_security",
+      "properties": {
+        "timestamp": "2026-02-25T22:59:27.550624"
+      },
+      "created_at": "2026-02-25T22:59:27.550627",
+      "strength": 1.0
+    },
+    "ep_20260225225927_9939-MENTIONS-topic_performance": {
+      "id": "ep_20260225225927_9939-MENTIONS-topic_performance",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225225927_9939",
+      "target_id": "topic_performance",
+      "properties": {
+        "timestamp": "2026-02-25T22:59:27.550643"
+      },
+      "created_at": "2026-02-25T22:59:27.550644",
+      "strength": 1.0
+    },
+    "ep_20260225225927_9939-MENTIONS-topic_scalability": {
+      "id": "ep_20260225225927_9939-MENTIONS-topic_scalability",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225225927_9939",
+      "target_id": "topic_scalability",
+      "properties": {
+        "timestamp": "2026-02-25T22:59:27.550649"
+      },
+      "created_at": "2026-02-25T22:59:27.550650",
+      "strength": 1.0
+    },
+    "ep_20260225225927_9939-MENTIONS-topic_api": {
+      "id": "ep_20260225225927_9939-MENTIONS-topic_api",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225225927_9939",
+      "target_id": "topic_api",
+      "properties": {
+        "timestamp": "2026-02-25T22:59:27.550668"
+      },
+      "created_at": "2026-02-25T22:59:27.550669",
+      "strength": 1.0
+    },
+    "ep_20260225225927_9939-MENTIONS-topic_ai": {
+      "id": "ep_20260225225927_9939-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260225225927_9939",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-25T22:59:27.550673"
+      },
+      "created_at": "2026-02-25T22:59:27.550674",
+      "strength": 1.0
+    },
+    "ep_20260226065219_4566-MENTIONS-topic_performance": {
+      "id": "ep_20260226065219_4566-MENTIONS-topic_performance",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226065219_4566",
+      "target_id": "topic_performance",
+      "properties": {
+        "timestamp": "2026-02-26T06:52:19.063932"
+      },
+      "created_at": "2026-02-26T06:52:19.063940",
+      "strength": 1.0
+    },
+    "ep_20260226065219_4566-MENTIONS-topic_ai": {
+      "id": "ep_20260226065219_4566-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226065219_4566",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T06:52:19.063968"
+      },
+      "created_at": "2026-02-26T06:52:19.063969",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-technology_aws": {
+      "id": "ep_20260226071459_1952-MENTIONS-technology_aws",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "technology_aws",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293533"
+      },
+      "created_at": "2026-02-26T07:14:59.293541",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-technology_gcp": {
+      "id": "ep_20260226071459_1952-MENTIONS-technology_gcp",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "technology_gcp",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293567"
+      },
+      "created_at": "2026-02-26T07:14:59.293568",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-technology_azure": {
+      "id": "ep_20260226071459_1952-MENTIONS-technology_azure",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "technology_azure",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293573"
+      },
+      "created_at": "2026-02-26T07:14:59.293574",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-topic_architecture": {
+      "id": "ep_20260226071459_1952-MENTIONS-topic_architecture",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "topic_architecture",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293580"
+      },
+      "created_at": "2026-02-26T07:14:59.293581",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-topic_microservices": {
+      "id": "ep_20260226071459_1952-MENTIONS-topic_microservices",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "topic_microservices",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293585"
+      },
+      "created_at": "2026-02-26T07:14:59.293586",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-topic_cloud": {
+      "id": "ep_20260226071459_1952-MENTIONS-topic_cloud",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "topic_cloud",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293596"
+      },
+      "created_at": "2026-02-26T07:14:59.293599",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-topic_devops": {
+      "id": "ep_20260226071459_1952-MENTIONS-topic_devops",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "topic_devops",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293609"
+      },
+      "created_at": "2026-02-26T07:14:59.293610",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-topic_ci/cd": {
+      "id": "ep_20260226071459_1952-MENTIONS-topic_ci/cd",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "topic_ci/cd",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293614"
+      },
+      "created_at": "2026-02-26T07:14:59.293615",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-topic_scalability": {
+      "id": "ep_20260226071459_1952-MENTIONS-topic_scalability",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "topic_scalability",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293629"
+      },
+      "created_at": "2026-02-26T07:14:59.293632",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-topic_api": {
+      "id": "ep_20260226071459_1952-MENTIONS-topic_api",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "topic_api",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293637"
+      },
+      "created_at": "2026-02-26T07:14:59.293638",
+      "strength": 1.0
+    },
+    "ep_20260226071459_1952-MENTIONS-topic_ai": {
+      "id": "ep_20260226071459_1952-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071459_1952",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T07:14:59.293642"
+      },
+      "created_at": "2026-02-26T07:14:59.293643",
+      "strength": 1.0
+    },
+    "ep_20260226071552_4705-MENTIONS-technology_go": {
+      "id": "ep_20260226071552_4705-MENTIONS-technology_go",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071552_4705",
+      "target_id": "technology_go",
+      "properties": {
+        "timestamp": "2026-02-26T07:15:52.336976"
+      },
+      "created_at": "2026-02-26T07:15:52.336985",
+      "strength": 1.0
+    },
+    "ep_20260226071552_4705-MENTIONS-topic_architecture": {
+      "id": "ep_20260226071552_4705-MENTIONS-topic_architecture",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071552_4705",
+      "target_id": "topic_architecture",
+      "properties": {
+        "timestamp": "2026-02-26T07:15:52.337060"
+      },
+      "created_at": "2026-02-26T07:15:52.337061",
+      "strength": 1.0
+    },
+    "ep_20260226071552_4705-MENTIONS-topic_cloud": {
+      "id": "ep_20260226071552_4705-MENTIONS-topic_cloud",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071552_4705",
+      "target_id": "topic_cloud",
+      "properties": {
+        "timestamp": "2026-02-26T07:15:52.337066"
+      },
+      "created_at": "2026-02-26T07:15:52.337067",
+      "strength": 1.0
+    },
+    "ep_20260226071552_4705-MENTIONS-topic_security": {
+      "id": "ep_20260226071552_4705-MENTIONS-topic_security",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071552_4705",
+      "target_id": "topic_security",
+      "properties": {
+        "timestamp": "2026-02-26T07:15:52.337076"
+      },
+      "created_at": "2026-02-26T07:15:52.337079",
+      "strength": 1.0
+    },
+    "ep_20260226071552_4705-MENTIONS-topic_database": {
+      "id": "ep_20260226071552_4705-MENTIONS-topic_database",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071552_4705",
+      "target_id": "topic_database",
+      "properties": {
+        "timestamp": "2026-02-26T07:15:52.337084"
+      },
+      "created_at": "2026-02-26T07:15:52.337085",
+      "strength": 1.0
+    },
+    "ep_20260226071552_4705-MENTIONS-topic_api": {
+      "id": "ep_20260226071552_4705-MENTIONS-topic_api",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071552_4705",
+      "target_id": "topic_api",
+      "properties": {
+        "timestamp": "2026-02-26T07:15:52.337089"
+      },
+      "created_at": "2026-02-26T07:15:52.337090",
+      "strength": 1.0
+    },
+    "ep_20260226071552_4705-MENTIONS-topic_ai": {
+      "id": "ep_20260226071552_4705-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071552_4705",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T07:15:52.337095"
+      },
+      "created_at": "2026-02-26T07:15:52.337096",
+      "strength": 1.0
+    },
+    "ep_20260226071617_3163-MENTIONS-topic_api": {
+      "id": "ep_20260226071617_3163-MENTIONS-topic_api",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071617_3163",
+      "target_id": "topic_api",
+      "properties": {
+        "timestamp": "2026-02-26T07:16:17.156396"
+      },
+      "created_at": "2026-02-26T07:16:17.156402",
+      "strength": 1.0
+    },
+    "ep_20260226071617_3163-MENTIONS-topic_ai": {
+      "id": "ep_20260226071617_3163-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226071617_3163",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T07:16:17.156415"
+      },
+      "created_at": "2026-02-26T07:16:17.156416",
+      "strength": 1.0
+    },
+    "ep_20260226072500_1108-MENTIONS-technology_docker": {
+      "id": "ep_20260226072500_1108-MENTIONS-technology_docker",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226072500_1108",
+      "target_id": "technology_docker",
+      "properties": {
+        "timestamp": "2026-02-26T07:25:00.389331"
+      },
+      "created_at": "2026-02-26T07:25:00.389338",
+      "strength": 1.0
+    },
+    "ep_20260226072500_1108-MENTIONS-topic_ai": {
+      "id": "ep_20260226072500_1108-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226072500_1108",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T07:25:00.389356"
+      },
+      "created_at": "2026-02-26T07:25:00.389357",
+      "strength": 1.0
+    },
+    "ep_20260226072544_3791-MENTIONS-technology_docker": {
+      "id": "ep_20260226072544_3791-MENTIONS-technology_docker",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226072544_3791",
+      "target_id": "technology_docker",
+      "properties": {
+        "timestamp": "2026-02-26T07:25:44.490987"
+      },
+      "created_at": "2026-02-26T07:25:44.490993",
+      "strength": 1.0
+    },
+    "ep_20260226072544_3791-MENTIONS-topic_ai": {
+      "id": "ep_20260226072544_3791-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226072544_3791",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T07:25:44.491006"
+      },
+      "created_at": "2026-02-26T07:25:44.491007",
+      "strength": 1.0
+    },
+    "ep_20260226072623_505-MENTIONS-technology_docker": {
+      "id": "ep_20260226072623_505-MENTIONS-technology_docker",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226072623_505",
+      "target_id": "technology_docker",
+      "properties": {
+        "timestamp": "2026-02-26T07:26:23.342455"
+      },
+      "created_at": "2026-02-26T07:26:23.342457",
+      "strength": 1.0
+    },
+    "ep_20260226072623_505-MENTIONS-topic_ai": {
+      "id": "ep_20260226072623_505-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226072623_505",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T07:26:23.342464"
+      },
+      "created_at": "2026-02-26T07:26:23.342465",
+      "strength": 1.0
+    },
+    "ep_20260226073435_8014-MENTIONS-technology_docker": {
+      "id": "ep_20260226073435_8014-MENTIONS-technology_docker",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226073435_8014",
+      "target_id": "technology_docker",
+      "properties": {
+        "timestamp": "2026-02-26T07:34:35.118237"
+      },
+      "created_at": "2026-02-26T07:34:35.118247",
+      "strength": 1.0
+    },
+    "ep_20260226073435_8014-MENTIONS-topic_ai": {
+      "id": "ep_20260226073435_8014-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226073435_8014",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T07:34:35.118269"
+      },
+      "created_at": "2026-02-26T07:34:35.118270",
+      "strength": 1.0
+    },
+    "ep_20260226081001_1311-MENTIONS-topic_ai": {
+      "id": "ep_20260226081001_1311-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226081001_1311",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T08:10:01.729703"
+      },
+      "created_at": "2026-02-26T08:10:01.729717",
+      "strength": 1.0
+    },
+    "ep_20260226082703_8109-MENTIONS-topic_ai": {
+      "id": "ep_20260226082703_8109-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226082703_8109",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T08:27:03.593678"
+      },
+      "created_at": "2026-02-26T08:27:03.593692",
+      "strength": 1.0
+    },
+    "ep_20260226101524_9466-MENTIONS-topic_ai": {
+      "id": "ep_20260226101524_9466-MENTIONS-topic_ai",
+      "type": "MENTIONS",
+      "source_id": "ep_20260226101524_9466",
+      "target_id": "topic_ai",
+      "properties": {
+        "timestamp": "2026-02-26T10:15:24.360140"
+      },
+      "created_at": "2026-02-26T10:15:24.360153",
       "strength": 1.0
     }
   }

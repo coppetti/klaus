@@ -38,5 +38,70 @@
     "examples": [
       "ep_20260224110823_5913"
     ]
+  },
+  {
+    "memory_id": "proc_20260225225737",
+    "timestamp": "2026-02-25T22:57:37.567060",
+    "context_pattern": "Hey check our workspace/marketing folder",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260225225737_8225"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226072146",
+    "timestamp": "2026-02-26T07:21:46.800768",
+    "context_pattern": "Thanks",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226072146_778"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226072544",
+    "timestamp": "2026-02-26T07:25:44.491021",
+    "context_pattern": "Thanks, one + question. if I BOOT.md a new agent o",
+    "action_taken": "code_examples",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226072544_3791"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226073435",
+    "timestamp": "2026-02-26T07:34:35.118307",
+    "context_pattern": "Good, thanks",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226073435_8014"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226082703",
+    "timestamp": "2026-02-26T08:27:03.593870",
+    "context_pattern": "Please create a task list in our workspace",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226082703_8109"
+    ]
   }
 ]

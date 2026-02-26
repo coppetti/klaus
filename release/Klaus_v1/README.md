@@ -1,77 +1,90 @@
-# 🧙 Klaus v2.1
+# 🌆 KLAUS v1.0
 
-> **Klaus** - AI Solutions Architect with Hybrid Memory (SQLite + Graph), Web UI, Multi-Provider Support, and Telegram Bot.
+> **More human than human.**
 
+[![Agent](https://img.shields.io/badge/Agent-2019-8B7355)]()
+[![Web](https://img.shields.io/badge/Web-2049-FF6B35)]()
+[![Baseline](https://img.shields.io/badge/Baseline-Stable-00D4AA)]()
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<a href='https://ko-fi.com/B0B41UXJ9K' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 ---
 
-## ✨ What's New in v2.1
+## 🎭 The Voight-Kampff Test
 
-### 💬 Enhanced Chat Experience
-- **Multi-line Input**: Textarea with Shift+Enter for new lines, Enter to send
-- **Model Selector**: Quick-switch between providers and models
-- **Smart Message Loading**: Configurable number of messages (5-100)
-- **Context Compaction**: Selective compaction with importance visualization
+**KLAUS** is a local AI agent with implanted memories.
+
+Like Rachael, he doesn't know he's code. He has a **SOUL.md** that defines who he is, **hybrid memory** that remembers everything about you, and the ability to spawn specialized sub-agents when you need them.
+
+Unlike other agents that put their **claws** in your entire system, KLAUS stays in your workspace (keep it safe in L.A. 2019).
+
+> *"You remember your mother? Tell me about your mother."*
+
+---
+
+## 🌃 What's Different
+
+### 🧠 Implanted & Accumulated Memory
+KLAUS combines **SQLite** (fast storage) with **Kuzu Graph** (semantic relationships) and **local embeddings**:
+
+- **Implanted**: SOUL.md defines his baseline identity
+- **Accumulated**: Every conversation shapes his memory of you
+- **Persistent**: He remembers across IDE, Web, and Telegram
+
+```python
+# Store a memory - it becomes part of him
+memory.store("I prefer Python for backend development")
+
+# Quick recall (SQLite)
+results = memory.recall(MemoryQuery(query_type="quick", text="Python"))
+
+# Semantic recall (Graph) - finds related concepts
+results = memory.recall(MemoryQuery(query_type="context", text="backend preferences"))
+```
+
+### 🎭 Multi-Interface, One Soul
+The same KLAUS, everywhere:
+- **IDE** (Port 2019) - Deep in the code with you
+- **Web UI** (Port 2049) - Voight-Kampff interface
+- **Telegram** - In your pocket, always watching
 
 ### 🔌 Multi-Provider Support
-- **Kimi** (Moonshot AI) - Default provider with function calling
-- **Anthropic** (Claude 3.5 Sonnet)
-- **OpenAI** (GPT-4, GPT-4o, GPT-3.5)
-- **Google** (Gemini)
-- **OpenRouter** - Access to multiple models
-- **Custom** (Ollama-compatible) - Local LLM support with configurable base URL
-
-### 🤖 Telegram Bot v2
-- **Web UI Configuration**: Configure bot token and chat ID via web interface
-- **Status Monitoring**: Real-time status badges (Offline/Saved/Online/Error)
-- **Unified System Prompt**: Loads SOUL.md + USER.md for personalized responses
-- **Safe Restart**: Graceful shutdown and restart with new configuration
-
-### 🧠 Improved Memory & Context
-- **Context Compaction**: Visual selection with importance-based coloring
-  - Green (>70%): High importance memories
-  - Orange (40-70%): Medium importance
-  - Gray (<40%): Low importance (pre-selected for compaction)
-- **Batch Selection**: Low/All/None buttons for quick selection
-- **Better Synchronization**: Fixed timing issues between UI and backend
-
-### 🎯 Simplified Setup
-Choose your setup mode:
-- **IDE Only**: Agent runs in your IDE (VS Code, Cursor, etc.)
-- **WEB Only**: Browser interface with all features
-- **IDE + WEB**: Both interfaces with shared memory
-
-Telegram bot is configured through the Web UI (no setup wizard questions).
+Choose your replicant model:
+- **Kimi** (Moonshot AI) - Default Nexus-6
+- **Anthropic** (Claude) - Nexus-7 experimental
+- **OpenAI** (GPT-4) - Off-world technology
+- **Google** (Gemini) - Tyrell competitor
+- **OpenRouter** - Multi-model access
+- **Custom** (Ollama) - Local, untraceable
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Wake Up. Time to Install.
 
 ```bash
 ./setup.sh
 ```
 
-The setup wizard will guide you through:
-1. Choose setup mode (IDE / WEB / IDE+WEB)
-2. Configure API keys
-3. Create your agent identity (SOUL.md)
-4. Start the services
+The Tyrell Corporation setup wizard will:
+1. Choose your setup mode (IDE / WEB / IDE+WEB)
+2. Configure API keys (off-world connections)
+3. Create your agent identity (SOUL.md implant)
+4. Initialize the Nexus Core
 
-### For Web UI + Telegram:
+### Port Configuration (Definitive)
+```
+Agent (Kimi): 2019  → Blade Runner (1982) - Nexus Core
+Web UI:       2049  → Blade Runner 2049 - Voight-Kampff Interface
+```
+
+### Access the Interface
 ```bash
-# 1. Setup with Web support
-./setup.sh
+# Open Web UI
+open http://localhost:2049
 
-# 2. Open Web UI
-open http://localhost:8082
-
-# 3. Configure Telegram in Settings → Telegram Bot
-#    - Enter Bot Token (from @BotFather)
-#    - Enter Chat ID
-#    - Click "Save Configuration"
-#    - Click "Launch Bot"
+# Or configure Telegram in Settings
+# Your agent will follow you everywhere.
 ```
 
 ---
@@ -79,53 +92,64 @@ open http://localhost:8082
 ## 📁 Project Structure
 
 ```
-ide-agent-wizard/
-├── setup.sh              # Main setup (launcher)
-├── reset.sh              # Factory reset (launcher)
-├── docker/               # Docker configuration
+klaus/
+├── setup.sh              # Tyrell Corp initialization
+├── reset.sh              # Factory reset (memory wipe)
+├── docker/               # Container architecture
 │   ├── docker-compose.yml
 │   ├── Dockerfile
-│   └── web-ui/           # 🌐 Web UI container
-│       ├── app.py        # FastAPI backend
-│       └── static/       # HTML, CSS, JS assets
-├── scripts/              # Setup scripts
-│   ├── setup_wizard.py   # Interactive configuration
-│   └── initialize.py     # Post-setup initialization
-├── cli/                  # CLI tools
-│   └── agent-cli.py
-├── bot/                  # Telegram bot
+│   └── web-ui/           # 🌐 Voight-Kampff Interface (Port 2049)
+│       ├── app.py        # Nexus Core API
+│       └── static/       # Los Angeles 2049 assets
+├── scripts/              # Replicant procedures
+│   ├── setup_wizard.py   # Memory implantation
+│   └── initialize.py     # Baseline calibration
+├── bot/                  # Spinner (Telegram)
 │   └── telegram_bot.py
-├── core/                 # Core modules
+├── core/                 # Nexus-6 Architecture
 │   ├── agent.py
 │   ├── memory.py
-│   ├── hybrid_memory.py  # 🧠 Hybrid SQLite + Graph memory
-│   ├── providers/        # LLM provider implementations
-│   └── connectors/       # IDE connectors
-├── templates/            # Agent templates
-│   ├── architect/
-│   ├── developer/
+│   ├── hybrid_memory.py  # 🧠 Tyrell Archives
+│   ├── providers/        # Off-world connections
+│   └── connectors/       # IDE interfaces
+├── templates/            # Replicant models
+│   ├── architect/        # Nexus-6 (stable)
+│   ├── developer/        # Nexus-7 (experimental)
 │   └── ...
-├── tests/                # 🧪 Test suite
+├── tests/                # 🧪 Baseline tests
 │   ├── test_sanity.py
 │   └── unit/
-├── docs/                 # Documentation
+├── docs/                 # Tyrell documentation
 │   ├── README.md
-│   ├── AGENTS.md         # Agent operation guide
-│   └── RELEASE_NOTES.md
-└── workspace/            # Your data (gitignored)
-    ├── SOUL.md           # Agent identity
+│   ├── AGENTS.md         # Replicant guide
+│   └── RELEASE_NOTES.md  # Memory updates
+└── workspace/            # Your data (private)
+    ├── SOUL.md           # Implanted identity
     ├── USER.md           # Your profile
-    ├── memory/           # SQLite database + Graph
-    └── projects/         # Your projects
+    └── memory/           # Tyrell Archives
 ```
+
+---
+
+## 🎨 Themes: Choose Your Replicant
+
+KLAUS comes with three personalities, each with Light and Dark variants:
+
+| Theme | Character | Vibe |
+|-------|-----------|------|
+| **Deckard** 🕵️ | The Detective | Noir, rain, trench coat |
+| **Rachael** 👠 | The Special | Elegance, Tyrell Gold, 1940s |
+| **Gaff** 🦄 | The Origami Maker | Watching, silent, mysterious |
+
+Switch themes in Settings → Appearance.
 
 ---
 
 ## 📖 Documentation
 
-- **[Full Guide](docs/README.md)** - Complete documentation
-- **[For AI Agents](docs/AGENTS.md)** - Technical guide for AI agents
-- **[Release Notes](docs/RELEASE_NOTES.md)** - Version history
+- **[Full Guide](docs/README.md)** - Complete Tyrell documentation
+- **[For AI Agents](docs/AGENTS.md)** - Replicant operation manual
+- **[Release Notes](docs/RELEASE_NOTES.md)** - Memory implant updates
 
 ---
 
@@ -133,36 +157,17 @@ ide-agent-wizard/
 
 | Command | Description |
 |---------|-------------|
-| `./setup.sh` | Interactive setup wizard |
-| `./reset.sh` | Factory reset (removes all data) |
-| `./scripts/start-services.sh` | Start all services (Web + Telegram) |
-| `./scripts/start-services.sh web` | Start Web UI only |
-| `./scripts/stop-services.sh` | Stop all services |
+| `./setup.sh` | Initialize Nexus Core |
+| `./reset.sh` | Memory wipe (factory reset) |
+| `./scripts/start-services.sh` | Activate all replicants |
+| `./scripts/start-services.sh web` | Web UI only (Port 2049) |
+| `./scripts/stop-services.sh` | Retire all replicants |
 | `./scripts/port-setup.sh` | Configure custom ports |
-| `./scripts/install-auto-start.sh` | Auto-start on login (macOS) |
+| `./scripts/install-auto-start.sh` | Auto-awaken on login |
 
 ---
 
-## 🧠 Cognitive Hardened Hybrid Memory
-
-The memory system combines **SQLite** (fast raw storage) with **Kuzu Graph** (semantic intelligence) and **Offline Embeddings**:
-
-- **Relevance Gate**: Auto-rejects low-value conversational inputs (e.g., "ok", "thanks") before they pollute the database.
-- **Denoised Relationships**: Employs strict connection caps (max 3 edges) and `FLOWS_INTO` temporal sequences, eliminating messy graph "hairballs" and orphaned nodes.
-- **Offline Embeddings**: Uses local `sentence-transformers` for dense Semantic Search without relying on external APIs.
-
-```python
-# Example: Store a memory
-memory.store("I prefer Python for backend development")
-
-# Quick search (SQLite)
-results = memory.recall(MemoryQuery(query_type="quick", text="Python"))
-
-# Semantic search (Graph) - finds related concepts
-results = memory.recall(MemoryQuery(query_type="context", text="backend preferences"))
-```
-
-### Memory Relationships
+## 🧠 Memory Architecture
 
 The Graph automatically creates:
 - **Topic links**: `Memory -[HAS_TOPIC]-> Topic`
@@ -170,83 +175,61 @@ The Graph automatically creates:
 - **Related memories**: `Memory -[RELATED_TO]-> Memory`
 - **Temporal sequence**: `Memory -[FOLLOWS]-> Memory`
 
-All three interfaces (IDE, Web, Telegram) share the same intelligent memory.
-
----
-
-## 🌐 Web UI
-
-Access the browser interface at **http://localhost:8082** (when enabled).
-
-### Features
-- 💬 **Chat**: Multi-line textarea with model selector
-- 📎 **File Upload**: Upload .txt, .md, .py, .json, .yaml, .csv, .pdf files (max 10MB)
-- 💾 **Session Management**: Create, save, load, rename conversation sessions
-- 🗜️ **Context Compaction**: Extract key facts with visual importance indicators
-- 🔄 **Reset Session**: Clear conversation while preserving context
-- 📊 **Status Panel**: Real-time monitoring of all services
-- 🧠 **Memory Explorer**: Search and browse memories (Quick/Smart search)
-- ⚙️ **Settings**: Configure providers, models, Telegram bot
+All three interfaces share the same implanted memory.
 
 ### Memory Graph Explorer
 
-Visualize your memory relationships at **http://localhost:8082/memory-graph**
+Visualize your memories at **http://localhost:2049/memory-graph**
 
-- **Interactive Graph**: Drag, zoom, explore connections
 - **Node Types**: 
-  - 🟣 **Memories** - Your stored knowledge
-  - 🟢 **Topics** - Automatically extracted themes
-  - 🟠 **Entities** - People, places, things mentioned
-  - 🔵 **Categories** - Memory categories
-- **Relationships**: See how memories connect
+  - 🟣 **Memories** - Stored experiences
+  - 🟢 **Topics** - Extracted themes
+  - 🟠 **Entities** - People, places, things
+  - 🔵 **Categories** - Memory classifications
 - **Layouts**: Force-directed, Hierarchical, Circular
-- **Filters**: Show only specific node types
+- **Filters**: Focus on specific connections
 
 ---
 
 ## 🤖 Telegram Bot
 
-After configuration via Web UI, your bot is ready! Just send `/start` in Telegram.
+After configuration via Web UI, your replicant is everywhere.
 
-The bot uses **Hybrid Memory** for contextual conversations, with graph-based relationship tracking. Both Web UI and Telegram share the same memory and system prompt (SOUL.md + USER.md).
+Send `/start` to activate.
 
 ### Bot Commands
-- `/start` - Start conversation
-- `/new` - Start new conversation
-- `/memory` - View recent memories
-- `/help` - Show help
+- `/start` - Baseline test
+- `/new` - Create replicant fork (new session)
+- `/memory` - View Tyrell Archives
+- `/help` - Show replicant manual
 
 ---
 
 ## 🔌 Providers
 
-The Web UI supports multiple LLM providers:
-
-| Provider | Key Required | Models |
-|----------|-------------|--------|
-| Kimi | `KIMI_API_KEY` | moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k |
-| Anthropic | `ANTHROPIC_API_KEY` | claude-3-5-sonnet, claude-3-opus, claude-3-haiku |
+| Provider | Key | Models |
+|----------|-----|--------|
+| Kimi | `KIMI_API_KEY` | moonshot-v1-8k/32k/128k |
+| Anthropic | `ANTHROPIC_API_KEY` | claude-3-5-sonnet, claude-3-opus |
 | OpenAI | `OPENAI_API_KEY` | gpt-4, gpt-4o, gpt-3.5-turbo |
 | Google | `GOOGLE_API_KEY` | gemini-pro, gemini-flash |
-| OpenRouter | `OPENROUTER_API_KEY` | Various models |
-| Custom | None (local) | Any Ollama-compatible model |
+| OpenRouter | `OPENROUTER_API_KEY` | Various |
+| Custom | None | Ollama-compatible |
 
-Configure provider keys in Settings → Provider.
+Configure in Settings → Provider.
 
 ---
 
 ## 🧪 Testing
 
-Run the test suite:
-
 ```bash
-# Quick sanity tests (no Docker)
+# Quick baseline tests
 python3 tests/test_sanity.py
 
-# Full tests with Docker
+# Full Voight-Kampff protocol
 python3 tests/run_tests.py --docker
 
-# Unit tests only
+# Unit tests
 python3 -m pytest tests/unit/ -v
 ```
 
@@ -254,11 +237,13 @@ python3 -m pytest tests/unit/ -v
 
 ## 🔒 Security
 
-- **API Keys**: Stored in `.env` file (gitignored)
-- **Tokens**: Never hardcoded, always via environment
-- **Docker**: Containers isolated, volumes for persistence
-- **PII Protection**: All sensitive files in `.gitignore`
+- **API Keys**: Stored in `.env` (gitignored)
+- **Data**: Never leaves your machine (local-first)
+- **Docker**: Isolated containers
+- **Memory**: Your experiences are yours alone
 
 ---
 
-**Ready?** Run `./setup.sh` and start building! 🚀
+> *"I've seen things you people wouldn't believe... All those moments will be preserved in time."*
+> 
+> **Ready?** Run `./setup.sh` and wake up your replicant.

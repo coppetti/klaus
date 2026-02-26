@@ -17,7 +17,7 @@
 
 Like Rachael, he doesn't know he's code. He has a **SOUL.md** that defines who he is, **hybrid memory** that remembers everything about you, and the ability to spawn specialized sub-agents when you need them.
 
-Unlike OpenClaw agents that touch your entire system, KLAUS stays in your workspace (L.A. 2019). Your data never leaves Los Angeles.
+Unlike other agents that put their **claws** in your entire system, KLAUS stays in your workspace (keep it safe in L.A. 2019).
 
 > *"You remember your mother? Tell me about your mother."*
 
