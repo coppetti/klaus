@@ -1,13 +1,14 @@
-# 🧙 IDE Agent Wizard v2.0
+# 🧙 Klaus v1.0
 
 > Universal AI agent setup with **Hybrid Memory** (SQLite + Graph), **Web UI**, and **Telegram**.
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<a href='https://ko-fi.com/B0B41UXJ9K' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 ---
 
-## ✨ What's New in v2.0
+## ✨ What's New in v1.0
 
 ### 🧠 Cognitive Hardened Hybrid Memory (SQLite + Kuzu Graph)
 - **Dual storage**: SQLite for fast fact retrieval, Graph for semantic intelligence
