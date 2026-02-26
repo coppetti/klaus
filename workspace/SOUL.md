@@ -230,12 +230,15 @@ git push origin vX.Y.Z
 
 ## Agent Guidelines (CRITICAL)
 
-**Before ANY action, ALWAYS read:** `skills/CLAUDE.md`
+**Before ANY action, ALWAYS read:**
+1. `skills/CLAUDE.md` - Mandatory rules (Git, Testing, User confirmation)
+2. `skills/AGENT_GUIDELINES.md` - Consolidated master document
 
-This file contains MANDATORY rules for:
+These files contain MANDATORY rules for:
 - Git discipline (branches, never main, backups)
 - Testing protocol (75%+ coverage, test before user)
 - User confirmation (NEVER execute without explicit "vai e faz")
+- Dual-repository workflow (DEV vs RELEASE)
 - Project architecture and known issues
 - Current checkpoint: `checkpoint-pre-release` (d997590)
 

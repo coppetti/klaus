@@ -1,6 +1,9 @@
 # Claude Agent Guidelines - Klaus Project
 # =========================================
 
+> **NEW:** For a consolidated view of all guidelines, see `skills/AGENT_GUIDELINES.md`
+> This file contains the critical rules that must never be broken.
+
 ## 🚨 CRITICAL RULES - NEVER BREAK
 
 ### 1. GIT DISCIPLINE
