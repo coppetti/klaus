@@ -1,4 +1,4 @@
-# 🗺️ Roadmap - IDE Agent Wizard v2.x
+# 🗺️ Roadmap - Klaus v2.x
 
 > Strategic plan for improvements and new features
 > Created: 2026-02-23

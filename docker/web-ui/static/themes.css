@@ -1,0 +1,526 @@
+/*
+ * KLAUS UI THEMES
+ * Deckard Collection - Exato do mockup
+ */
+
+/* ========================================
+   DECKARD LIGHT THEME - Mockup specs
+   ======================================== */
+.theme-deckard-light {
+  /* Base - Warm off-white */
+  --bg-primary: #FAF9F7;           /* Main background */
+  --bg-secondary: #F2F0ED;         /* Chat area */
+  --bg-tertiary: #EBE8E4;          /* Assistant bubble */
+  
+  /* Text - Soft blacks */
+  --text-primary: #201E1B;         /* Headings */
+  --text-secondary: #5C5854;       /* Body text */
+  --text-tertiary: #8C8884;        /* Muted/placeholders */
+  
+  /* Border */
+  --border-subtle: #E5E2DE;
+  --border-focus: #C5C0BB;
+  
+  /* Accents */
+  --accent-orange: #F26B3A;
+  --accent-teal: #229E8B;
+  --accent-gold: #B8963C;
+  
+  /* Semantic */
+  --success: #457A5C;
+  --warning: #B88A2F;
+  --error: #A34B5A;
+}
+
+/* ========================================
+   DECKARD DARK THEME
+   ======================================== */
+.theme-deckard-dark {
+  --bg-primary: #161412;
+  --bg-secondary: #1E1C19;
+  --bg-tertiary: #282623;
+  
+  --text-primary: #ECE9E4;
+  --text-secondary: #BDB8B0;
+  --text-tertiary: #948F88;
+  
+  --border-subtle: #383532;
+  --border-focus: #4A4642;
+  
+  --accent-orange: #F0784A;
+  --accent-teal: #2CB5A0;
+  --accent-gold: #C9A84C;
+  
+  --success: #5A9A7A;
+  --warning: #D4A347;
+  --error: #C65B6B;
+}
+
+/* ========================================
+   BASE
+   ======================================== */
+* { font-family: 'Inter', -apple-system, sans-serif; }
+
+.theme-deckard-light,
+.theme-deckard-dark {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Fonte display - Orbitron */
+.font-display {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* ========================================
+   LAYOUT - Sidebars e Header
+   ======================================== */
+.sidebar-bg {
+  background-color: var(--bg-primary);
+  border-color: var(--border-subtle);
+}
+
+.main-bg {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Dark mode fixes - Vitiligo prevention */
+.theme-deckard-dark #chat-messages,
+.theme-deckard-dark .bg-gray-50,
+.theme-deckard-dark .bg-gray-100 {
+  background-color: var(--bg-secondary) !important;
+}
+
+.theme-deckard-dark .bg-white {
+  background-color: var(--bg-primary) !important;
+}
+
+.theme-deckard-dark .chat-bubble-assistant {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+.theme-deckard-dark .chat-bubble-user {
+  background-color: #ECE9E4 !important;
+  color: #161412 !important;
+}
+
+/* Input fixes for dark mode */
+.theme-deckard-dark input,
+.theme-deckard-dark select,
+.theme-deckard-dark textarea {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+.theme-deckard-dark input::placeholder,
+.theme-deckard-dark textarea::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+/* Text color fixes */
+.theme-deckard-dark .text-gray-900,
+.theme-deckard-dark .text-gray-700,
+.theme-deckard-dark .text-gray-600 {
+  color: var(--text-primary) !important;
+}
+
+.theme-deckard-dark .text-gray-500,
+.theme-deckard-dark .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+/* Graph container - preserve original colors */
+.theme-deckard-dark #graph-container canvas,
+.theme-deckard-dark #mynetwork canvas {
+  filter: invert(0.9) hue-rotate(180deg);
+}
+
+/* ========================================
+   HEADER - Exato do mockup
+   ======================================== */
+.header-title {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* ========================================
+   BUTTONS - Exato do mockup
+   ======================================== */
+
+/* btn-filled - Preto sólido (New Session) */
+.btn-filled {
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-filled:hover {
+  opacity: 0.85;
+}
+
+/* btn-outline - Borda laranja (Launch Bot) */
+.btn-outline {
+  background-color: transparent;
+  color: var(--accent-orange);
+  border: 1px solid var(--accent-orange);
+  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-outline:hover {
+  background-color: rgba(242, 107, 58, 0.08);
+}
+
+/* btn-secondary - Cinza sutil (Save, Test) */
+.btn-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-focus);
+}
+
+/* ========================================
+   CARDS - Exato do mockup
+   ======================================== */
+.card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+/* ========================================
+   SESSION LIST - Exato do mockup
+   ======================================== */
+.session-item {
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.session-item:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.session-active {
+  background-color: var(--bg-secondary);
+  border-left: 2px solid var(--accent-orange);
+}
+
+.session-title {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.session-preview {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-time {
+  font-size: 0.625rem;
+  color: var(--text-tertiary);
+}
+
+/* ========================================
+   CHAT BUBBLES - Exato do mockup
+   ======================================== */
+
+/* User bubble - Preto sólido */
+.chat-user {
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+  border-radius: 16px 16px 4px 16px;
+  padding: 1rem 1.25rem;
+  max-width: 75%;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.chat-user .timestamp {
+  font-size: 0.625rem;
+  opacity: 0.6;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+/* Assistant bubble - Cinza claro */
+.chat-assistant {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px 16px 16px 4px;
+  padding: 1rem 1.25rem;
+  max-width: 75%;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.chat-assistant .timestamp {
+  font-size: 0.625rem;
+  color: var(--text-tertiary);
+  margin-top: 0.5rem;
+  display: block;
+}
+
+/* ========================================
+   STATUS - Outline style
+   ======================================== */
+.status-online {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--success);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: var(--success);
+  background: transparent;
+}
+
+.status-offline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  background: transparent;
+}
+
+/* ========================================
+   AVATAR - Exato do mockup
+   ======================================== */
+.avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3D3A37, #5C5854);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.avatar-lg {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1.25rem;
+}
+
+/* ========================================
+   INPUT - Exato do mockup
+   ======================================== */
+.input {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent-orange);
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ========================================
+   SEND BUTTON - Exato do mockup
+   ======================================== */
+.send-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border: none;
+}
+
+.send-btn:hover {
+  background-color: var(--accent-orange);
+}
+
+/* ========================================
+   SECTION HEADERS
+   ======================================== */
+.section-header {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* ========================================
+   PROVIDER CARDS
+   ======================================== */
+.provider-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0.75rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid transparent;
+  border-radius: 8px;
+}
+
+.provider-card.online {
+  border-left-color: var(--success);
+}
+
+.provider-card.offline {
+  opacity: 0.7;
+}
+
+.provider-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.provider-name.inactive {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.provider-status {
+  font-size: 0.625rem;
+  color: var(--text-tertiary);
+}
+
+.provider-status.active {
+  color: var(--success);
+}
+
+/* ========================================
+   WELCOME ICON
+   ======================================== */
+.welcome-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #3D3A37, #5C5854);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin: 0 auto 1rem;
+}
+
+/* ========================================
+   TABS
+   ======================================== */
+.tab {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tab:hover {
+  color: var(--text-secondary);
+}
+
+.tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent-orange);
+}
+
+/* ========================================
+   TEXT UTILITIES
+   ======================================== */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-accent { color: var(--accent-orange); }
+.text-success { color: var(--success); }
+
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+.text-xs-tight { font-size: 0.625rem; }
+
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+
+/* ========================================
+   BORDERS
+   ======================================== */
+.border-subtle { border-color: var(--border-subtle); }
+.border-b { border-bottom: 1px solid var(--border-subtle); }
+.border-r { border-right: 1px solid var(--border-subtle); }
+.border-l { border-left: 1px solid var(--border-subtle); }
