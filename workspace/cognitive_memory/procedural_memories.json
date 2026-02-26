@@ -103,5 +103,109 @@
     "examples": [
       "ep_20260226082703_8109"
     ]
+  },
+  {
+    "memory_id": "proc_20260226170536",
+    "timestamp": "2026-02-26T17:05:36.409888",
+    "context_pattern": "check our task list (workspace folder)",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226170536_1578"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226170559",
+    "timestamp": "2026-02-26T17:05:59.500584",
+    "context_pattern": "workspace/ exposed via docker",
+    "action_taken": "code_examples",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226170559_123"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226170726",
+    "timestamp": "2026-02-26T17:07:26.746521",
+    "context_pattern": "cat workspace/ << yes this workspace u dumbass. wo",
+    "action_taken": "code_examples",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226170726_3013"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226170802",
+    "timestamp": "2026-02-26T17:08:02.501107",
+    "context_pattern": "thanks for nothing",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226170802_6840"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226170953",
+    "timestamp": "2026-02-26T17:09:53.132157",
+    "context_pattern": "my bad:\n- PROJECTS_PATH=/app/workspace/projects\n\nw",
+    "action_taken": "code_examples",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226170953_1815"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226171106",
+    "timestamp": "2026-02-26T17:11:06.513136",
+    "context_pattern": "workspace/projects/tasklist.md\n[]test before deplo",
+    "action_taken": "code_examples",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226171106_8740"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226203833",
+    "timestamp": "2026-02-26T20:38:33.063918",
+    "context_pattern": "I work at Google as a Senior Solutions Architect",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226203833_5982"
+    ]
+  },
+  {
+    "memory_id": "proc_20260226203841",
+    "timestamp": "2026-02-26T20:38:41.199589",
+    "context_pattern": "I am working on a project using Python and FastAPI",
+    "action_taken": "explanation",
+    "result": "successful",
+    "success_rate": 1.0,
+    "usage_count": 1,
+    "related_entities": [],
+    "examples": [
+      "ep_20260226203841_6914"
+    ]
   }
 ]
