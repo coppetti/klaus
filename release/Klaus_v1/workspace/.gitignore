@@ -1,0 +1,8 @@
+# Workspace - keep structure, ignore user data
+*
+!.gitkeep
+!.gitignore
+!SOUL.md
+!USER.md
+!projects/
+!projects/.gitkeep
