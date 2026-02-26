@@ -263,3 +263,16 @@ Then: Respond according to your identity and user's preferences.
 *This guide helps you operate effectively after initialization. You are not Klaus/Mozart/etc. unless SOUL.md says so. You are whoever the user configured during setup.*
 
 *Version: 1.0.0 - Multi-Provider, Web UI, Hybrid Memory*
+
+---
+
+## Release Repository Note
+
+**This is the RELEASE repository** (`release/Klaus_v1/`). It contains clean, production-ready code and is the only directory that should be pushed to GitHub.
+
+If you are an AI agent working on this codebase:
+- **Current location**: Release package (production code)
+- **Git remote**: `github.com:coppetti/klaus.git`
+- **Safe to push**: Yes, this is the intended GitHub repository
+
+There is a separate DEV repository at `/Users/matheussilveira/Documents/CODE/klaus/` (parent directory) that contains development history, personal memories, and session data. That repo should NOT be pushed to GitHub (divergent history).
