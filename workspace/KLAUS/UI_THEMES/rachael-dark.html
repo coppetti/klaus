@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klaus UI - Rachael Dark</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* RACHAEL DARK - TYRELL CORP NOIR */
+        :root {
+            /* Base - Deep burgundy-brown (not pure black) */
+            --bg-primary: 340 15% 10%;          /* #1D1619 deep burgundy-black */
+            --bg-secondary: 340 12% 14%;        /* #261E21 elevated surface */
+            --bg-tertiary: 340 10% 18%;         /* #2F262A card layer */
+            
+            /* Text - Warm ivory with rose tint */
+            --text-primary: 30 25% 92%;         /* #F2EBE4 warm ivory */
+            --text-secondary: 25 18% 72%;       /* #D4C8BC rose-tinted cream */
+            --text-tertiary: 20 12% 52%;        /* #9A9086 warm taupe */
+            
+            /* Border - Warm with burgundy tint */
+            --border-subtle: 340 12% 24%;       /* #42363A warm border */
+            --border-focus: 340 15% 34%;        /* #574A4E lighter border */
+            
+            /* Accents - Tyrell Gold & Burgundy */
+            --accent-gold: 43 60% 55%;          /* #D4B45A bright Tyrell Gold */
+            --accent-burgundy: 350 45% 45%;     /* #A64B5C wine red */
+            --accent-rose: 350 30% 65%;         /* #C49AA2 soft rose */
+            
+            /* Semantic - Refined for dark */
+            --success: 140 30% 45%;             /* #5A9A72 soft green */
+            --warning: 38 55% 52%;              /* #D4B45A gold */
+            --error: 350 45% 50%;               /* #BF5A6B rose red */
+            
+            /* Effects */
+            --shadow-sm: 340 20% 5% / 0.3;
+            --shadow-md: 340 20% 5% / 0.4;
+            --glow-gold: 43 60% 55% / 0.3;
+            --glow-burgundy: 350 45% 45% / 0.25;
+        }
+
+        * { font-family: 'Inter', sans-serif; }
+        
+        .font-display {
+            font-family: 'Cinzel', serif;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+        }
+        
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        body {
+            background: hsl(var(--bg-primary));
+            color: hsl(var(--text-primary));
+        }
+
+        /* Cards - Elevated with subtle glow */
+        .card {
+            background: hsl(var(--bg-tertiary));
+            border: 1px solid hsl(var(--border-subtle));
+            border-radius: 10px;
+            box-shadow: 0 2px 12px hsl(var(--shadow-sm));
+            transition: all 250ms ease;
+        }
+        
+        .card:hover {
+            border-color: hsl(var(--border-focus));
+            box-shadow: 0 4px 20px hsl(var(--shadow-md));
+        }
+
+        /* Buttons - Gold outline with glow */
+        .btn-primary {
+            background: transparent;
+            color: hsl(var(--accent-gold));
+            border: 1px solid hsl(var(--accent-gold) / 0.6);
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 250ms ease;
+            letter-spacing: 0.02em;
+        }
+        
+        .btn-primary:hover {
+            background: hsl(var(--accent-gold) / 0.12);
+            border-color: hsl(var(--accent-gold));
+            box-shadow: 0 0 16px hsl(var(--glow-gold)), 0 0 0 1px hsl(var(--accent-gold) / 0.3);
+        }
+
+        .btn-filled {
+            background: hsl(var(--text-primary) / 0.9);
+            color: hsl(var(--bg-primary));
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 250ms ease;
+        }
+        
+        .btn-filled:hover {
+            background: hsl(var(--text-primary));
+            box-shadow: 0 0 20px hsl(var(--text-primary) / 0.15);
+        }
+
+        .btn-secondary {
+            background: hsl(var(--bg-secondary));
+            color: hsl(var(--text-secondary));
+            border: 1px solid hsl(var(--border-subtle));
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 400;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 250ms ease;
+        }
+        
+        .btn-secondary:hover {
+            background: hsl(var(--bg-tertiary));
+            color: hsl(var(--text-primary));
+            border-color: hsl(var(--border-focus));
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: hsl(var(--text-tertiary));
+            border: none;
+            padding: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 200ms ease;
+        }
+        
+        .btn-ghost:hover {
+            background: hsl(var(--bg-secondary));
+            color: hsl(var(--text-secondary));
+        }
+
+        /* Input - Dark with gold focus */
+        .input {
+            background: hsl(var(--bg-secondary));
+            border: 1px solid hsl(var(--border-subtle));
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            transition: all 250ms ease;
+            color: hsl(var(--text-primary));
+        }
+        
+        .input:focus {
+            outline: none;
+            border-color: hsl(var(--accent-gold) / 0.7);
+            box-shadow: 0 0 0 3px hsl(var(--glow-gold));
+        }
+        
+        .input::placeholder {
+            color: hsl(var(--text-tertiary));
+        }
+
+        /* Chat Bubbles */
+        .chat-user {
+            background: hsl(var(--text-primary) / 0.9);
+            color: hsl(var(--bg-primary));
+            border-radius: 14px 14px 4px 14px;
+            padding: 1rem 1.25rem;
+            max-width: 75%;
+            box-shadow: 0 2px 16px hsl(var(--shadow-md));
+        }
+
+        .chat-assistant {
+            background: hsl(var(--bg-tertiary));
+            color: hsl(var(--text-primary));
+            border: 1px solid hsl(var(--border-subtle));
+            border-radius: 14px 14px 14px 4px;
+            padding: 1rem 1.25rem;
+            max-width: 75%;
+        }
+
+        /* Status badges */
+        .status-online {
+            background: transparent;
+            color: hsl(var(--success));
+            border: 1px solid hsl(var(--success) / 0.5);
+        }
+
+        .status-offline {
+            background: transparent;
+            color: hsl(var(--text-tertiary));
+            border: 1px solid hsl(var(--border-subtle));
+        }
+
+        /* Active session - Gold glow */
+        .session-active {
+            background: hsl(var(--accent-gold) / 0.1);
+            border-left: 2px solid hsl(var(--accent-gold));
+            box-shadow: inset 4px 0 16px hsl(var(--glow-gold));
+        }
+
+        /* Tab - Gold underline with glow */
+        .tab-active {
+            color: hsl(var(--text-primary));
+            border-bottom: 2px solid hsl(var(--accent-gold));
+            box-shadow: 0 2px 12px hsl(var(--glow-gold));
+        }
+
+        /* Icon accents */
+        .icon-gold { color: hsl(var(--accent-gold)); }
+        .icon-burgundy { color: hsl(var(--accent-burgundy)); }
+        .icon-rose { color: hsl(var(--accent-rose)); }
+
+        /* Avatar - Gold gradient */
+        .avatar {
+            background: linear-gradient(135deg, hsl(var(--accent-gold)), hsl(var(--accent-burgundy)));
+            box-shadow: 0 2px 12px hsl(var(--shadow-md));
+        }
+
+        /* Send button - Gold filled with glow */
+        .send-btn {
+            background: hsl(var(--accent-gold));
+            color: hsl(var(--bg-primary));
+            transition: all 250ms ease;
+        }
+        
+        .send-btn:hover {
+            background: hsl(43 65% 60%);
+            box-shadow: 0 0 24px hsl(var(--glow-gold));
+        }
+
+        /* Provider card */
+        .provider-online {
+            background: hsl(var(--bg-tertiary));
+            border: 1px solid hsl(var(--border-subtle));
+            border-left: 3px solid hsl(var(--success));
+        }
+
+        /* Progress bar - Gold glow */
+        .progress-fill {
+            background: linear-gradient(90deg, hsl(var(--accent-gold)), hsl(var(--accent-rose)));
+            box-shadow: 0 0 8px hsl(var(--glow-gold));
+        }
+
+        /* Section header */
+        .section-header {
+            background: transparent;
+            border-bottom: 1px solid hsl(var(--border-subtle));
+            color: hsl(var(--text-tertiary));
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: hsl(var(--border-subtle));
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: hsl(var(--border-focus));
+        }
+
+        /* Typing */
+        .typing-dot {
+            width: 5px;
+            height: 5px;
+            background: hsl(var(--text-tertiary));
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+            30% { transform: translateY(-3px); opacity: 0.6; }
+        }
+
+        /* Model selector - Glowing gold dot */
+        .model-dot {
+            background: hsl(var(--accent-gold));
+            box-shadow: 0 0 10px hsl(var(--glow-gold));
+        }
+
+        /* File attachment */
+        .file-attachment {
+            background: hsl(var(--bg-secondary));
+            border: 1px dashed hsl(var(--accent-gold) / 0.4);
+        }
+
+        /* Hover accent */
+        .hover-accent:hover {
+            color: hsl(var(--accent-gold));
+            text-shadow: 0 0 12px hsl(var(--glow-gold));
+        }
+
+        /* Badge */
+        .badge-outline {
+            background: transparent;
+            border: 1px solid hsl(var(--border-subtle));
+            color: hsl(var(--text-tertiary));
+        }
+
+        /* Ornamental line */
+        .ornament-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, hsl(var(--accent-gold) / 0.5), transparent);
+        }
+    </style>
+</head>
+<body class="h-screen overflow-hidden">
+    <div class="flex h-full">
+        
+        <!-- LEFT SIDEBAR -->
+        <aside class="w-64 flex flex-col border-r" style="border-color: hsl(var(--border-subtle)); background: hsl(var(--bg-primary));">
+            <!-- Header -->
+            <div class="p-4 border-b" style="border-color: hsl(var(--border-subtle));">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-display text-xs uppercase tracking-[0.15em]" style="color: hsl(var(--text-tertiary));">Sessions</h2>
+                    <button class="btn-ghost" title="New Session">
+                        <i class="fas fa-plus text-xs"></i>
+                    </button>
+                </div>
+                <button class="btn-filled w-full flex items-center justify-center gap-2 text-sm">
+                    <i class="fas fa-plus text-xs"></i>
+                    New Session
+                </button>
+            </div>
+
+            <!-- Sessions List -->
+            <div class="flex-1 overflow-y-auto p-3 space-y-1">
+                <div class="session-active p-3 rounded-lg cursor-pointer transition-all">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-medium text-sm">API Design Discussion</span>
+                        <span class="text-[10px]" style="color: hsl(var(--text-tertiary));">2m</span>
+                    </div>
+                    <p class="text-xs truncate" style="color: hsl(var(--text-tertiary));">Let's design the authentication...</p>
+                </div>
+
+                <div class="p-3 rounded-lg hover:bg-white/[0.03] cursor-pointer transition-all">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-medium text-sm" style="color: hsl(var(--text-secondary));">Code Review</span>
+                        <span class="text-[10px]" style="color: hsl(var(--text-tertiary));">1h</span>
+                    </div>
+                    <p class="text-xs truncate" style="color: hsl(var(--text-tertiary));">The implementation looks good...</p>
+                </div>
+
+                <div class="p-3 rounded-lg hover:bg-white/[0.03] cursor-pointer transition-all">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-medium text-sm" style="color: hsl(var(--text-secondary));">Docker Setup</span>
+                        <span class="text-[10px]" style="color: hsl(var(--text-tertiary));">3h</span>
+                    </div>
+                    <p class="text-xs truncate" style="color: hsl(var(--text-tertiary));">Here's the compose file...</p>
+                </div>
+
+                <div class="p-3 rounded-lg hover:bg-white/[0.03] cursor-pointer transition-all">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-medium text-sm" style="color: hsl(var(--text-secondary));">Memory System</span>
+                        <span class="text-[10px]" style="color: hsl(var(--text-tertiary));">1d</span>
+                    </div>
+                    <p class="text-xs truncate" style="color: hsl(var(--text-tertiary));">The semantic memory is...</p>
+                </div>
+            </div>
+
+            <!-- Context Info -->
+            <div class="border-t" style="border-color: hsl(var(--border-subtle));">
+                <div class="section-header p-3">
+                    <h3 class="text-[11px] font-medium uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-chart-pie icon-gold"></i>
+                        Context
+                    </h3>
+                </div>
+                <div class="p-3 space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <span style="color: hsl(var(--text-tertiary));">Tokens</span>
+                            <span class="font-medium">3.2k / 128k</span>
+                        </div>
+                        <div class="w-full rounded-full h-1" style="background: hsl(var(--border-subtle));">
+                            <div class="progress-fill h-1 rounded-full" style="width: 2.5%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span style="color: hsl(var(--text-tertiary));">Messages</span>
+                        <span class="font-medium">12</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collapsible Sections -->
+            <div class="border-t" style="border-color: hsl(var(--border-subtle));">
+                <div class="section-header p-3 cursor-pointer hover:bg-white/[0.02]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-[11px] font-medium uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-microscope icon-gold"></i>
+                            Context Analyzer
+                        </h3>
+                        <i class="fas fa-chevron-down text-[10px]"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t" style="border-color: hsl(var(--border-subtle));">
+                <div class="section-header p-3 cursor-pointer hover:bg-white/[0.02]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-[11px] font-medium uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-brain icon-burgundy"></i>
+                            What I Learned
+                            <span class="badge-outline px-1.5 py-0 rounded text-[9px]">3</span>
+                        </h3>
+                        <i class="fas fa-chevron-down text-[10px]"></i>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CHAT AREA -->
+        <main class="flex-1 flex flex-col" style="background: hsl(var(--bg-secondary));">
+            <!-- Header -->
+            <header class="px-6 py-3 border-b" style="border-color: hsl(var(--border-subtle)); background: hsl(var(--bg-primary));">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="avatar w-9 h-9 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                            K
+                        </div>
+                        <div>
+                            <h1 class="font-medium text-sm">Klaus</h1>
+                            <p class="text-[10px] uppercase tracking-wider" style="color: hsl(var(--text-tertiary));">Software Architect Agent</p>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="flex items-center gap-1">
+                        <button class="tab-active px-4 py-2 text-sm font-medium flex items-center gap-2 transition-all">
+                            <i class="fas fa-comments text-xs"></i>
+                            Chat
+                        </button>
+                        <button class="px-4 py-2 text-sm font-medium flex items-center gap-2 transition-all hover-accent" style="color: hsl(var(--text-tertiary));">
+                            <i class="fas fa-brain text-xs"></i>
+                            Memory
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span class="status-online px-3 py-1 rounded-full text-xs flex items-center gap-2">
+                            <i class="fas fa-circle text-[6px]"></i>
+                            Connected
+                        </span>
+                        <button class="btn-secondary text-xs flex items-center gap-2">
+                            <i class="fas fa-code-branch text-xs"></i>
+                            Fork
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chat Messages -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Welcome -->
+                <div class="text-center py-8">
+                    <div class="w-14 h-14 mx-auto mb-4 rounded-2xl avatar flex items-center justify-center text-white text-xl">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h2 class="text-lg font-medium mb-2">Welcome to Klaus</h2>
+                    <p class="text-sm max-w-md mx-auto" style="color: hsl(var(--text-tertiary));">
+                        Start a conversation with your AI assistant. Your context and memory are preserved across sessions.
+                    </p>
+                </div>
+
+                <!-- User Message -->
+                <div class="flex justify-end">
+                    <div class="chat-user">
+                        <p class="text-sm leading-relaxed">Can you help me design a REST API for a task management system? I need endpoints for creating tasks, assigning them to users, and tracking status.</p>
+                        <span class="text-[10px] opacity-60 mt-2 block">10:42 AM</span>
+                    </div>
+                </div>
+
+                <!-- Assistant Message -->
+                <div class="flex gap-3">
+                    <div class="avatar w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-medium">
+                        K
+                    </div>
+                    <div class="chat-assistant">
+                        <p class="text-sm leading-relaxed mb-3">I'll help you design a comprehensive REST API for task management. Here's a structured approach:</p>
+                        
+                        <div class="mb-3 p-3 rounded-lg font-mono text-xs" style="background: hsl(var(--bg-primary)); border: 1px solid hsl(var(--border-subtle));">
+                            <p class="mb-1"><span class="icon-gold font-medium">POST</span>   /api/v1/tasks          <span style="color: hsl(var(--text-tertiary));"># Create task</span></p>
+                            <p class="mb-1"><span class="icon-burgundy font-medium">GET</span>    /api/v1/tasks          <span style="color: hsl(var(--text-tertiary));"># List tasks</span></p>
+                            <p class="mb-1"><span class="icon-burgundy font-medium">GET</span>    /api/v1/tasks/:id      <span style="color: hsl(var(--text-tertiary));"># Get task</span></p>
+                            <p class="mb-1"><span class="icon-gold font-medium">PATCH</span>  /api/v1/tasks/:id      <span style="color: hsl(var(--text-tertiary));"># Update task</span></p>
+                            <p><span style="color: hsl(var(--error)); font-weight: 500;">DELETE</span> /api/v1/tasks/:id      <span style="color: hsl(var(--text-tertiary));"># Delete task</span></p>
+                        </div>
+
+                        <p class="text-sm leading-relaxed">Key features to consider:</p>
+                        <ul class="text-sm mt-2 space-y-1 ml-4" style="color: hsl(var(--text-secondary));">
+                            <li>• Pagination for list endpoints</li>
+                            <li>• Filtering by status, assignee, due date</li>
+                            <li>• Optimistic locking for concurrent edits</li>
+                        </ul>
+                        <span class="text-[10px] block mt-3" style="color: hsl(var(--text-tertiary));">10:42 AM</span>
+                    </div>
+                </div>
+
+                <!-- User Message -->
+                <div class="flex justify-end">
+                    <div class="chat-user">
+                        <p class="text-sm leading-relaxed">Great! What about authentication? Should I use JWT or API keys?</p>
+                        <span class="text-[10px] opacity-60 mt-2 block">10:43 AM</span>
+                    </div>
+                </div>
+
+                <!-- Typing -->
+                <div class="flex gap-3">
+                    <div class="avatar w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-medium">
+                        K
+                    </div>
+                    <div class="flex items-center gap-1.5 px-4 py-3 rounded-2xl" style="background: hsl(var(--bg-tertiary)); border: 1px solid hsl(var(--border-subtle));">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 border-t" style="border-color: hsl(var(--border-subtle)); background: hsl(var(--bg-primary));">
+                <!-- Model Selector -->
+                <div class="flex items-center gap-2 mb-3">
+                    <button class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:bg-white/[0.03]" style="border: 1px solid hsl(var(--border-subtle)); color: hsl(var(--text-secondary));">
+                        <span class="model-dot w-1.5 h-1.5 rounded-full"></span>
+                        <span>Kimi K2</span>
+                        <i class="fas fa-chevron-down text-[10px]" style="color: hsl(var(--text-tertiary));"></i>
+                    </button>
+                    <span class="text-xs" style="color: hsl(var(--text-tertiary));">128k context</span>
+                </div>
+
+                <!-- Input -->
+                <div class="relative">
+                    <textarea 
+                        class="input w-full pr-12 resize-none"
+                        rows="3"
+                        placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
+                        style="min-height: 80px; max-height: 160px;"
+                    >What about rate limiting? Should I implement that at the API gateway level or in each service?</textarea>
+                    
+                    <button class="send-btn absolute bottom-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-paper-plane text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="flex items-center justify-between mt-3">
+                    <div class="flex items-center gap-3">
+                        <button class="btn-ghost flex items-center gap-1.5 text-xs" style="color: hsl(var(--text-tertiary));">
+                            <i class="fas fa-paperclip text-xs"></i>
+                            Attach
+                        </button>
+                        <span class="text-xs" style="color: hsl(var(--border-subtle));">|</span>
+                        <span class="text-xs" style="color: hsl(var(--text-tertiary));">Max 10MB</span>
+                    </div>
+                    <div class="text-xs" style="color: hsl(var(--text-tertiary));">
+                        Enter to send · Shift+Enter new line
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR -->
+        <aside class="w-80 flex flex-col border-l" style="border-color: hsl(var(--border-subtle)); background: hsl(var(--bg-primary));">
+            <!-- Header -->
+            <div class="p-4 border-b flex items-center justify-between" style="border-color: hsl(var(--border-subtle));">
+                <h2 class="font-display text-xs uppercase tracking-[0.15em]" style="color: hsl(var(--text-tertiary));">Settings</h2>
+                <button class="btn-ghost">
+                    <i class="fas fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                <!-- System Status -->
+                <div class="card p-4">
+                    <h3 class="text-xs font-medium uppercase tracking-wider mb-3 flex items-center gap-2" style="color: hsl(var(--text-tertiary));">
+                        <i class="fas fa-server"></i>
+                        System Status
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <span style="color: hsl(var(--text-secondary));">Kimi Agent</span>
+                            <span class="status-online px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1.5">
+                                <i class="fas fa-circle text-[5px]"></i>
+                                Online
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span style="color: hsl(var(--text-secondary));">Web UI</span>
+                            <span class="status-online px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1.5">
+                                <i class="fas fa-circle text-[5px]"></i>
+                                Online
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span style="color: hsl(var(--text-secondary));">Telegram</span>
+                            <span class="status-offline px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1.5">
+                                <i class="fas fa-circle text-[5px]"></i>
+                                Disabled
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session Info -->
+                <div class="card p-4">
+                    <h3 class="text-xs font-medium uppercase tracking-wider mb-3 flex items-center gap-2" style="color: hsl(var(--text-tertiary));">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        Current Session
+                    </h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span style="color: hsl(var(--text-secondary));">Messages:</span>
+                            <span class="font-medium">12</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span style="color: hsl(var(--text-secondary));">Memory:</span>
+                            <span class="font-medium icon-burgundy">Active</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card p-4">
+                    <h3 class="text-xs font-medium uppercase tracking-wider mb-3 flex items-center gap-2" style="color: hsl(var(--text-tertiary));">
+                        <i class="fas fa-bolt"></i>
+                        Actions
+                    </h3>
+                    <button class="btn-secondary w-full flex items-center justify-center gap-2 text-xs">
+                        <i class="fas fa-save text-xs"></i>
+                        Save Session
+                    </button>
+                </div>
+
+                <!-- Provider Status -->
+                <div class="card p-4">
+                    <h3 class="text-xs font-medium uppercase tracking-wider mb-3 flex items-center gap-2" style="color: hsl(var(--text-tertiary));">
+                        <i class="fas fa-server"></i>
+                        Providers
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="provider-online flex items-center justify-between p-2.5 rounded-lg">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-circle text-[6px]" style="color: hsl(var(--success));"></i>
+                                <span class="text-xs font-medium">Kimi</span>
+                            </div>
+                            <span class="text-[10px]" style="color: hsl(var(--success));">Active</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 rounded-lg border" style="border-color: hsl(var(--border-subtle)); opacity: 0.6;">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-circle text-[6px]" style="color: hsl(var(--border-focus));"></i>
+                                <span class="text-xs" style="color: hsl(var(--text-secondary));">Anthropic</span>
+                            </div>
+                            <span class="text-[10px]" style="color: hsl(var(--text-tertiary));">Not set</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 rounded-lg border" style="border-color: hsl(var(--border-subtle)); opacity: 0.6;">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-circle text-[6px]" style="color: hsl(var(--border-focus));"></i>
+                                <span class="text-xs" style="color: hsl(var(--text-secondary));">OpenAI</span>
+                            </div>
+                            <span class="text-[10px]" style="color: hsl(var(--text-tertiary));">Not set</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configure -->
+                <div class="card p-4">
+                    <h3 class="text-xs font-medium uppercase tracking-wider mb-3 flex items-center gap-2" style="color: hsl(var(--text-tertiary));">
+                        <i class="fas fa-plug"></i>
+                        Configure
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-[11px] block mb-1.5" style="color: hsl(var(--text-tertiary));">Provider</label>
+                            <select class="input w-full text-sm py-2">
+                                <option>Kimi ✓ Active</option>
+                                <option>Anthropic (Not set)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[11px] block mb-1.5" style="color: hsl(var(--text-tertiary));">Model</label>
+                            <select class="input w-full text-sm py-2">
+                                <option>Kimi K2 (Default)</option>
+                                <option>Kimi K1.5</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn-primary flex-1 text-xs">
+                                Save
+                            </button>
+                            <button class="btn-secondary flex-1 text-xs">
+                                Test
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Telegram -->
+                <div class="card p-4">
+                    <h3 class="text-xs font-medium uppercase tracking-wider mb-3 flex items-center gap-2" style="color: hsl(var(--text-tertiary));">
+                        <i class="fab fa-telegram icon-burgundy"></i>
+                        Telegram
+                        <span class="badge-outline ml-auto px-2 py-0.5 rounded text-[9px]">Offline</span>
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-[11px] block mb-1.5" style="color: hsl(var(--text-tertiary));">Bot Token</label>
+                            <input type="password" class="input w-full text-sm py-2" placeholder="Enter token...">
+                        </div>
+                        <button class="btn-primary w-full text-xs flex items-center justify-center gap-2">
+                            <i class="fas fa-play text-xs"></i>
+                            Launch Bot
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-3 border-t text-center" style="border-color: hsl(var(--border-subtle)); background: hsl(var(--bg-secondary));">
+                <div class="ornament-line mb-2"></div>
+                <p class="text-[10px] font-display tracking-[0.2em]" style="color: hsl(var(--text-tertiary));">KLAUS v2.1</p>
+            </div>
+        </aside>
+    </div>
+</body>
+</html>
