@@ -1,1 +1,1 @@
-"""Integration tests for Klaus"""
+"""Integration tests for IDE Agent Wizard"""

@@ -1,49 +1,72 @@
-# Secrets
+# IDE Agent Wizard - Git Ignore
+# ==============================
+
+# Environment variables (secrets)
 .env
 .env.local
 .env.*.local
-*.key
-*.pem
-secrets/
-credentials/
 
-# Runtime data (user-specific)
-workspace/sessions/*
-workspace/memory/*
-workspace/logs/*
-!workspace/sessions/.gitkeep
-!workspace/memory/.gitkeep
-!workspace/logs/.gitkeep
+# Configuration files with sensitive data
+init.yaml
+!init.yaml.example
 
 # Python
 __pycache__/
 *.py[cod]
+*$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
 *.egg-info/
-.pytest_cache/
-.coverage
-htmlcov/
+.installed.cfg
+*.egg
 
 # Virtual environments
-venv/
 .venv/
+venv/
+ENV/
+env/
 
-# IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+Thumbs.db
 
 # Logs
 *.log
 logs/
 
-# OS
-Thumbs.db
+# Memory and data
+workspace/memory/
+workspace/*.db
+*.db
 
-# Marketing (personal, not for repo)
-workspace/marketing/
-docs/marketing/
-index.html
-.env.bak
+# Test files
+test_setup.sh
+test_*.py
+
+# Docker volumes
+.docker/
+
+# Backup files
+*.bak
+*.backup
+backup/
+fun-snippets/

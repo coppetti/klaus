@@ -1,5 +1,5 @@
 """
-Tests for Klaus
+Tests for IDE Agent Wizard
 ==========================
 Run with: python tests/run_tests.py
 """

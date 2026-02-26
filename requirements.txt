@@ -1,4 +1,4 @@
-# Klaus - Dependencies
+# IDE Agent Wizard - Dependencies
 # ================================
 
 # Core

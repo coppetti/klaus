@@ -1,94 +1,99 @@
-# Quick Start Guide
+# Quick Start Guide - IDE Agent Wizard v2.1
 
-Get started with Klaus in 5 minutes.
+> Get up and running in 5 minutes
 
----
+## Prerequisites
 
-## Start Klaus
+- Python 3.11+
+- Docker & Docker Compose
+- API key from [Kimi](https://platform.moonshot.cn) (or other providers)
+
+## Quick Install
 
 ```bash
-./scripts/start-services.sh
+# 1. Extract the release
+cd ~/Downloads
+unzip ide-agent-wizard-v2.1.0.zip
+cd 20260224-v2_1
+
+# 2. (Optional) Configure custom ports
+./port-setup.sh
+#    Kimi Agent port [8081]: 8083
+#    Web UI port [8082]: 8084
+
+# 3. Configure API keys
+cp .env.example .env
+# Edit .env with your API keys:
+#   KIMI_API_KEY=sk-your-key-here
+
+# 4. Run setup
+./setup.sh
 ```
 
-Open http://localhost:2077 in your browser.
+## Setup Options
 
----
+The wizard will ask you to choose:
 
-## Your First Conversation
+| Mode | Description | Docker |
+|------|-------------|--------|
+| **IDE Only** | Agent runs in your IDE (VS Code, Cursor, etc.) | ❌ No |
+| **WEB Only** | Browser interface at `http://localhost:8082` | ✅ Yes |
+| **IDE + WEB** | Both interfaces with shared memory | ✅ Yes |
 
-1. Click **"New Session"** in the sidebar
-2. Type: `Create a Python function to calculate factorial`
-3. Watch Klaus respond with code and explanation
+## After Setup
 
----
+### Web UI
+Open http://localhost:8082 (or your custom port)
 
-## Upload Files
+### Telegram Bot (optional)
+1. Open Web UI → Settings → Telegram Bot
+2. Enter Bot Token (from [@BotFather](https://t.me/botfather))
+3. Enter Chat ID
+4. Click "Save Configuration" → "Launch Bot"
 
-Drag and drop files onto the chat:
-- Code files: `.py`, `.js`, `.ts`, `.java`, etc.
-- Documents: `.md`, `.txt`, `.pdf`
-- Data: `.json`, `.yaml`, `.csv`
-
-Klaus will analyze and remember the content.
-
----
-
-## Memory Features
-
-### View Your Memories
-
-1. Click **"Memory Explorer"** in the sidebar
-2. Search memories by keyword
-3. See connected concepts in the graph
-
-### Memory Consolidation
-
-Type `consolidate` to trigger manual memory consolidation.
-
----
-
-## Sub-Agents
-
-Klaus auto-detects when to spawn specialist agents:
-
-| Trigger | Agent | Example |
-|---------|-------|---------|
-| "review this code" | Developer | Review Python function |
-| "design system" | Architect | Design microservices |
-| "calculate ROI" | Finance | Analyze investment |
-| "marketing strategy" | Marketing | Create campaign plan |
-
----
-
-## Session Management
-
-- **New Session**: Start fresh conversation
-- **Save**: Persist to disk
-- **Load**: Continue previous chat
-- **Rename**: Organize your sessions
-
----
+### IDE Mode
+Just start chatting in your IDE!
 
 ## Useful Commands
 
-| Command | Description |
-|---------|-------------|
-| `/save` | Save current session |
-| `/clear` | Clear chat history |
-| `consolidate` | Trigger memory consolidation |
-| `status` | Show system status |
-
----
-
-## Stop Klaus
-
 ```bash
-./scripts/stop-services.sh
+# Check status
+docker ps
+
+# View logs
+docker compose -f docker/docker-compose.yml logs -f
+
+# Stop containers
+docker compose -f docker/docker-compose.yml down
+
+# Factory reset (removes ALL data)
+./reset.sh
 ```
 
----
+## Troubleshooting
+
+### Port already in use
+```bash
+# Option 1: Use different ports
+./port-setup.sh
+
+# Option 2: Stop existing containers
+docker stop ide-agent-web ide-agent-kimi
+```
+
+### 401 API Key error
+Edit `.env` file and add a valid API key:
+```bash
+KIMI_API_KEY=sk-your-real-key-here
+```
+
+Then restart:
+```bash
+docker compose -f docker/docker-compose.yml restart
+```
 
 ## Need Help?
 
-- Check [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) for detailed setup
-- Run `./scripts/verify.sh` to diagnose issues
+- Full documentation: `docs/README.md`
+- For AI agents: `docs/AGENTS.md`
+- Release notes: `docs/RELEASE_NOTES.md`

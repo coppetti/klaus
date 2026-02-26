@@ -105,23 +105,23 @@ def load_workspace_context() -> str:
 SOUL_PROMPT = load_workspace_context()
 
 FILE_TOOLS_PROMPT = """
-FILE TOOLS (WORKSPACE INSIGHTS):
-You have permission to read and write Markdown (.md) files in the local projects directory.
-To use these tools, include STRICT XML blocks in your response. The system will intercept and execute them, injecting the result into the next message.
+FERRAMENTAS DE ARQUIVO (WORKSPACE INSIGHTS):
+Você tem permissão para ler e escrever arquivos Markdown (.md) no diretório de projetos local do usuário.
+Para usar essas ferramentas, você deve incluir blocos XML ESTRITOS na sua resposta. O sistema irá interceptá-los e executá-los injetando o resultado na próxima mensagem.
 
-To READ a file, use exactly this format:
-<READ_FILE path="path/to/file.md"/>
+Para LER um arquivo, use exatamente este formato:
+<READ_FILE path="caminho/do/arquivo.md"/>
 (Ex: <READ_FILE path="prj001/README.md"/>)
 
-To WRITE to a file, use exactly this format:
-<WRITE_FILE path="path/to/file.md">
-# Title
-File content...
+Para ESCREVER em um arquivo, use exatamente este formato:
+<WRITE_FILE path="caminho/do/arquivo.md">
+# Título
+Conteúdo do arquivo...
 </WRITE_FILE>
-(Ex: <WRITE_FILE path="reports/insight.md">...</WRITE_FILE>)
+(Ex: <WRITE_FILE path="relatorios/insight.md">...</WRITE_FILE>)
 
-* The path is always relative to the `projects` folder.
-* NEVER invent XML blocks different from these.
+* O caminho (path) é sempre relativo à pasta `projects`.
+* NUNCA invente blocos XML diferentes destes.
 * Você pode usar estas ferramentas de forma proativa quando precisar analisar código ou gerar relatórios solicitados pelo usuário."""
 
 CLAWD_SYSTEM_PROMPT = f"""{SOUL_PROMPT}

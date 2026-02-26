@@ -1,5 +1,5 @@
 #!/bin/bash
-# Klaus - Auto-Start Installation
+# IDE Agent Wizard - Auto-Start Installation
 # ==========================================
 # Configures services to start automatically on macOS login
 # Usage: ./install-auto-start.sh
@@ -10,7 +10,7 @@ PLIST_NAME="com.ide-agent-wizard.services.plist"
 PLIST_PATH="$HOME/Library/LaunchAgents/$PLIST_NAME"
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-echo "🔧 Klaus - Auto-Start Configuration"
+echo "🔧 IDE Agent Wizard - Auto-Start Configuration"
 echo "=============================================="
 echo ""
 

@@ -1,11 +1,11 @@
 """
-Klaus - Core Module
+IDE Agent Wizard - Core Module
 ==============================
 Universal AI agent that works with any IDE and LLM provider.
 """
 
 __version__ = "1.0.0"
-__author__ = "Klaus"
+__author__ = "IDE Agent Wizard"
 
 from .agent import Agent
 from .memory import MemoryStore

@@ -1,4 +1,4 @@
-# Klaus - Configuration Example
+# IDE Agent Wizard - Configuration Example
 # =========================================
 # Copy this file to init.yaml and fill in your values
 # DO NOT commit init.yaml to git (it's in .gitignore)

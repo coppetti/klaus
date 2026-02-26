@@ -30,7 +30,7 @@ class OpenRouterProvider(BaseProvider):
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
             "HTTP-Referer": "https://github.com/ide-agent-wizard",  # Required by OpenRouter
-            "X-Title": "Klaus"  # Optional site name
+            "X-Title": "IDE Agent Wizard"  # Optional site name
         }
         
         formatted_messages = self.format_messages(messages)

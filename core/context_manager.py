@@ -1,5 +1,5 @@
 """
-Context Manager for Klaus
+Context Manager for IDE Agent Wizard
 =====================================
 Manages conversation context intelligently:
 - Short-term: Recent messages (sliding window)

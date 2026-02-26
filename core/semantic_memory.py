@@ -1,5 +1,5 @@
 """
-Semantic Memory System for Klaus
+Semantic Memory System for IDE Agent Wizard
 ===========================================
 Human-like memory that understands:
 - Feedback (positive/negative)

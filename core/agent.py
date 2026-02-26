@@ -1,5 +1,5 @@
 """
-Klaus - Core Agent
+IDE Agent Wizard - Core Agent
 =============================
 Main agent class that reads init.yaml and orchestrates everything.
 """

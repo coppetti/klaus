@@ -1,8 +1,8 @@
-# USER - Matheus
+# USER - Configuration
 
 ## Profile
-**Name:** Matheus  
-**Role:** AI Solutions Architect  
+**Name:** User  
+**Role:** Developer  
 **Experience Level:** expert
 
 ## Preferences

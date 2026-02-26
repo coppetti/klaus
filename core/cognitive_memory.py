@@ -1,5 +1,5 @@
 """
-Cognitive Memory System for Klaus
+Cognitive Memory System for IDE Agent Wizard
 ============================================
 Human-like memory architecture with:
 - Episodic Memory: Events and experiences (with embeddings and VAD emotions)

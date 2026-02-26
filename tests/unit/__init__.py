@@ -1,1 +1,1 @@
-"""Unit tests for Klaus"""
+"""Unit tests for IDE Agent Wizard"""
