@@ -41,8 +41,8 @@
 
 ### Memory System
 ```
-web-ui (:2049)      → HybridMemoryStore (SQLite + Cognitive Memory) - HAS LOCK
-kimi-agent (:2019)  → Stateless API, no direct memory access
+web-ui (:7072)      → HybridMemoryStore (SQLite + Kuzu Graph) - HAS LOCK
+kimi-agent (:7070)  → Stateless API, no direct memory access
 telegram-bot        → MemoryStore (SQLite-only) - NO GRAPH ACCESS
 ```
 
@@ -53,7 +53,7 @@ telegram-bot        → MemoryStore (SQLite-only) - NO GRAPH ACCESS
 - Result: telegram-bot falls back to SQLite-only mode
 
 ### Ports
-- Local Dev: 2019 (kimi), 2049 (web-ui)
+- Local Dev: 7070 (kimi), 7072 (web-ui)
 - Release: 2013 (kimi), 2077 (web-ui) - Easter eggs
 
 ### Docker Services

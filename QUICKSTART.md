@@ -37,15 +37,13 @@ The wizard will ask you to choose:
 | Mode | Description | Docker |
 |------|-------------|--------|
 | **IDE Only** | Agent runs in your IDE (VS Code, Cursor, etc.) | ❌ No |
-| **WEB Only** | Browser interface at `http://localhost:2049` | ✅ Yes |
+| **WEB Only** | Browser interface at `http://localhost:8082` | ✅ Yes |
 | **IDE + WEB** | Both interfaces with shared memory | ✅ Yes |
 
 ## After Setup
 
 ### Web UI
-Open http://localhost:2049 (or your custom port)
-
-**Theme Toggle:** Click the sun/moon icon in the top-right to switch between Light and Dark themes.
+Open http://localhost:8082 (or your custom port)
 
 ### Telegram Bot (optional)
 1. Open Web UI → Settings → Telegram Bot

@@ -75,24 +75,22 @@ class GeminiProvider(BaseProvider):
             }
         
         async with httpx.AsyncClient() as client:
-            async with client.stream(
-                "POST",
-                f"{self.base_url}/models/{self.model}:streamGenerateContent?key={self.api_key}",
+            # Use non-streaming endpoint for reliability
+            response = await client.post(
+                f"{self.base_url}/models/{self.model}:generateContent?key={self.api_key}",
                 headers=headers,
                 json=payload,
                 timeout=120.0
-            ) as response:
-                async for line in response.aiter_lines():
-                    if line.startswith("data: "):
-                        try:
-                            data = json.loads(line[6:])
-                            if candidates := data.get("candidates", []):
-                                if content := candidates[0].get("content", {}):
-                                    if parts := content.get("parts", []):
-                                        if text := parts[0].get("text"):
-                                            yield text
-                        except (json.JSONDecodeError, IndexError, KeyError):
-                            continue
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            # Extract text from response
+            if candidates := data.get("candidates", []):
+                if content := candidates[0].get("content", {}):
+                    if parts := content.get("parts", []):
+                        if text := parts[0].get("text"):
+                            yield text
     
     async def generate_sync(
         self,

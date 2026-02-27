@@ -26,7 +26,7 @@ Unlike other agents that put their **claws** in your entire system, KLAUS stays 
 ## 🌃 What's Different
 
 ### 🧠 Implanted & Accumulated Memory
-KLAUS combines **SQLite** (fast storage) with **Cognitive Memory** (semantic relationships) and **local embeddings**:
+KLAUS combines **SQLite** (fast storage) with **Kuzu Graph** (semantic relationships) and **local embeddings**:
 
 - **Implanted**: SOUL.md defines his baseline identity
 - **Accumulated**: Every conversation shapes his memory of you
@@ -39,21 +39,15 @@ memory.store("I prefer Python for backend development")
 # Quick recall (SQLite)
 results = memory.recall(MemoryQuery(query_type="quick", text="Python"))
 
-# Semantic recall (Cognitive Memory) - finds related concepts
+# Semantic recall (Graph) - finds related concepts
 results = memory.recall(MemoryQuery(query_type="context", text="backend preferences"))
 ```
 
 ### 🎭 Multi-Interface, One Soul
 The same KLAUS, everywhere:
 - **IDE** (Port 2019) - Deep in the code with you
-- **Web UI** (Port 2049) - Voight-Kampff interface with **Deckard Themes** (Light/Dark)
+- **Web UI** (Port 2049) - Voight-Kampff interface
 - **Telegram** - In your pocket, always watching
-
-### 🎨 Deckard Themes
-Toggle between **Light** (warm paper tones) and **Dark** (smoky noir) themes:
-- Click the sun/moon icon in the Web UI header
-- Theme persists across sessions
-- Applies to all UI components including the Cognitive Memory Graph
 
 ### 🔌 Multi-Provider Support
 Choose your replicant model:

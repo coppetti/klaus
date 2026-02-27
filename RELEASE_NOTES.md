@@ -52,8 +52,8 @@ cp .env.example .env
 ./scripts/start-services.sh
 
 # 4. Access
-# Web UI: http://localhost:2049
-# API: http://localhost:2019
+# Web UI: http://localhost:7072
+# API: http://localhost:7070
 ```
 
 ## System Requirements

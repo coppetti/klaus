@@ -130,5 +130,81 @@ async def _fallback_chat(provider, model, messages, system, temperature, max_tok
             max_tokens=max_tokens
         )
         return response.choices[0].message.content
+    
+    elif provider in ["google", "gemini"]:
+        import google.generativeai as genai
+        genai.configure(api_key=os.getenv("GOOGLE_API_KEY", ""))
+        
+        model_instance = genai.GenerativeModel(model)
+        
+        # Format messages for Gemini
+        gemini_messages = []
+        for msg in messages:
+            role = msg["role"]
+            content = msg["content"]
+            if role == "user":
+                gemini_messages.append({"role": "user", "parts": [content]})
+            else:
+                gemini_messages.append({"role": "model", "parts": [content]})
+        
+        # Start chat and send messages
+        chat = model_instance.start_chat(history=gemini_messages[:-1] if len(gemini_messages) > 1 else [])
+        
+        # Generate response
+        generation_config = {
+            "temperature": temperature,
+            "max_output_tokens": max_tokens
+        }
+        
+        response = chat.send_message(
+            gemini_messages[-1]["parts"][0] if gemini_messages else "",
+            generation_config=generation_config
+        )
+        return response.text
+    
+    elif provider == "openrouter":
+        from openai import OpenAI
+        client = OpenAI(
+            api_key=os.getenv("OPENROUTER_API_KEY", ""),
+            base_url="https://openrouter.ai/api/v1"
+        )
+        
+        # Prepend system message
+        openrouter_messages = messages.copy()
+        if system:
+            openrouter_messages.insert(0, {"role": "system", "content": system})
+            
+        response = client.chat.completions.create(
+            model=model,
+            messages=openrouter_messages,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        return response.choices[0].message.content
+    
+    elif provider == "custom":
+        from openai import OpenAI
+        
+        # Get custom provider config from env
+        base_url = os.getenv("CUSTOM_BASE_URL", "http://localhost:11434/v1")
+        api_key = os.getenv("CUSTOM_API_KEY", "ollama")  # Ollama doesn't require key but OpenAI client needs something
+        
+        client = OpenAI(
+            api_key=api_key,
+            base_url=base_url
+        )
+        
+        # Prepend system message
+        custom_messages = messages.copy()
+        if system:
+            custom_messages.insert(0, {"role": "system", "content": system})
+            
+        response = client.chat.completions.create(
+            model=model or os.getenv("CUSTOM_MODEL", "llama3.2"),
+            messages=custom_messages,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        return response.choices[0].message.content
         
     raise Exception(f"Provider {provider} not supported in fallback and core.providers failed.")

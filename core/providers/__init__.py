@@ -50,6 +50,7 @@ def create_provider(
         "anthropic": ProviderType.ANTHROPIC,
         "openrouter": ProviderType.OPENROUTER,
         "gemini": ProviderType.GEMINI,
+        "google": ProviderType.GEMINI,  # Alias for Google/Gemini
         "kimi": ProviderType.KIMI,
     }
     

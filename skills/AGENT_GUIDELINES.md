@@ -191,7 +191,7 @@ memory.recall(MemoryQuery(query_type="semantic", text="backend"))
 ## 🔌 System Architecture
 
 ### Ports
-- **Dev:** 2019 (Kimi), 2049 (Web UI)
+- **Dev:** 7070 (Kimi), 7072 (Web UI)
 - **Release:** 2013 (Kimi), 2077 (Web UI) - Easter eggs
 
 ### Containers

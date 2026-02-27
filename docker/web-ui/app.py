@@ -196,9 +196,9 @@ class Session(BaseModel):
 PROVIDER_MODELS = {
     "kimi": ["kimi-k2-0711", "kimi-latest"],
     "openrouter": ["anthropic/claude-3.5-sonnet", "openai/gpt-4o", "meta-llama/llama-3.1-70b"],
-    "anthropic": ["claude-3-5-sonnet-20241022", "claude-3-opus-20240229"],
+    "anthropic": ["claude-3-haiku-20240307"],  # Updated: only haiku available on this account
     "openai": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
-    "google": ["gemini-pro", "gemini-pro-vision"],
+    "google": ["gemini-2.5-flash"],  # Updated: working model
     "custom": []  # Custom provider - models are free text
 }
 
@@ -218,8 +218,7 @@ MODEL_CONTEXT_LIMITS = {
     "kimi-k2-0711": 267000,
     "kimi-latest": 267000,
     # Anthropic (Claude)
-    "claude-3-5-sonnet-20241022": 200000,
-    "claude-3-opus-20240229": 200000,
+    "claude-3-haiku-20240307": 200000,
     # OpenAI
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
@@ -2140,7 +2139,9 @@ async def get_chat_page():
                 'kimi': 'Kimi (Moonshot)',
                 'openrouter': 'OpenRouter',
                 'anthropic': 'Anthropic (Claude)',
-                'openai': 'OpenAI'
+                'openai': 'OpenAI',
+                'google': 'Google (Gemini)',
+                'custom': 'Custom (Local)'
             }};
             
             let html = '';
@@ -2984,10 +2985,7 @@ async def get_chat_page():
                 {{value: 'kimi-k1-5', label: 'Kimi K1.5'}},
             ],
             anthropic: [
-                {{value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet'}},
-                {{value: 'claude-3-opus-20240229', label: 'Claude 3 Opus'}},
-                {{value: 'claude-3-sonnet-20240229', label: 'Claude 3 Sonnet'}},
-                {{value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku'}},
+                {{value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku (Available)'}},
             ],
             openai: [
                 {{value: 'gpt-4o', label: 'GPT-4o'}},
@@ -2996,9 +2994,7 @@ async def get_chat_page():
                 {{value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo'}},
             ],
             google: [
-                {{value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro'}},
-                {{value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash'}},
-                {{value: 'gemini-1.0-pro', label: 'Gemini 1.0 Pro'}},
+                {{value: 'gemini-2.5-flash', label: 'Gemini 2.0 Flash (Available)'}},
             ],
             openrouter: [
                 {{value: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet'}},
