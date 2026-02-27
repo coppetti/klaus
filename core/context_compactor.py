@@ -85,7 +85,11 @@ class ContextAnalyzer:
         """
         content = message.get("text", "").lower()
         sender = message.get("sender", "user")
-        msg_id = message.get("id", 0)
+        # Ensure msg_id is an integer
+        try:
+            msg_id = int(message.get("id", 0))
+        except (ValueError, TypeError):
+            msg_id = 0
         
         factors = {}
         

@@ -17,11 +17,13 @@ services:
     ports:
       - "2019:8080"
     volumes:
-      # Full workspace access for marketing/docs
-      - ../workspace:/app/workspace:rw
-      - ../docs:/app/docs:rw
+      # Sync memory with host
+      - ../workspace/memory:/app/memory:rw
+      - ../workspace:/app/workspace:ro
       # Mount core modules for shared logic
       - ../core:/app/core:ro
+      # Mount projects folder (read-write for IDE access)
+      - ../workspace/projects:/app/workspace/projects:rw
     env_file:
       - ../.env
     environment:

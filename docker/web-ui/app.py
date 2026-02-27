@@ -1078,21 +1078,21 @@ async def get_chat_page():
                     <div class="space-y-2">
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-600">Kimi Agent</span>
-                            <span id="status-kimi" class="status-offline px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1.5">
+                            <span id="status-kimi" class="status-badge offline">
                                 <i class="fas fa-circle text-xs"></i>
                                 Checking...
                             </span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-600">Web UI</span>
-                            <span class="status-online px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1.5">
+                            <span class="status-badge online">
                                 <i class="fas fa-circle text-xs"></i>
                                 Online
                             </span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-600">Telegram Bot</span>
-                            <span id="status-telegram" class="{'status-online' if telegram_enabled else 'status-offline'} px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1.5">
+                            <span id="status-telegram" class="{'status-badge online' if telegram_enabled else 'status-badge offline'}">
                                 <i class="fas fa-circle text-xs"></i>
                                 {'Enabled' if telegram_enabled else 'Disabled'}
                             </span>
@@ -1273,9 +1273,7 @@ async def get_chat_page():
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                         <i class="fab fa-telegram text-gray-400"></i>
                         Telegram Bot
-                        <span id="telegram-status-badge" class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">
-                            <i class="fas fa-circle text-[6px] mr-1"></i>Offline
-                        </span>
+                        <span id="telegram-status-badge" class="status-badge offline ml-auto">Offline</span>
                     </h3>
                     <div class="space-y-3">
                         <!-- Bot Token -->
@@ -1306,9 +1304,7 @@ async def get_chat_page():
                     <h3 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                         <i class="fas fa-globe text-gray-400"></i>
                         Remote Access (Ngrok)
-                        <span id="ngrok-status-badge" class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">
-                            <i class="fas fa-circle text-[6px] mr-1"></i>Offline
-                        </span>
+                        <span id="ngrok-status-badge" class="status-badge offline ml-auto">Offline</span>
                     </h3>
                     <div class="space-y-3">
                         <div>
@@ -2011,6 +2007,9 @@ async def get_chat_page():
                     providerSelect.value = currentSettings.provider;
                     updateModelOptions();
                     
+                    // Load provider-specific settings (custom model, base URL, etc.)
+                    await updateProviderSettings();
+                    
                     safeSet('settings-model', currentSettings.model);
                     safeSet('settings-temperature', currentSettings.temperature);
                     safeText('temp-value', currentSettings.temperature);
@@ -2047,8 +2046,8 @@ async def get_chat_page():
                 if (!badge || !toggleBtn) return;
 
                 if (status.enabled) {{
-                    badge.innerHTML = '<i class="fas fa-circle text-[6px] mr-1"></i>Online';
-                    badge.className = 'ml-auto text-[10px] px-2 py-0.5 rounded-full text-teal-600 border border-teal-400';
+                    badge.textContent = 'Online';
+                    badge.className = 'status-badge online ml-auto';
                     toggleBtn.textContent = 'Stop Tunnel';
                     toggleBtn.className = 'btn btn-secondary flex-1 text-xs py-1.5';
                     if (urlContainer) {{
@@ -2056,8 +2055,8 @@ async def get_chat_page():
                         urlInput.value = status.url;
                     }}
                 }} else {{
-                    badge.innerHTML = '<i class="fas fa-circle text-[6px] mr-1"></i>Offline';
-                    badge.className = 'ml-auto text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-400';
+                    badge.textContent = 'Offline';
+                    badge.className = 'status-badge offline ml-auto';
                     toggleBtn.textContent = 'Start Tunnel';
                     toggleBtn.className = 'btn btn-primary flex-1 text-xs py-1.5';
                     if (urlContainer) urlContainer.classList.add('hidden');
@@ -2560,6 +2559,42 @@ async def get_chat_page():
             }}).join('');
         }}
         
+        // Update chat header when session changes
+        function updateChatHeader(session) {{
+            const nameEl = document.getElementById('current-session-name');
+            const countEl = document.getElementById('session-message-count');
+            const templateEl = document.getElementById('current-session-template');
+            const contextEl = document.getElementById('current-session-context');
+            
+            if (!session) {{
+                // No session selected
+                if (nameEl) nameEl.textContent = 'No Session';
+                if (countEl) countEl.textContent = '0';
+                if (templateEl) templateEl.classList.add('hidden');
+                if (contextEl) contextEl.classList.add('hidden');
+            }} else {{
+                // Session selected
+                if (nameEl) nameEl.textContent = session.name || 'Untitled Session';
+                if (countEl) countEl.textContent = session.message_count || '0';
+                if (templateEl) {{
+                    if (session.template && session.template !== 'default') {{
+                        templateEl.textContent = session.template;
+                        templateEl.classList.remove('hidden');
+                    }} else {{
+                        templateEl.classList.add('hidden');
+                    }}
+                }}
+                if (contextEl) {{
+                    if (session.context_limit) {{
+                        contextEl.textContent = `${{session.context_limit}} ctx`;
+                        contextEl.classList.remove('hidden');
+                    }} else {{
+                        contextEl.classList.add('hidden');
+                    }}
+                }}
+            }}
+        }}
+        
         let currentSessionId = '';
         
         async function createNewSession() {{
@@ -2632,77 +2667,6 @@ async def get_chat_page():
             
             // Show modal
             document.body.insertAdjacentHTML('beforeend', modalHtml);
-            
-            // Initialize model options
-            updateModelOptionsForNewSession();
-        }}
-        
-        function updateModelOptionsForNewSession() {{
-            const provider = document.getElementById('new-session-provider').value;
-            const modelContainer = document.getElementById('new-session-model')?.parentElement;
-            
-            // For custom provider, replace select with text input
-            if (provider === 'custom') {{
-                const modelSelect = document.getElementById('new-session-model');
-                if (modelSelect && modelSelect.tagName === 'SELECT') {{
-                    const modelInput = document.createElement('input');
-                    modelInput.type = 'text';
-                    modelInput.id = 'new-session-model';
-                    modelInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm';
-                    modelInput.placeholder = 'e.g., llama3.1:8b, hermes3:8b';
-                    modelSelect.parentElement.replaceChild(modelInput, modelSelect);
-                }}
-                return;
-            }}
-            
-            // For standard providers, ensure we have a select element
-            let modelSelect = document.getElementById('new-session-model');
-            if (modelSelect && modelSelect.tagName === 'INPUT') {{
-                const newSelect = document.createElement('select');
-                newSelect.id = 'new-session-model';
-                newSelect.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm';
-                modelSelect.parentElement.replaceChild(newSelect, modelSelect);
-                modelSelect = newSelect;
-            }}
-            
-            const models = {{
-                'kimi': ['kimi-k2-0711', 'kimi-latest'],
-                'anthropic': ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229'],
-                'openai': ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'],
-                'openrouter': ['anthropic/claude-3.5-sonnet', 'openai/gpt-4o'],
-                'google': ['gemini-pro', 'gemini-pro-vision']
-            }};
-            
-            const providerModels = models[provider] || models['kimi'];
-            modelSelect.innerHTML = providerModels.map(m => `<option value="${{m}}">${{m}}</option>`).join('');
-        }}
-        
-        let newSessionMode = 'balanced';
-        function setNewSessionMode(mode) {{
-            newSessionMode = mode;
-            ['fast', 'balanced', 'deep'].forEach(m => {{
-                const btn = document.getElementById(`new-mode-${{m}}`);
-                if (m === mode) {{
-                    btn.className = 'flex-1 px-3 py-2 text-xs bg-gray-700 text-white border border-gray-700 rounded-lg';
-                }} else {{
-                    btn.className = 'flex-1 px-3 py-2 text-xs border border-gray-300 rounded-lg hover:bg-gray-50';
-                }}
-            }});
-            
-            // Update max tokens based on mode
-            const maxTokensInput = document.getElementById('new-session-max-tokens');
-            const provider = document.getElementById('new-session-provider')?.value || 'kimi';
-            const contextLimits = {{
-                'kimi-k2-0711': 267000,
-                'kimi-latest': 267000,
-                'claude-3-5-sonnet-20241022': 200000,
-                'gpt-4o': 128000
-            }};
-            const model = document.getElementById('new-session-model')?.value || 'kimi-k2-0711';
-            const limit = contextLimits[model] || 128000;
-            
-            const percentages = {{ fast: 0.20, balanced: 0.40, deep: 0.95 }};
-            maxTokensInput.value = Math.floor(limit * percentages[mode]);
         }}
         
         function closeNewSessionModal() {{
@@ -3084,7 +3048,8 @@ async def get_chat_page():
                 
                 // Update API key placeholder based on whether a key exists
                 if (providerData.has_api_key) {{
-                    apiKeyInput.placeholder = "•••••••••••••••••••• (configured - enter new to replace)";
+                    // Show masked key like sk-...XXXX or ••••••••••••••XXXX
+                    apiKeyInput.placeholder = providerData.masked_key + " (enter new to replace)";
                     apiKeyInput.value = "";  // Clear any previous value
                 }} else {{
                     apiKeyInput.placeholder = "Enter API key...";
@@ -3305,17 +3270,18 @@ async def get_chat_page():
             const statusDiv = document.getElementById('telegram-last-status');
             if (!badge) return;
             
+            // Status badge styling - standardized outline badges
             const statusConfig = {{
-                'offline': {{ class: 'bg-gray-100 text-gray-400', icon: 'fa-circle', text: 'Offline' }},
-                'configured': {{ class: 'bg-yellow-100 text-yellow-600', icon: 'fa-check', text: 'Saved' }},
-                'online': {{ class: 'text-teal-600 border border-teal-400', icon: 'fa-check-circle', text: 'Online' }},
-                'error': {{ class: 'bg-red-100 text-red-600', icon: 'fa-exclamation-circle', text: 'Error' }},
-                'launching': {{ class: 'bg-blue-100 text-blue-600', icon: 'fa-spinner fa-spin', text: 'Launching' }}
+                'offline': {{ class: 'status-badge offline', text: 'Offline' }},
+                'configured': {{ class: 'status-badge warning', text: 'Saved' }},
+                'online': {{ class: 'status-badge online', text: 'Online' }},
+                'error': {{ class: 'status-badge offline', text: 'Error' }},
+                'launching': {{ class: 'status-badge warning', text: 'Launching' }}
             }};
             
             const config = statusConfig[status] || statusConfig['offline'];
-            badge.className = `ml-auto text-[10px] px-2 py-0.5 rounded-full ${{config.class}}`;
-            badge.innerHTML = `<i class="fas ${{config.icon}} text-[6px] mr-1"></i>${{config.text}}`;
+            badge.className = config.class + ' ml-auto';
+            badge.textContent = config.text;
             
             // Show detailed status
             if (statusDiv) {{
@@ -3402,6 +3368,9 @@ async def get_chat_page():
             const statsEl = document.getElementById('context-analyzer-stats');
             const compactBtn = document.getElementById('btn-compact-context');
             
+            // Reset UI state for new analysis
+            statusEl.classList.remove('hidden');
+            statsEl.classList.add('hidden');
             statusEl.textContent = 'Analyzing...';
             
             try {{
@@ -5006,8 +4975,8 @@ Source: {weather_data.get('source', 'web search')}
         # Add ALL conversation history - NO MESSAGE LIMIT
         # Only limited by model's max_tokens
         for msg in web_messages:
-            role = "user" if msg["sender"] == "user" else "assistant"
-            messages.append({"role": role, "content": msg["text"]})
+            role = "user" if msg.get("sender", "user") == "user" else "assistant"
+            messages.append({"role": role, "content": msg.get("text", "")})
         
         # Use override provider/model if provided, otherwise use settings
         chat_provider = override_provider or settings.provider
@@ -5088,29 +5057,38 @@ Source: {weather_data.get('source', 'web search')}
             print(f"⚠️  Could not create semantic memory: {e}", flush=True)
         
         # Cognitive Memory - Store in episodic + semantic + procedural
+        # BUT only if relevance gate approves (skip greetings, acks, noise)
         try:
+            from core.memory_relevance_gate import MemoryRelevanceGate
             from core.cognitive_memory import get_cognitive_memory_manager
             
-            # Detect sentiment from user message
-            sentiment = 3  # Neutral default
-            user_lower = user_message.lower()
-            if any(w in user_lower for w in ["excelente", "perfeito", "ótimo", "great", "perfect", "amazing"]):
-                sentiment = 5
-            elif any(w in user_lower for w in ["bom", "good", "funcionou", "works", "thanks", "obrigado"]):
-                sentiment = 4
-            elif any(w in user_lower for w in ["ruim", "bad", "não funcionou", "not working"]):
-                sentiment = 2
+            # Check relevance before storing
+            gate = MemoryRelevanceGate()
+            decision = gate.evaluate(user_message, assistant_message)
             
-            manager = get_cognitive_memory_manager()
-            episode = manager.store_interaction(
-                user_message=user_message,
-                assistant_message=assistant_message,
-                session_id=current_session.id if current_session else "unknown",
-                sentiment=sentiment,
-                successful=(sentiment >= 3)
-            )
-            
-            print(f"🧠 Cognitive memory stored: {len(episode.entities_involved)} entities, topics: {episode.topics}", flush=True)
+            if decision.should_store:
+                # Detect sentiment from user message
+                sentiment = 3  # Neutral default
+                user_lower = user_message.lower()
+                if any(w in user_lower for w in ["excelente", "perfeito", "ótimo", "great", "perfect", "amazing"]):
+                    sentiment = 5
+                elif any(w in user_lower for w in ["bom", "good", "funcionou", "works", "thanks", "obrigado"]):
+                    sentiment = 4
+                elif any(w in user_lower for w in ["ruim", "bad", "não funcionou", "not working"]):
+                    sentiment = 2
+                
+                manager = get_cognitive_memory_manager()
+                episode = manager.store_interaction(
+                    user_message=user_message,
+                    assistant_message=assistant_message,
+                    session_id=current_session.id if current_session else "unknown",
+                    sentiment=sentiment,
+                    successful=(sentiment >= 3)
+                )
+                
+                print(f"🧠 Cognitive memory stored: {len(episode.entities_involved)} entities, topics: {episode.topics} (score: {decision.score:.2f})", flush=True)
+            else:
+                print(f"🧠 Cognitive memory skipped: {decision.skip_reason}", flush=True)
         except Exception as e:
             print(f"⚠️  Could not store cognitive memory: {e}", flush=True)
         
@@ -5226,7 +5204,7 @@ def update_init_yaml_settings(settings: Settings):
 def save_settings(settings: Settings):
     """Save settings to file and sync with init.yaml."""
     with open(SETTINGS_FILE, 'w') as f:
-        json.dump(settings.dict(), f, indent=2)
+        json.dump(settings.model_dump(), f, indent=2)
     
     # Sync with init.yaml
     update_init_yaml_settings(settings)
@@ -5258,7 +5236,7 @@ def save_session(session: Session):
     """Save a session to file."""
     session_file = SESSIONS_DIR / f"{session.id}.json"
     with open(session_file, 'w') as f:
-        json.dump(session.dict(), f, indent=2, default=str)
+        json.dump(session.model_dump(), f, indent=2, default=str)
 
 def delete_session(session_id: str):
     """Delete a session."""
@@ -5422,7 +5400,7 @@ def extract_important_facts(messages):
     info_keywords = ["meu nome é", "my name is", "eu sou", "i am", "trabalho com", "work with",
                     "minha empresa", "my company", "projeto", "project"]
     
-    user_messages = [m["text"] for m in messages if m["sender"] == "user"]
+    user_messages = [m.get("text", "") for m in messages if m.get("sender", "") == "user"]
     
     for msg in user_messages:
         msg_lower = msg.lower()
@@ -5532,7 +5510,7 @@ async def chat_with_provider(provider: str, model: str, messages: list, system: 
 @app.get("/api/settings")
 async def get_settings():
     """Get current settings."""
-    return JSONResponse(settings.dict())
+    return JSONResponse(settings.model_dump())
 
 @app.post("/api/settings")
 async def update_settings(request: Request):
@@ -5543,7 +5521,7 @@ async def update_settings(request: Request):
         new_settings = Settings(**data)
         save_settings(new_settings)
         settings = new_settings
-        return JSONResponse({"status": "ok", "settings": settings.dict()})
+        return JSONResponse({"status": "ok", "settings": settings.model_dump()})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=400)
 
@@ -5641,15 +5619,33 @@ async def get_provider_settings(provider: str):
     # Hide key values but confirm they exist
     has_key = api_key is not None and api_key != ""
     
+    # Create masked key display: sk-...XXXX (last 4 chars)
+    masked_key = None
+    if has_key and len(api_key) >= 4:
+        # For keys starting with "sk-", preserve that prefix
+        if api_key.startswith("sk-"):
+            masked_key = f"sk-...{api_key[-4:]}"
+        else:
+            masked_key = f"••••••••••••••••{api_key[-4:]}"
+    
     # Custom base URL support
     base_url = ""
     if provider == "custom":
         base_url = os.getenv("CUSTOM_BASE_URL", "")
-        
+    elif provider == "openrouter":
+        base_url = os.getenv("OPENROUTER_BASE_URL", "")
+    
+    # Get configured model for this provider
+    model_env_var = f"{provider.upper()}_MODEL"
+    configured_model = os.getenv(model_env_var, "")
+    
     return JSONResponse({
         "provider": provider,
         "has_key": has_key,
+        "has_api_key": has_key,  # For frontend compatibility
+        "masked_key": masked_key,
         "base_url": base_url,
+        "configured_model": configured_model,
         "current_model": settings.model if settings.provider == provider else None
     })
 
@@ -5666,14 +5662,14 @@ async def set_mode(mode: str):
     settings.max_tokens = get_max_tokens_for_model(settings.model, mode)
     settings.mode = mode
     save_settings(settings)
-    return JSONResponse({"status": "ok", "settings": settings.dict()})
+    return JSONResponse({"status": "ok", "settings": settings.model_dump()})
 
 # Session endpoints
 @app.get("/api/sessions")
 async def get_sessions():
     """Get all saved sessions."""
     sessions = load_sessions()
-    return JSONResponse([s.dict() for s in sessions])
+    return JSONResponse([s.model_dump() for s in sessions])
 
 
 def get_current_agent_info():
@@ -5763,7 +5759,7 @@ async def create_new_session(request: Request):
         with open(CURRENT_SESSION_FILE, 'w') as f:
             json.dump({"current_session_id": current_session.id}, f)
         
-        return JSONResponse({"status": "ok", "session": current_session.dict()})
+        return JSONResponse({"status": "ok", "session": current_session.model_dump()})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
@@ -5772,7 +5768,7 @@ async def get_session(session_id: str):
     """Get a specific session."""
     session = load_session(session_id)
     if session:
-        return JSONResponse(session.dict())
+        return JSONResponse(session.model_dump())
     return JSONResponse({"error": "Session not found"}, status_code=404)
 
 @app.post("/api/sessions/{session_id}/fork")
@@ -5819,7 +5815,7 @@ async def fork_session(session_id: str, request: Request):
         with open(CURRENT_SESSION_FILE, 'w') as f:
             json.dump({"current_session_id": current_session.id}, f)
             
-        return JSONResponse({"status": "ok", "session": current_session.dict()})
+        return JSONResponse({"status": "ok", "session": current_session.model_dump()})
         
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
@@ -5849,7 +5845,7 @@ async def load_session_endpoint(session_id: str):
     
     return JSONResponse({
         "status": "ok", 
-        "session": current_session.dict(),
+        "session": current_session.model_dump(),
         "messages": web_messages
     })
 
@@ -5879,7 +5875,7 @@ async def rename_session_endpoint(session_id: str, request: Request):
         if current_session and current_session.id == session_id:
             current_session.name = new_name
         
-        return JSONResponse({"status": "ok", "session": session.dict()})
+        return JSONResponse({"status": "ok", "session": session.model_dump()})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
@@ -7501,7 +7497,7 @@ async def get_current_session():
     if current_session:
         current_session.messages = web_messages
         current_session.message_count = len(web_messages)
-        return JSONResponse(current_session.dict())
+        return JSONResponse(current_session.model_dump())
     return JSONResponse({"error": "No active session"}, status_code=404)
 
 # ============================================================================
