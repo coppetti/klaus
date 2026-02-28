@@ -195,10 +195,10 @@ class Session(BaseModel):
 # Provider configurations
 PROVIDER_MODELS = {
     "kimi": ["kimi-k2-0711", "kimi-latest"],
-    "openrouter": ["anthropic/claude-3.5-sonnet", "openai/gpt-4o", "meta-llama/llama-3.1-70b"],
-    "anthropic": ["claude-3-haiku-20240307"],  # Updated: only haiku available on this account
-    "openai": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
-    "google": ["gemini-2.5-flash"],  # Updated: working model
+    "openrouter": ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "google/gemini-2.5-flash", "meta-llama/llama-3.1-70b"],
+    "anthropic": ["claude-haiku-4-5-20251001", "claude-sonnet-4-6", "claude-opus-4-6"],
+    "openai": ["gpt-4o", "gpt-4o-mini"],
+    "google": ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite", "gemini-3-flash-preview"],
     "custom": []  # Custom provider - models are free text
 }
 
@@ -2996,21 +2996,24 @@ async def get_chat_page():
                 {{value: 'kimi-latest', label: 'Kimi Latest'}},
             ],
             anthropic: [
-                {{value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku (Available)'}},
+                {{value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (Default)'}},
+                {{value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6'}},
+                {{value: 'claude-opus-4-6', label: 'Claude Opus 4.6'}},
             ],
             openai: [
                 {{value: 'gpt-4o', label: 'GPT-4o'}},
                 {{value: 'gpt-4o-mini', label: 'GPT-4o Mini'}},
-                {{value: 'gpt-4-turbo', label: 'GPT-4 Turbo'}},
-                {{value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo'}},
             ],
             google: [
-                {{value: 'gemini-2.5-flash', label: 'Gemini 2.0 Flash (Available)'}},
+                {{value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (Default)'}},
+                {{value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro'}},
+                {{value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite'}},
+                {{value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)'}},
             ],
             openrouter: [
-                {{value: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet'}},
+                {{value: 'anthropic/claude-sonnet-4-6', label: 'Claude Sonnet 4.6'}},
                 {{value: 'openai/gpt-4o', label: 'GPT-4o'}},
-                {{value: 'google/gemini-1.5-pro', label: 'Gemini 1.5 Pro'}},
+                {{value: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash'}},
                 {{value: 'meta-llama/llama-3.1-405b', label: 'Llama 3.1 405B'}},
             ],
             custom: [
