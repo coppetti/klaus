@@ -54,10 +54,10 @@ The same Klaus, everywhere:
 ### 🔌 Off-World Protocols
 
 Connect to any model:
-- **Kimi** (Moonshot AI) — Default
-- **Anthropic** (Claude) — claude-3-5-sonnet, claude-opus
-- **OpenAI** (GPT-4) — gpt-4, gpt-4o
-- **Google** (Gemini) — gemini-2.5-flash, gemini-2.0
+- **Kimi** (Moonshot AI) — kimi-k2-0711, kimi-k2
+- **Anthropic** (Claude) — claude-sonnet-4-6, claude-opus-4-6, claude-haiku-4-5
+- **OpenAI** — gpt-4o, gpt-4o-mini
+- **Google** (Gemini) — gemini-2.5-flash, gemini-2.0-flash
 - **OpenRouter** — Multi-model access
 - **Custom** (Ollama) — Local, private, offline
 
