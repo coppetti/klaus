@@ -17,6 +17,8 @@ services:
     ports:
       - "12019:8080"
     volumes:
+      # Mount init.yaml so llm_router reads live config (provider/model changes)
+      - ../init.yaml:/app/init.yaml:ro
       # Sync memory with host
       - ../workspace/memory:/app/memory:rw
       - ../workspace:/app/workspace:ro
