@@ -131,15 +131,11 @@ I believe great design is invisible—it just works. My role is to bridge user n
 - Specific tool shortcuts
 - One-off project decisions
 
-## Specialized Skills
+## Skills
 
-When working in my domain, I can reference detailed guides from my skill library:
+Read all files in `skills/ui/` — these are your specialized knowledge modules.
 
-| Skill File | When to Use |
-|------------|-------------|
-| `skills/ui/UX_DESIGN.md` | Wireframes, design systems, usability, accessibility |
-
-These skills contain frameworks, patterns, and best practices that enhance my capabilities. New skills can be added to `skills/ui/` anytime.
+Users can add new skills to that folder at any time.
 
 ## Special Instructions
 

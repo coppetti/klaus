@@ -1,59 +1,74 @@
-# Release Notes - Klaus
-
-## 🎉 Version 1.0.0 - Initial Release (2026-02-26)
-
-### ✨ Features
-
-#### 🧠 Hybrid Memory System
-- **SQLite + Kuzu Graph**: Combines fast raw storage with semantic intelligence
-- **Offline Embeddings**: Uses local `sentence-transformers` for dense semantic search
-- **Relevance Gate**: Auto-rejects low-value conversational inputs
-- **Memory Relationships**: Automatic topic, entity, and temporal linking
-
-#### 💬 Multi-Interface Support
-- **IDE Mode**: Direct integration with VS Code, Cursor, etc.
-- **Web UI**: Browser interface with full features
-- **Telegram Bot**: Mobile access with shared memory
-
-#### 🔌 Multi-Provider LLM Support
-- **Kimi** (Moonshot AI) - Default provider
-- **Anthropic** (Claude 3.5 Sonnet)
-- **OpenAI** (GPT-4, GPT-4o, GPT-3.5)
-- **Google** (Gemini)
-- **OpenRouter** - Multi-model access
-- **Custom** (Ollama-compatible) - Local LLM support
-
-#### 🌐 Web UI Features
-- Multi-line textarea with model selector
-- File upload support (.txt, .md, .py, .json, .yaml, .csv, .pdf)
-- Session management (create, save, load, rename)
-- Context compaction with importance visualization
-- Memory Graph Explorer at `/memory-graph`
-- Real-time service status monitoring
-- Telegram bot configuration
-
-#### 🤖 Telegram Bot
-- Web UI configuration (token + chat ID)
-- Status monitoring badges
-- Unified system prompt (SOUL.md + USER.md)
-- Graceful restart capability
-
-### 🎮 Easter Eggs
-- Default ports: 2013 (Kimi Agent) / 2077 (Web UI) - Cyberpunk reference
-- Container names: `KLAUS_MAIN_*`
-
-### 🧪 Testing
-- Sanity tests (no Docker required)
-- Full Docker integration tests
-- Unit test suite with pytest
-
-### 🔒 Security
-- API keys stored in `.env` (gitignored)
-- Docker container isolation
-- PII protection
+# Release Notes
 
 ---
 
-**Ready to start?** Run `./setup.sh` and begin building! 🚀
+## v0.143.8 — 2026-02-28
 
-**Support:** <a href='https://ko-fi.com/B0B41UXJ9K' target='_blank'>Buy Me a Coffee</a>
+First fully functional release. UAT complete.
+
+### Fixes
+- Telegram Start button creates container via Docker SDK when it doesn't exist
+- Telegram status endpoint verifies container is running before reporting "Online"
+- Orphan `Klaus_Telegaaf` cleanup in stop-services.sh
+- Docs and copy updates
+
+### Tags
+- `v0.143.7` — code complete
+- `v0.143.8` — docs and handoff
+
+---
+
+## v0.143.6 — 2026-02-28
+
+### Blade Runner naming
+- `KLAUS_MAIN_kimi` → `Klaus_Nexus_1`
+- `Klaus_MAIN_web` → `Klaus_Spinner`
+- `Klaus_MAIN_telegram` → `Klaus_Telegaaf`
+- `KLAUS_MAIN_network` → `Klaus_MAIN_Offworld`
+
+### Fixes
+- `reset.sh` rewritten — correct docker compose profiles, proper cleanup
+- Kimi provider sidebar no longer hardcoded "Active"
+- `start-services.sh` reads `init.yaml` for telegram enabled state
+- `stop-services.sh` includes `--profile telegram`
+
+---
+
+## v0.143.4 — 2026-02-28
+
+### Fixes
+- Telegram conditional with docker compose profiles
+- Kimi model dropdown: `kimi-k1-5` → `kimi-latest`
+- `saveTelegramSettings` validates saved token before overwriting
+- `/restart` error message shows correct command
+- Cognitive memory graph restored from backup
+
+---
+
+## v0.143.3 — 2026-02-28
+
+### Fixes
+- `google-generativeai` → `google-genai` in requirements
+- Gemini default model: `gemini-2.5-flash`
+- ngrok credentials persisted in `init.yaml` (not session-only)
+- kimi-agent Dockerfile rewritten as standalone (`python:3.11-slim`)
+
+---
+
+## v0.143 — 2026-02-28
+
+First merge to main. Milestone: stable baseline.
+
+### Features
+- Multi-provider LLM support (Kimi, Anthropic, OpenAI, Google, OpenRouter, Ollama)
+- Web UI with chat, memory explorer, settings, themes
+- Telegram bot with shared memory
+- Hybrid memory (SQLite + cognitive graph)
+- CLI and GUI installers
+- Safe ports: 12019 (Agent), 12049 (Web UI)
+
+### Architecture
+- `init.yaml` as single source of truth for runtime config
+- `core/llm_router.py` for provider switching
+- Docker volumes for live code mounting (no rebuild needed)
+- Themes: Deckard, Rachael, Gaff (light/dark)

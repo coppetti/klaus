@@ -1,5 +1,4 @@
-# IDE Agent Wizard - Dependencies
-# ================================
+# Klaus - Dependencies
 
 # Core
 pyyaml>=6.0
@@ -9,16 +8,16 @@ httpx>=0.25.0
 python-telegram-bot>=20.6
 aiohttp>=3.9.0
 
-# Web Search (for real-time information)
-duckduckgo-search>=3.9.0  # Web search without API key
+# Web Search
+duckduckgo-search>=3.9.0
 
-# LLM Provider SDKs (required for multi-provider support)
-anthropic>=0.8.0  # Anthropic SDK (used by Kimi provider)
-google-genai>=1.0.0  # Google Gemini SDK (new, GA since May 2025)
+# LLM Providers
+anthropic>=0.8.0
+google-genai>=1.0.0
 
-# Hybrid Memory (optional but recommended)
-kuzu>=0.4.0                    # Graph database for semantic relationships
-sentence-transformers>=2.2.0   # Semantic embeddings (all-MiniLM-L6-v2, ~80MB, fully offline)
+# Hybrid Memory
+kuzu>=0.4.0
+sentence-transformers>=2.2.0
 
 # Development
 pytest>=7.4.0

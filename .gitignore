@@ -73,6 +73,17 @@ fun-snippets/
 installer.backup*/
 releases/
 
+# Release snapshots (use git tags instead)
+release/
+
+# Sensitive workspace files
+workspace/kimi_*
+workspace/projects/
+
+# Archives (no binaries in git)
+*.zip
+*.aiff
+
 # Runtime workspace data (não commitar — dados do agente em execução)
 workspace/SOUL.md
 workspace/USER.md
