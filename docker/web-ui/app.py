@@ -1291,10 +1291,17 @@ async def get_chat_page():
                             <button onclick="saveTelegramSettings()" class="btn-secondary flex-1 text-xs py-1.5">
                                 <i class="fas fa-save mr-1"></i>Save
                             </button>
-                            <button onclick="launchTelegramBot()" id="telegram-launch-btn" class="btn-outline flex-1 text-xs py-1.5">
-                                <i class="fas fa-play mr-1 text-orange-500"></i>Launch
+                            <button onclick="startTelegramBot()" id="telegram-start-btn" class="btn-outline flex-1 text-xs py-1.5">
+                                <i class="fas fa-play mr-1 text-green-500"></i>Start
+                            </button>
+                            <button onclick="stopTelegramBot()" id="telegram-stop-btn" class="btn-outline flex-1 text-xs py-1.5 hidden">
+                                <i class="fas fa-stop mr-1 text-red-500"></i>Stop
                             </button>
                         </div>
+                        <p class="text-xs text-gray-400 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Start/Stop applies immediately via container restart.
+                        </p>
                     </div>
                 </div>
 
@@ -3210,20 +3217,33 @@ async def get_chat_page():
             }}
         }}
         
-        async function launchTelegramBot() {{
-            const btn = document.getElementById('telegram-launch-btn');
+        function setTelegramButtons(isOnline) {{
+            const startBtn = document.getElementById('telegram-start-btn');
+            const stopBtn = document.getElementById('telegram-stop-btn');
+            if (!startBtn || !stopBtn) return;
+            if (isOnline) {{
+                startBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+            }} else {{
+                startBtn.classList.remove('hidden');
+                stopBtn.classList.add('hidden');
+            }}
+        }}
+
+        async function startTelegramBot() {{
+            const btn = document.getElementById('telegram-start-btn');
             const token = document.getElementById('settings-telegram-token').value;
             const chatIds = document.getElementById('settings-telegram-chats').value;
-            
+
             if (!token || !chatIds) {{
                 showToast('Please fill in Bot Token and Chat ID first', 'error');
                 return;
             }}
-            
-            setButtonLoading(btn, 'Launching...');
-            
+
+            setButtonLoading(btn, 'Starting...');
+
             try {{
-                // First save the settings
+                // Save settings with enabled: true
                 await fetch('/api/settings/telegram', {{
                     method: 'POST',
                     headers: {{'Content-Type': 'application/json'}},
@@ -3233,31 +3253,53 @@ async def get_chat_page():
                         allowed_chat_ids: chatIds.split(',').map(s => s.trim()).filter(s => s)
                     }})
                 }});
-                
-                // Then try to launch/check the bot
-                const res = await fetch('/api/settings/telegram/launch', {{
+
+                // Restart the container
+                const res = await fetch('/api/settings/telegram/restart', {{
                     method: 'POST',
                     headers: {{'Content-Type': 'application/json'}}
                 }});
                 const data = await res.json();
-                
-                if (data.status === 'ok' || data.status === 'online') {{
+
+                if (data.status === 'ok') {{
                     setButtonSuccess(btn, 'Online!');
-                    showToast('Bot is online! ✅', 'success');
-                    updateTelegramStatusBadge('online', data.bot_info);
-                }} else if (data.status === 'error') {{
-                    setButtonError(btn, 'Failed');
-                    showToast('Bot error: ' + data.error, 'error');
-                    updateTelegramStatusBadge('error', data.error);
+                    showToast('Bot started! ✅', 'success');
+                    updateTelegramStatusBadge('online');
+                    setTelegramButtons(true);
                 }} else {{
-                    setButtonError(btn, 'Unknown');
-                    showToast('Bot status: ' + data.status, 'warning');
-                    updateTelegramStatusBadge(data.status);
+                    setButtonError(btn, 'Failed');
+                    showToast('Error: ' + data.error, 'error');
+                    updateTelegramStatusBadge('error');
                 }}
             }} catch (error) {{
                 setButtonError(btn, 'Error');
-                showToast('Failed to launch bot: ' + error.message, 'error');
-                updateTelegramStatusBadge('error', error.message);
+                showToast('Failed to start bot: ' + error.message, 'error');
+            }}
+        }}
+
+        async function stopTelegramBot() {{
+            const btn = document.getElementById('telegram-stop-btn');
+            setButtonLoading(btn, 'Stopping...');
+
+            try {{
+                const res = await fetch('/api/settings/telegram/stop', {{
+                    method: 'POST',
+                    headers: {{'Content-Type': 'application/json'}}
+                }});
+                const data = await res.json();
+
+                if (data.status === 'ok') {{
+                    setButtonSuccess(btn, 'Stopped');
+                    showToast('Bot stopped ✅', 'success');
+                    updateTelegramStatusBadge('offline');
+                    setTelegramButtons(false);
+                }} else {{
+                    setButtonError(btn, 'Failed');
+                    showToast('Error: ' + data.error, 'error');
+                }}
+            }} catch (error) {{
+                setButtonError(btn, 'Error');
+                showToast('Failed to stop bot: ' + error.message, 'error');
             }}
         }}
         
@@ -3303,7 +3345,11 @@ async def get_chat_page():
                     if (data.enabled) {{
                         document.getElementById('settings-telegram-token').placeholder = '•••••••••••• (saved)';
                         document.getElementById('settings-telegram-chats').value = data.chat_ids?.join(', ') || '';
-                        updateTelegramStatusBadge(data.status === 'online' ? 'online' : 'configured', data.bot_info);
+                        const isOnline = data.status === 'online';
+                        updateTelegramStatusBadge(isOnline ? 'online' : 'configured', data.bot_info);
+                        setTelegramButtons(isOnline);
+                    }} else {{
+                        setTelegramButtons(false);
                     }}
                 }}
             }} catch (e) {{
@@ -8990,6 +9036,57 @@ async def launch_telegram_bot():
         return {"status": "error", "error": "Connection timeout - check internet"}
     except Exception as e:
         return {"status": "error", "error": str(e)}
+
+
+# Restart Telegram Container API
+@app.post("/api/settings/telegram/restart")
+async def restart_telegram_container():
+    """Restart ONLY the KLAUS_MAIN_telegram Docker container via socket."""
+    try:
+        import docker as docker_sdk
+        client = docker_sdk.from_env()
+        container = client.containers.get("KLAUS_MAIN_telegram")
+        container.restart(timeout=10)
+        return {"status": "ok", "message": "Telegram bot restarted successfully"}
+    except Exception as e:
+        if "404" in str(e) or "No such container" in str(e):
+            return {"status": "error", "error": "Container KLAUS_MAIN_telegram not found. Is the bot running?"}
+        return {"status": "error", "error": str(e)}
+
+
+# Stop Telegram Container API
+@app.post("/api/settings/telegram/stop")
+async def stop_telegram_container():
+    """Disable Telegram in init.yaml and stop the KLAUS_MAIN_telegram container."""
+    try:
+        # Update init.yaml: set telegram enabled = false
+        init_path = Path("init.yaml")
+        config = {}
+        if init_path.exists():
+            with open(init_path) as f:
+                config = yaml.safe_load(f) or {}
+        if "mode" not in config:
+            config["mode"] = {}
+        if "telegram" not in config["mode"]:
+            config["mode"]["telegram"] = {}
+        config["mode"]["telegram"]["enabled"] = False
+        with open(init_path, "w") as f:
+            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+
+        # Stop the container
+        import docker as docker_sdk
+        client = docker_sdk.from_env()
+        try:
+            container = client.containers.get("KLAUS_MAIN_telegram")
+            container.stop(timeout=10)
+        except Exception:
+            pass  # Container may already be stopped
+
+        settings.telegram_enabled = False
+        return {"status": "ok", "message": "Telegram bot stopped and disabled"}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
 
 if __name__ == '__main__':
     import uvicorn
