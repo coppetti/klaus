@@ -70,3 +70,10 @@ test_*.py
 *.backup
 backup/
 fun-snippets/
+installer.backup*/
+releases/
+
+# Runtime workspace data (não commitar — dados do agente em execução)
+workspace/cognitive_memory/
+workspace/semantic_memory/
+workspace/web_ui_data/
