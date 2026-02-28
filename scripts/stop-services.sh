@@ -12,7 +12,7 @@ echo "🛑 Stopping Klaus Services..."
 echo "========================================"
 echo ""
 
-docker compose -f "$COMPOSE_FILE" --profile web down
+docker compose -f "$COMPOSE_FILE" --profile web --profile telegram down
 
 echo ""
 echo "✅ All services stopped!"

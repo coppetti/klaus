@@ -651,10 +651,10 @@ class KlausInstaller:
         ).pack(anchor='w', padx=40, pady=(20, 10))
         
         actions = [
-            "✓ Create workspace/SOUL.md and workspace/init.yaml",
+            "✓ Create workspace/SOUL.md and root init.yaml",
             "✓ Create .env with your API keys",
             "✓ Build and start Docker containers",
-            "✓ Open http://localhost:2049 in your browser"
+            "✓ Open http://localhost:12049 in your browser"
         ]
         
         for action in actions:
@@ -796,8 +796,8 @@ OPENROUTER_API_KEY={self.config['openrouter_key'].get()}
 CUSTOM_BASE_URL={self.config['custom_base_url'].get()}
 CUSTOM_MODEL={self.config['custom_model'].get()}
 
-KIMI_AGENT_PORT=2019
-WEB_UI_PORT=2049
+KIMI_AGENT_PORT=12019
+WEB_UI_PORT=12049
 KLAUS_MODE={self.config['setup_mode'].get()}
 """
             (workspace_dir / ".env").write_text(env_content)
@@ -830,8 +830,9 @@ provider:
 
 defaults:
   provider: {provider}
+  model: {{'kimi': 'kimi-k2-0711', 'anthropic': 'claude-sonnet-4-6', 'google': 'gemini-2.5-flash', 'openrouter': 'anthropic/claude-sonnet-4-6'}.get(provider, self.config['custom_model'].get() or 'llama3.2')}
 """
-            (workspace_dir / "init.yaml").write_text(init_content)
+            (repo_root / "init.yaml").write_text(init_content)
             
             # SOUL.md
             soul_content = f"""# {self.config['agent_name'].get() or 'Klaus'} - Agent Profile
@@ -942,7 +943,7 @@ defaults:
         
         tk.Label(
             url_frame,
-            text="🌐 http://localhost:2049",
+            text="🌐 http://localhost:12049",
             font=('Inter', 12, 'bold'),
             bg='#e0e7ff',
             fg='#7c3aed'
@@ -998,7 +999,7 @@ defaults:
             padx=20,
             pady=8,
             bd=0,
-            command=lambda: webbrowser.open("http://localhost:2049")
+            command=lambda: webbrowser.open("http://localhost:12049")
         ).place(x=40, y=30)
         
         tk.Button(

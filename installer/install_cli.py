@@ -315,10 +315,10 @@ def step_summary(config: dict):
     print(f"  User:         {config['user_name']} ({config['user_role']})")
     print()
     print("This will:")
-    print("  ✓ Create workspace/SOUL.md and workspace/init.yaml")
+    print("  ✓ Create workspace/SOUL.md and root init.yaml")
     print("  ✓ Create .env with your API keys")
     print("  ✓ Build and start Docker containers")
-    print("  ✓ Open http://localhost:2049 in your browser")
+    print("  ✓ Open http://localhost:12049 in your browser")
     
     confirm = input(f"\n{Colors.BOLD}Install Klaus? [Y/n]: {Colors.END}").strip().lower()
     return confirm in ('', 'y', 'yes')
@@ -366,14 +366,23 @@ OPENROUTER_API_KEY={config.get('openrouter_key', '')}
 CUSTOM_BASE_URL={config.get('custom_base_url', 'http://localhost:11434/v1')}
 CUSTOM_MODEL={config.get('custom_model', 'llama3.2')}
 
-KIMI_AGENT_PORT=2019
-WEB_UI_PORT=2049
+KIMI_AGENT_PORT=12019
+WEB_UI_PORT=12049
 KLAUS_MODE={config['setup_mode']}
 """
         (workspace_dir / ".env").write_text(env_content)
         (repo_root / ".env").write_text(env_content)
         
-        # init.yaml
+        # Default model per provider
+        default_models = {
+            'kimi': 'kimi-k2-0711',
+            'anthropic': 'claude-sonnet-4-6',
+            'google': 'gemini-2.5-flash',
+            'openrouter': 'anthropic/claude-sonnet-4-6',
+            'custom': config.get('custom_model', 'llama3.2'),
+        }
+
+        # init.yaml — written to repo root (not workspace/)
         init_content = f"""agent:
   name: {config['agent_name']}
   template: {config['agent_persona']}
@@ -400,8 +409,9 @@ provider:
 
 defaults:
   provider: {config['provider']}
+  model: {default_models.get(config['provider'], 'kimi-k2-0711')}
 """
-        (workspace_dir / "init.yaml").write_text(init_content)
+        (repo_root / "init.yaml").write_text(init_content)
         
         # SOUL.md
         soul_content = f"""# {config['agent_name']} - Agent Profile
@@ -448,7 +458,7 @@ def build_containers(config: dict) -> bool:
     try:
         repo_root = Path(__file__).parent.parent
         result = subprocess.run(
-            ["docker", "compose", "-f", "docker/docker-compose.yml", "build"],
+            ["docker", "compose", "-f", "docker/docker-compose.yml", "--profile", "web", "build"],
             cwd=repo_root,
             capture_output=True
         )
@@ -498,11 +508,15 @@ def step_complete():
     print_blade_runner('"Like tears in rain... time to code."')
     print()
     print(f"{Colors.GREEN}Klaus is running at:{Colors.END}")
-    print(f"  🌐 http://localhost:2049")
+    print(f"  🌐 http://localhost:12049")
     print()
     print("Useful commands:")
     print("  • Logs:    docker logs -f Klaus_Spinner")
-    print("  • Stop:    docker compose -f docker/docker-compose.yml down")
+    print("  • Stop:    docker compose -f docker/docker-compose.yml --profile web down")
+    print()
+    print_warning("First time configuring Telegram?")
+    print("  After saving your bot token in Settings, run:")
+    print("  docker compose -f docker/docker-compose.yml --profile telegram up -d")
     print()
     print_success("Installation successful!")
 
