@@ -196,7 +196,7 @@ class Session(BaseModel):
 PROVIDER_MODELS = {
     "kimi": ["kimi-k2-0711", "kimi-latest"],
     "openrouter": ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "google/gemini-2.5-flash", "meta-llama/llama-3.1-70b"],
-    "anthropic": ["claude-haiku-4-5-20251001", "claude-sonnet-4-6", "claude-opus-4-6"],
+    "anthropic": ["claude-opus-4-5-20251101", "claude-3-haiku-20240307"],  # verified available on this account
     "openai": ["gpt-4o", "gpt-4o-mini"],
     "google": ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite", "gemini-3-flash-preview"],
     "custom": []  # Custom provider - models are free text
@@ -2996,9 +2996,8 @@ async def get_chat_page():
                 {{value: 'kimi-latest', label: 'Kimi Latest'}},
             ],
             anthropic: [
-                {{value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (Default)'}},
-                {{value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6'}},
-                {{value: 'claude-opus-4-6', label: 'Claude Opus 4.6'}},
+                {{value: 'claude-opus-4-5-20251101', label: 'Claude Opus 4.5 (Default)'}},
+                {{value: 'claude-3-haiku-20240307', label: 'Claude Haiku 3'}},
             ],
             openai: [
                 {{value: 'gpt-4o', label: 'GPT-4o'}},

@@ -12,7 +12,7 @@ from .base import BaseProvider, Message, GenerationConfig, ProviderType
 class AnthropicProvider(BaseProvider):
     """Anthropic Claude provider."""
     
-    def __init__(self, api_key: str, model: str = "claude-haiku-4-5-20251001", config: Dict = None):
+    def __init__(self, api_key: str, model: str = "claude-opus-4-5-20251101", config: Dict = None):
         super().__init__(api_key, model, config)
         self.provider_type = ProviderType.ANTHROPIC
         self.base_url = "https://api.anthropic.com/v1"
