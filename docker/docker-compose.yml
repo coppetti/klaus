@@ -94,13 +94,16 @@ services:
     volumes:
       # Mount workspace for data persistence (sessions, settings)
       - ../workspace:/app/workspace:rw
-      - ../init.yaml:/app/init.yaml:ro
+      - ../init.yaml:/app/init.yaml:rw
       # Mount core modules for hybrid memory access
       - ../core:/app/core:ro
       # Mount templates for agent selection
       - ../templates:/app/templates:ro
       # Mount static files (themes.css) for live updates
       - ./web-ui/static:/app/static:ro
+      # ⚠️ Docker socket: allows web UI to restart ONLY KLAUS_MAIN_telegram container
+      # Risk accepted: local network + Google OAuth via ngrok (single user, personal project)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     env_file:
       - ../.env
     environment:

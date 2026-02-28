@@ -15,7 +15,8 @@ RUN pip install --no-cache-dir \
     python-multipart \
     pyngrok \
     jinja2 \
-    aiofiles
+    aiofiles \
+    docker
 
 # Try to install kuzu and sentence-transformers (graph + embeddings) - optional
 RUN pip install --no-cache-dir kuzu sentence-transformers || echo "Graph/embedding deps skipped"
