@@ -74,6 +74,9 @@ installer.backup*/
 releases/
 
 # Runtime workspace data (não commitar — dados do agente em execução)
+workspace/SOUL.md
+workspace/USER.md
+workspace/sessions/
 workspace/cognitive_memory/
 workspace/semantic_memory/
 workspace/web_ui_data/

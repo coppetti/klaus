@@ -51,13 +51,13 @@ start_web() {
     echo -e "${BLUE}🌐 Starting Web UI...${NC}"
     docker compose -f "$COMPOSE_FILE" --profile web up -d
     echo -e "${GREEN}✅ Web UI started!${NC}"
-    echo "   Access: http://localhost:8082"
+    echo "   Access: http://localhost:12049"
     echo ""
 }
 
 start_telegram() {
     echo -e "${BLUE}📱 Starting Telegram Bot...${NC}"
-    docker compose -f "$COMPOSE_FILE" up -d
+    docker compose -f "$COMPOSE_FILE" --profile telegram up -d
     echo -e "${GREEN}✅ Telegram Bot started!${NC}"
     echo ""
 }

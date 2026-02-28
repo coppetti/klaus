@@ -512,7 +512,11 @@ def step_complete():
     print()
     print("Useful commands:")
     print("  • Logs:    docker logs -f Klaus_Spinner")
-    print("  • Stop:    docker compose -f docker/docker-compose.yml down")
+    print("  • Stop:    docker compose -f docker/docker-compose.yml --profile web down")
+    print()
+    print_warning("First time configuring Telegram?")
+    print("  After saving your bot token in Settings, run:")
+    print("  docker compose -f docker/docker-compose.yml --profile telegram up -d")
     print()
     print_success("Installation successful!")
 

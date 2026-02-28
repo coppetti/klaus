@@ -1162,12 +1162,12 @@ async def get_chat_page():
                         Provider Status
                     </h3>
                     <div class="space-y-2 text-xs">
-                        <div class="provider-online flex items-center justify-between p-2.5 rounded-lg">
+                        <div class="flex items-center justify-between p-2.5 rounded-lg border border-subtle {'opacity-50' if not os.getenv('KIMI_API_KEY') else 'provider-online'}">
                             <div class="flex items-center gap-2">
-                                <i class="fas fa-circle text-[6px] icon-accent"></i>
-                                <span class="text-xs font-medium">Kimi</span>
+                                <i class="fas fa-circle text-[6px] {'icon-accent' if os.getenv('KIMI_API_KEY') else 'text-tertiary'}"></i>
+                                <span class="text-xs {'font-medium' if os.getenv('KIMI_API_KEY') else 'text-secondary'}">Kimi</span>
                             </div>
-                            <span class="text-[10px]" style="color: hsl(var(--success));">Active</span>
+                            <span class="text-[10px] {'icon-accent' if os.getenv('KIMI_API_KEY') else 'text-tertiary'}">{'Active' if os.getenv('KIMI_API_KEY') else 'Not set'}</span>
                         </div>
                         <div class="flex items-center justify-between p-2.5 rounded-lg border border-subtle {'opacity-50' if not os.getenv('ANTHROPIC_API_KEY') else 'provider-online'}">
                             <div class="flex items-center gap-2">

@@ -4,8 +4,6 @@
 # Resets everything to factory defaults.
 # WARNING: This deletes all configurations and memories!
 
-set -e
-
 echo "🔄 Klaus - Factory Reset"
 echo "===================================="
 echo ""
@@ -39,26 +37,23 @@ if command -v docker &> /dev/null; then
 fi
 
 # Remove configuration
-[ -f "init.yaml" ] && rm init.yaml && echo "   ✓ Removed init.yaml"
-[ -f ".env" ] && rm .env && echo "   ✓ Removed .env"
+rm -f init.yaml   && echo "   ✓ Removed init.yaml"
+rm -f .env        && echo "   ✓ Removed .env"
 
 # Remove workspace files
-[ -f "workspace/SOUL.md" ] && rm workspace/SOUL.md && echo "   ✓ Removed workspace/SOUL.md"
-[ -f "workspace/USER.md" ] && rm workspace/USER.md && echo "   ✓ Removed workspace/USER.md"
-[ -f "workspace/memory.db" ] && rm workspace/memory.db && echo "   ✓ Removed workspace/memory.db"
+rm -f workspace/SOUL.md     && echo "   ✓ Removed workspace/SOUL.md"
+rm -f workspace/USER.md     && echo "   ✓ Removed workspace/USER.md"
+rm -f workspace/memory.db   && echo "   ✓ Removed workspace/memory.db"
 
 # Remove memory and session data
-[ -d "workspace/memory" ] && rm -rf workspace/memory && echo "   ✓ Removed workspace/memory/"
-[ -d "workspace/sessions" ] && rm -rf workspace/sessions && echo "   ✓ Removed workspace/sessions/"
-[ -d "workspace/cognitive_memory" ] && rm -rf workspace/cognitive_memory && echo "   ✓ Removed workspace/cognitive_memory/"
-[ -d "workspace/semantic_memory" ] && rm -rf workspace/semantic_memory && echo "   ✓ Removed workspace/semantic_memory/"
-[ -d "workspace/web_ui_data" ] && rm -rf workspace/web_ui_data && echo "   ✓ Removed workspace/web_ui_data/"
-
-# Remove projects (optional - keep structure)
-# [ -d "workspace/projects" ] && rm -rf workspace/projects/*
+rm -rf workspace/memory           && echo "   ✓ Removed workspace/memory/"
+rm -rf workspace/sessions         && echo "   ✓ Removed workspace/sessions/"
+rm -rf workspace/cognitive_memory && echo "   ✓ Removed workspace/cognitive_memory/"
+rm -rf workspace/semantic_memory  && echo "   ✓ Removed workspace/semantic_memory/"
+rm -rf workspace/web_ui_data      && echo "   ✓ Removed workspace/web_ui_data/"
 
 # Remove virtual environment
-[ -d ".venv" ] && rm -rf .venv && echo "   ✓ Removed .venv/"
+rm -rf .venv && echo "   ✓ Removed .venv/"
 
 echo ""
 echo "✅ Reset complete!"
