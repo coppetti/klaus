@@ -12,7 +12,7 @@ from .base import BaseProvider, Message, GenerationConfig, ProviderType
 class AnthropicProvider(BaseProvider):
     """Anthropic Claude provider."""
     
-    def __init__(self, api_key: str, model: str = "claude-opus-4-5-20251101", config: Dict = None):
+    def __init__(self, api_key: str, model: str = "claude-sonnet-4-6", config: Dict = None):
         super().__init__(api_key, model, config)
         self.provider_type = ProviderType.ANTHROPIC
         self.base_url = "https://api.anthropic.com/v1"
@@ -66,6 +66,7 @@ class AnthropicProvider(BaseProvider):
                 json=payload,
                 timeout=120.0
             ) as response:
+                response.raise_for_status()
                 async for line in response.aiter_lines():
                     if line.startswith("data: "):
                         data = line[6:]
