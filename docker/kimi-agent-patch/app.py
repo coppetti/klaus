@@ -65,7 +65,11 @@ def load_workspace_context() -> str:
         print(f"⚠️ AGENTS.md não encontrado em {agents_path}", flush=True)
     
     # Carregar INIT.md (documentação técnica completa)
-    init_path = Path(CLAWD_WORKSPACE) / "INIT.md"
+    try:
+        clawd_workspace = CLAWD_WORKSPACE
+    except NameError:
+        clawd_workspace = os.getenv("CLAWD_WORKSPACE", "/app/workspace")
+    init_path = Path(clawd_workspace) / "INIT.md"
     if init_path.exists():
         parts.append("# DOCUMENTAÇÃO TÉCNICA (INIT.md)\n")
         parts.append(init_path.read_text())
@@ -91,7 +95,11 @@ def load_workspace_context() -> str:
         print(f"✅ USER.md carregado: {USER_MD_PATH}", flush=True)
     
     # Carregar STRUCTURE.md (estrutura do workspace)
-    structure_path = Path(CLAWD_WORKSPACE) / "STRUCTURE.md"
+    try:
+        clawd_workspace = CLAWD_WORKSPACE
+    except NameError:
+        clawd_workspace = os.getenv("CLAWD_WORKSPACE", "/app/workspace")
+    structure_path = Path(clawd_workspace) / "STRUCTURE.md"
     if structure_path.exists():
         parts.append("\n\n# ESTRUTURA DO WORKSPACE (STRUCTURE.md)\n")
         parts.append(structure_path.read_text())
@@ -310,7 +318,12 @@ REGRAS DE RESPOSTA:
             response_text = response.content[0].text
             
         # 6. Interceptar Ferramentas de Arquivo (XML Tags)
-        projects_dir = Path(CLAWD_WORKSPACE) / "projects"
+        # Ensure CLAWD_WORKSPACE is defined (defensive programming)
+        try:
+            clawd_workspace = CLAWD_WORKSPACE
+        except NameError:
+            clawd_workspace = os.getenv("CLAWD_WORKSPACE", "/app/workspace")
+        projects_dir = Path(clawd_workspace) / "projects"
         projects_dir.mkdir(parents=True, exist_ok=True)
         
         # Processar exclusões (Write)
