@@ -16,7 +16,7 @@ mode:
     allowed_chat_ids:
     - '6564821315'
     bot_token: '8552605246:AAGjWqeIsNhvRbhAiS1_hCN4z3S4uZaXDCY'
-    enabled: false
+    enabled: true
     token: '8552605246:AAGjWqeIsNhvRbhAiS1_hCN4z3S4uZaXDCY'
     user_id: '6564821315'
     webhook_url: ''
