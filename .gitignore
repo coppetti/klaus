@@ -1,0 +1,93 @@
+# IDE Agent Wizard - Git Ignore
+# ==============================
+
+# Environment variables (secrets)
+.env
+.env.local
+.env.*.local
+
+# Configuration files with sensitive data
+init.yaml
+!init.yaml.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Memory and data
+workspace/memory/
+workspace/*.db
+*.db
+
+# Test files
+test_setup.sh
+test_*.py
+
+# Docker volumes
+.docker/
+
+# Backup files
+*.bak
+*.backup
+backup/
+fun-snippets/
+installer.backup*/
+releases/
+
+# Release snapshots (use git tags instead)
+release/
+
+# Sensitive workspace files
+workspace/kimi_*
+workspace/projects/
+
+# Archives (no binaries in git)
+*.zip
+*.aiff
+
+# Runtime workspace data (não commitar — dados do agente em execução)
+workspace/SOUL.md
+workspace/USER.md
+workspace/sessions/
+workspace/cognitive_memory/
+workspace/semantic_memory/
+workspace/web_ui_data/

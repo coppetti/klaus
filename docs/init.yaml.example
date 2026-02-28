@@ -1,0 +1,60 @@
+# Klaus — Configuration Example
+# =============================
+# Copy this file to init.yaml in the project root.
+# DO NOT commit init.yaml to git — it contains API keys.
+#
+# The setup wizard (./setup.sh) generates this automatically.
+# Edit manually only if you know what you're doing.
+
+agent:
+  name: "Klaus"
+  template: "general"  # general, architect, developer, finance, legal, marketing, ui
+  personality:
+    tone: "professional"
+    style: "balanced"
+    language: "en"
+
+user:
+  name: "Your Name"
+  role: "Your Role"
+  experience_level: "intermediate"  # beginner, intermediate, advanced, expert
+  preferences:
+    communication: "concise"  # concise, detailed, bullet_points
+    code_style: "clean"
+
+defaults:
+  provider: "anthropic"  # kimi, anthropic, openai, google, openrouter, custom
+  model: "claude-sonnet-4-6"
+
+mode:
+  primary: "hybrid"  # ide, hybrid
+  ide:
+    enabled: true
+  web:
+    enabled: true
+  telegram:
+    enabled: false
+    # Configure via Web UI → Settings → Telegram Bot
+    # Or set env vars: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_IDS
+  # ngrok:
+  #   auth_token: ""
+  #   domain: ""
+
+provider:
+  api_key: ""  # Or use .env file (recommended)
+  parameters:
+    temperature: 0.7
+    max_tokens: 4096
+
+memory:
+  enabled: true
+  backend: "hybrid"
+  sqlite:
+    path: "./workspace/memory/agent_memory.db"
+
+# Workspace (auto-created by setup):
+# - workspace/SOUL.md       → Agent identity
+# - workspace/USER.md       → User profile
+# - workspace/memory/       → SQLite + cognitive graph
+# - workspace/projects/     → User projects
+# - workspace/uploads/      → File uploads (Web UI)

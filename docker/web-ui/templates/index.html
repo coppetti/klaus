@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-deckard-light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#FAF9F7" id="theme-color-meta">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2103/2103633.png">
+    <title>Klaus - AI Solutions Architect</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&family=Orbitron:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="/static/themes.css">
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Theme initialization -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('klaus-theme') || 'deckard-light';
+            document.documentElement.className = 'theme-' + savedTheme;
+            const meta = document.getElementById('theme-color-meta');
+            if (meta) meta.content = savedTheme === 'deckard-dark' ? '#161412' : '#FAF9F7';
+        })();
+    </script>
+</head>
+<body class="h-screen overflow-hidden bg-[hsl(var(--bg-primary))] text-[hsl(var(--text-primary))]">
+    <!-- Layout principal -->
+    <div class="flex h-full">
+        
+        <!-- Sidebar esquerda -->
+        <aside class="w-64 flex flex-col bg-[hsl(var(--bg-primary))] border-r border-[hsl(var(--border-subtle))]">
+            <!-- Header -->
+            <div class="p-4 border-b border-[hsl(var(--border-subtle))]">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-display text-xs uppercase tracking-[0.15em] text-[hsl(var(--text-tertiary))]">Sessions</h2>
+                    <button class="text-[hsl(var(--text-tertiary))] hover:text-[hsl(var(--text-secondary))] p-1 rounded hover:bg-[hsl(var(--bg-secondary))]">
+                        <i class="fas fa-plus text-xs"></i>
+                    </button>
+                </div>
+                <button class="w-full flex items-center justify-center gap-2 text-sm bg-[hsl(var(--text-primary))] text-[hsl(var(--bg-primary))] py-2 rounded-lg hover:opacity-90 transition-all">
+                    <i class="fas fa-plus text-xs"></i>
+                    New Session
+                </button>
+            </div>
+
+            <!-- Lista de sessões -->
+            <div class="flex-1 overflow-y-auto p-3 space-y-1">
+                <div class="p-3 rounded-lg cursor-pointer bg-[hsl(var(--accent-orange)_/_0.08)] border-l-2 border-[hsl(var(--accent-orange))]">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-medium text-sm">API Design Discussion</span>
+                        <span class="text-[10px] text-[hsl(var(--text-tertiary))]">2m</span>
+                    </div>
+                    <p class="text-xs text-[hsl(var(--text-tertiary))] truncate">Let's design the authentication...</p>
+                </div>
+            </div>
+
+            <!-- Context -->
+            <div class="border-t border-[hsl(var(--border-subtle))]">
+                <div class="p-3 border-b border-[hsl(var(--border-subtle))]">
+                    <h3 class="text-[11px] font-medium uppercase tracking-wider flex items-center gap-2 text-[hsl(var(--text-tertiary))]">
+                        <i class="fas fa-chart-pie text-[hsl(var(--accent-orange))]"></i>
+                        Context
+                    </h3>
+                </div>
+                <div class="p-3 space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-[hsl(var(--text-tertiary))]">Tokens</span>
+                            <span class="font-medium">3.2k / 128k</span>
+                        </div>
+                        <div class="w-full rounded-full h-1 bg-[hsl(var(--border-subtle))]">
+                            <div class="h-1 rounded-full bg-gradient-to-r from-[hsl(var(--accent-orange))] to-[hsl(var(--accent-gold))]" style="width: 2.5%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área principal -->
+        <main class="flex-1 flex flex-col bg-[hsl(var(--bg-secondary))]">
+            <!-- Header -->
+            <header class="px-6 py-3 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-primary))]">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-[hsl(var(--text-secondary))] to-[hsl(var(--text-tertiary))] flex items-center justify-center text-white font-medium text-sm">
+                            K
+                        </div>
+                        <div>
+                            <h1 class="font-medium text-sm">Klaus</h1>
+                            <p class="text-[10px] uppercase tracking-wider text-[hsl(var(--text-tertiary))]">Software Architect Agent</p>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="flex items-center gap-1">
+                        <button class="px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 border-[hsl(var(--accent-orange))]">
+                            <i class="fas fa-comments text-xs"></i>
+                            Chat
+                        </button>
+                        <button class="px-4 py-2 text-sm font-medium flex items-center gap-2 text-[hsl(var(--text-tertiary))] hover:text-[hsl(var(--accent-orange))]">
+                            <i class="fas fa-brain text-xs"></i>
+                            Memory
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center gap-2 px-2 py-1 rounded text-xs border border-[hsl(var(--success)_/_0.5)] text-[hsl(var(--success))]">
+                            <i class="fas fa-circle text-[5px]"></i>
+                            Connected
+                        </span>
+                        <button class="text-xs flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[hsl(var(--bg-tertiary))] text-[hsl(var(--text-secondary))] border border-[hsl(var(--border-subtle))] hover:border-[hsl(var(--border-focus))]">
+                            <i class="fas fa-code-branch text-xs"></i>
+                            Fork
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chat -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Welcome -->
+                <div class="text-center py-8">
+                    <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[hsl(var(--text-secondary))] to-[hsl(var(--text-tertiary))] flex items-center justify-center text-white text-xl">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h2 class="font-display text-lg font-medium mb-2">Welcome to Klaus</h2>
+                    <p class="text-sm max-w-md mx-auto text-[hsl(var(--text-tertiary))]">
+                        Start a conversation with your AI assistant.
+                    </p>
+                </div>
+
+                <!-- Mensagem usuário -->
+                <div class="flex justify-end">
+                    <div class="bg-[hsl(var(--text-primary))] text-[hsl(var(--bg-primary))] rounded-2xl rounded-br-sm px-4 py-3 max-w-[75%]">
+                        <p class="text-sm">Hello Klaus!</p>
+                        <span class="text-[10px] opacity-60 mt-1 block">10:42 AM</span>
+                    </div>
+                </div>
+
+                <!-- Mensagem assistant -->
+                <div class="flex gap-3">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[hsl(var(--text-secondary))] to-[hsl(var(--text-tertiary))] flex-shrink-0 flex items-center justify-center text-white text-xs">K</div>
+                    <div class="bg-[hsl(var(--bg-tertiary))] border border-[hsl(var(--border-subtle))] text-[hsl(var(--text-primary))] rounded-2xl rounded-bl-sm px-4 py-3 max-w-[75%]">
+                        <p class="text-sm">Hello! How can I help you today?</p>
+                        <span class="text-[10px] text-[hsl(var(--text-tertiary))] mt-1 block">10:42 AM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="p-4 border-t border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-primary))]">
+                <div class="relative">
+                    <textarea class="w-full p-3 pr-12 bg-[hsl(var(--bg-primary))] border border-[hsl(var(--border-subtle))] rounded-xl resize-none text-sm focus:outline-none focus:border-[hsl(var(--accent-orange)_/_0.5)] focus:ring-2 focus:ring-[hsl(var(--accent-orange)_/_0.1)]" rows="3" placeholder="Type your message..."></textarea>
+                    <button class="absolute bottom-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center bg-[hsl(var(--text-primary))] text-[hsl(var(--bg-primary))] hover:bg-[hsl(var(--accent-orange))] transition-all">
+                        <i class="fas fa-paper-plane text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar direita (Settings) -->
+        <aside class="w-80 flex flex-col bg-[hsl(var(--bg-primary))] border-l border-[hsl(var(--border-subtle))]">
+            <div class="p-4 border-b border-[hsl(var(--border-subtle))] flex items-center justify-between">
+                <h2 class="font-display text-xs uppercase tracking-[0.15em] text-[hsl(var(--text-tertiary))]">Settings</h2>
+                <button class="text-[hsl(var(--text-tertiary))] hover:text-[hsl(var(--text-secondary))]">
+                    <i class="fas fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                <!-- System Status -->
+                <div class="bg-[hsl(var(--bg-primary))] border border-[hsl(var(--border-subtle))] rounded-xl p-4">
+                    <h3 class="text-xs font-medium uppercase tracking-wider mb-3 flex items-center gap-2 text-[hsl(var(--text-tertiary))]">
+                        <i class="fas fa-server"></i>
+                        System Status
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-[hsl(var(--text-secondary))]">Kimi Agent</span>
+                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] border border-[hsl(var(--success)_/_0.5)] text-[hsl(var(--success))]">
+                                <i class="fas fa-circle text-[5px]"></i>
+                                Online
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme -->
+                <div class="bg-[hsl(var(--bg-primary))] border border-[hsl(var(--border-subtle))] rounded-xl p-4">
+                    <h3 class="text-xs font-medium uppercase tracking-wider mb-3 flex items-center gap-2 text-[hsl(var(--text-tertiary))]">
+                        <i class="fas fa-palette"></i>
+                        Theme
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-[hsl(var(--text-secondary))]">Mode</span>
+                            <button id="theme-toggle" onclick="toggleTheme()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm border border-[hsl(var(--accent-orange)_/_0.4)] text-[hsl(var(--accent-orange))] hover:bg-[hsl(var(--accent-orange)_/_0.08)] transition-all">
+                                <i class="fas fa-sun"></i>
+                                <span>Light</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('theme-deckard-dark');
+            const newTheme = isDark ? 'deckard-light' : 'deckard-dark';
+            
+            html.className = 'theme-' + newTheme;
+            localStorage.setItem('klaus-theme', newTheme);
+            
+            const meta = document.getElementById('theme-color-meta');
+            if (meta) meta.content = newTheme === 'deckard-dark' ? '#161412' : '#FAF9F7';
+            
+            // Update button
+            const btn = document.getElementById('theme-toggle');
+            if (btn) {
+                btn.innerHTML = newTheme === 'deckard-dark' ? 
+                    '<i class="fas fa-moon"></i><span>Dark</span>' : 
+                    '<i class="fas fa-sun"></i><span>Light</span>';
+            }
+        }
+        
+        // Init
+        const saved = localStorage.getItem('klaus-theme') || 'deckard-light';
+        document.documentElement.className = 'theme-' + saved;
+    </script>
+</body>
+</html>
