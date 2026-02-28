@@ -12,10 +12,8 @@ aiohttp>=3.9.0
 # Web Search (for real-time information)
 duckduckgo-search>=3.9.0  # Web search without API key
 
-# Optional: For advanced features
-# google-generativeai>=0.3.0  # Gemini native (optional)
-# anthropic>=0.8.0  # Anthropic SDK (optional)
-# openai>=1.0.0  # OpenAI SDK (optional)
+# LLM Provider SDKs (required for multi-provider support)
+anthropic>=0.8.0  # Anthropic SDK (used by Kimi provider)
 
 # Hybrid Memory (optional but recommended)
 kuzu>=0.4.0                    # Graph database for semantic relationships
