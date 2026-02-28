@@ -9045,6 +9045,24 @@ async def get_telegram_status():
                 "message": "Bot is disabled"
             }
         
+        # Check if Klaus_Telegaaf container is actually running
+        container_running = False
+        try:
+            import docker as docker_sdk
+            _docker_client = docker_sdk.from_env()
+            _container = _docker_client.containers.get("Klaus_Telegaaf")
+            container_running = _container.status == "running"
+        except Exception:
+            pass
+
+        if not container_running:
+            return {
+                "enabled": True,
+                "status": "offline",
+                "message": "Container not running. Click Start to launch.",
+                "chat_ids": [c for c in chat_ids if c]
+            }
+
         # Try to get bot info from Telegram API
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
@@ -9065,7 +9083,7 @@ async def get_telegram_status():
                         }
         except Exception as e:
             print(f"Telegram status check failed: {e}")
-        
+
         return {
             "enabled": True,
             "status": "configured",
@@ -9121,16 +9139,58 @@ async def launch_telegram_bot():
 # Restart Telegram Container API
 @app.post("/api/settings/telegram/restart")
 async def restart_telegram_container():
-    """Restart ONLY the Klaus_Telegaaf Docker container via socket."""
+    """Start or restart the Klaus_Telegaaf Docker container via socket."""
+    import docker as docker_sdk
+    client = docker_sdk.from_env()
+
+    # If container exists, restart it
     try:
-        import docker as docker_sdk
-        client = docker_sdk.from_env()
         container = client.containers.get("Klaus_Telegaaf")
         container.restart(timeout=10)
         return {"status": "ok", "message": "Telegram bot restarted successfully"}
+    except docker_sdk.errors.NotFound:
+        pass
     except Exception as e:
-        if "404" in str(e) or "No such container" in str(e):
-            return {"status": "error", "error": "Container Klaus_Telegaaf not found. Create it first: docker compose --profile telegram up -d telegram-bot"}
+        return {"status": "error", "error": str(e)}
+
+    # Container doesn't exist — create it using running infrastructure
+    try:
+        spinner = client.containers.get("Klaus_Spinner")
+    except Exception:
+        return {"status": "error", "error": "Klaus_Spinner not running."}
+
+    image = "klaus-telegram-bot"
+    mounts = {m["Destination"]: m["Source"] for m in spinner.attrs.get("Mounts", [])}
+    host_workspace = mounts.get("/app/workspace")
+    host_init = mounts.get("/app/init.yaml")
+
+    if not host_workspace or not host_init:
+        return {"status": "error", "error": "Cannot determine volume paths from Klaus_Spinner"}
+
+    host_base = os.path.dirname(host_init)
+    env_keys = ["ANTHROPIC_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_IDS",
+                "KIMI_API_KEY", "OPENAI_API_KEY", "OPENROUTER_API_KEY", "GOOGLE_API_KEY"]
+    env_vars = {k: v for k in env_keys if (v := os.getenv(k))}
+    env_vars.update({"KIMI_AGENT_URL": "http://Klaus_Nexus_1:8080", "AGENT_MODE": "telegram"})
+
+    try:
+        client.containers.run(
+            image,
+            name="Klaus_Telegaaf",
+            detach=True,
+            environment=env_vars,
+            volumes={
+                host_workspace: {"bind": "/app/workspace", "mode": "rw"},
+                f"{host_workspace}/memory": {"bind": "/app/workspace/memory", "mode": "rw"},
+                host_init: {"bind": "/app/init.yaml", "mode": "ro"},
+                f"{host_base}/docs": {"bind": "/app/docs", "mode": "ro"},
+                f"{host_workspace}/projects": {"bind": "/app/workspace/projects", "mode": "rw"},
+            },
+            restart_policy={"Name": "unless-stopped"},
+            network="Klaus_MAIN_Offworld"
+        )
+        return {"status": "ok", "message": "Telegram bot started successfully"}
+    except Exception as e:
         return {"status": "error", "error": str(e)}
 
 

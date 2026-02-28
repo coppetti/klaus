@@ -47,6 +47,13 @@ fi
 # Determine what to start
 MODE="${1:-all}"
 
+# Check if telegram is configured and enabled in init.yaml
+is_telegram_configured() {
+    INIT_YAML="../init.yaml"
+    if [ ! -f "$INIT_YAML" ]; then return 1; fi
+    grep -A5 "telegram:" "$INIT_YAML" | grep -q "enabled: true"
+}
+
 start_web() {
     echo -e "${BLUE}🌐 Starting Web UI...${NC}"
     docker compose -f "$COMPOSE_FILE" --profile web up -d
@@ -70,7 +77,12 @@ case "$MODE" in
         start_telegram
         ;;
     all|*)
-        start_telegram
+        if is_telegram_configured; then
+            start_telegram
+        else
+            echo -e "${YELLOW}⚠️  Telegram not configured — skipping.${NC}"
+            echo ""
+        fi
         start_web
         ;;
 esac
