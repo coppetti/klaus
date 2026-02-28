@@ -3,57 +3,77 @@
 Klaus Installer GUI
 ===================
 
-Cross-platform installer with graphical interface.
-Supports: macOS, Linux, Windows
+Wizard-style installer with Next/Back navigation.
+Each screen fits in 700x600 without scrolling.
 
 Usage:
     python installer/install_gui.py
 """
 
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox
 import subprocess
-import platform
 import os
 import sys
 import shutil
 from pathlib import Path
 import threading
-import json
+import webbrowser
 
 
 class KlausInstaller:
-    """Main installer application."""
+    """Wizard-style installer."""
     
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Klaus Installer")
         self.root.geometry("700x600")
         self.root.resizable(False, False)
+        self.root.configure(bg="#f5f5f5")
         
         # Center window
         self.center_window()
         
-        # Variables
-        self.install_dir = tk.StringVar(value=str(Path.home() / "Klaus"))
-        self.kimi_key = tk.StringVar()
-        self.anthropic_key = tk.StringVar()
-        self.openai_key = tk.StringVar()
-        self.selected_providers = []
-        self.setup_mode = tk.StringVar(value="full")
-        
         # Colors
         self.bg_color = "#f5f5f5"
-        self.accent_color = "#7c3aed"  # Violet
+        self.accent_color = "#7c3aed"
         self.text_color = "#1f2937"
         
-        self.root.configure(bg=self.bg_color)
+        # State
+        self.current_step = 0
         
-        self.setup_styles()
-        self.create_widgets()
+        # Config variables
+        self.config = {
+            'setup_mode': tk.StringVar(value='web+ide'),
+            'provider': tk.StringVar(value='kimi'),
+            'kimi_key': tk.StringVar(),
+            'anthropic_key': tk.StringVar(),
+            'google_key': tk.StringVar(),
+            'openrouter_key': tk.StringVar(),
+            'custom_base_url': tk.StringVar(value='http://localhost:11434/v1'),
+            'custom_model': tk.StringVar(value='llama3.2'),
+            'agent_name': tk.StringVar(value='Klaus'),
+            'agent_persona': tk.StringVar(value='architect'),
+            'user_name': tk.StringVar(),
+            'user_role': tk.StringVar(),
+            'user_tone': tk.StringVar(value='professional'),
+            'user_detail': tk.StringVar(value='balanced'),
+        }
         
+        # Main frame (500px height for content)
+        self.main_frame = tk.Frame(self.root, bg=self.bg_color, width=700, height=500)
+        self.main_frame.place(x=0, y=0, width=700, height=500)
+        
+        # Button frame (100px height, fixed at bottom)
+        self.button_frame = tk.Frame(self.root, bg=self.bg_color, width=700, height=100)
+        self.button_frame.pack(side='bottom', fill='x')
+        self.button_frame.pack_propagate(False)
+        
+        # Show first step
+        self.show_welcome()
+    
     def center_window(self):
-        """Center the window on screen."""
+        """Center window on screen."""
         self.root.update_idletasks()
         width = 700
         height = 600
@@ -61,472 +81,739 @@ class KlausInstaller:
         y = (self.root.winfo_screenheight() // 2) - (height // 2)
         self.root.geometry(f'{width}x{height}+{x}+{y}')
     
-    def setup_styles(self):
-        """Setup ttk styles."""
-        style = ttk.Style()
-        style.theme_use('clam')
-        
-        # Configure styles
-        style.configure(
-            'Title.TLabel',
-            font=('Inter', 24, 'bold'),
-            foreground=self.text_color,
-            background=self.bg_color
-        )
-        
-        style.configure(
-            'Subtitle.TLabel',
-            font=('Inter', 12),
-            foreground='#6b7280',
-            background=self.bg_color
-        )
-        
-        style.configure(
-            'Accent.TButton',
-            font=('Inter', 12, 'bold'),
-            background=self.accent_color,
-            foreground='white'
-        )
-        
-        style.configure(
-            'Section.TLabelframe',
-            background=self.bg_color,
-            borderwidth=2,
-            relief='solid'
-        )
-        
-        style.configure(
-            'Section.TLabelframe.Label',
-            font=('Inter', 11, 'bold'),
-            background=self.bg_color,
-            foreground=self.text_color
-        )
+    def clear_frame(self):
+        """Clear main frame."""
+        for widget in self.main_frame.winfo_children():
+            widget.destroy()
+        for widget in self.button_frame.winfo_children():
+            widget.destroy()
     
-    def create_widgets(self):
-        """Create UI widgets."""
-        # Main container
-        main_frame = tk.Frame(self.root, bg=self.bg_color, padx=30, pady=30)
-        main_frame.pack(fill='both', expand=True)
-        
+    def create_header(self, title):
+        """Create header with title only."""
         # Title
-        ttk.Label(
-            main_frame,
+        tk.Label(
+            self.main_frame,
             text="🧙 Klaus Installer",
-            style='Title.TLabel'
-        ).pack(anchor='w')
-        
-        ttk.Label(
-            main_frame,
-            text="AI Solutions Architect with Hybrid Memory",
-            style='Subtitle.TLabel'
-        ).pack(anchor='w', pady=(0, 20))
-        
-        # Separator
-        ttk.Separator(main_frame, orient='horizontal').pack(
-            fill='x', pady=(0, 20)
-        )
-        
-        # Installation Directory
-        self.create_directory_section(main_frame)
-        
-        # Setup Mode
-        self.create_mode_section(main_frame)
-        
-        # API Keys
-        self.create_api_keys_section(main_frame)
-        
-        # Progress (hidden initially)
-        self.progress_frame = tk.Frame(main_frame, bg=self.bg_color)
-        self.progress_label = tk.Label(
-            self.progress_frame,
-            text="Installing...",
-            font=('Inter', 11),
+            font=('Inter', 24, 'bold'),
             bg=self.bg_color,
             fg=self.text_color
-        )
-        self.progress_label.pack(anchor='w')
+        ).pack(anchor='w', padx=40, pady=(20, 0))
         
-        self.progress_bar = ttk.Progressbar(
-            self.progress_frame,
-            mode='determinate',
-            length=640
-        )
-        self.progress_bar.pack(fill='x', pady=10)
-        
-        self.status_label = tk.Label(
-            self.progress_frame,
-            text="",
-            font=('Inter', 10),
+        # Subtitle - Blade Runner quote
+        tk.Label(
+            self.main_frame,
+            text="Wake up, time to install!",
+            font=('Inter', 12),
             bg=self.bg_color,
             fg='#6b7280'
+        ).pack(anchor='w', padx=40)
+        
+        # Separator
+        ttk.Separator(self.main_frame, orient='horizontal').pack(
+            fill='x', padx=40, pady=15
         )
-        self.status_label.pack(anchor='w')
         
-        # Buttons
-        button_frame = tk.Frame(main_frame, bg=self.bg_color)
-        button_frame.pack(fill='x', pady=(20, 0))
+        # Step title
+        tk.Label(
+            self.main_frame,
+            text=title,
+            font=('Inter', 16, 'bold'),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(10, 20))
+    
+    def create_buttons(self, back_text=None, next_text="Continue →", next_cmd=None, back_cmd=None):
+        """Create navigation buttons at bottom."""
+        # Back button
+        if back_text:
+            tk.Button(
+                self.button_frame,
+                text=back_text,
+                font=('Inter', 11),
+                bg='#e5e7eb',
+                fg=self.text_color,
+                activebackground='#d1d5db',
+                cursor='hand2',
+                padx=20,
+                pady=8,
+                bd=0,
+                command=back_cmd or self.go_back
+            ).place(x=40, y=30)
         
-        self.install_btn = tk.Button(
-            button_frame,
-            text="Install Klaus",
-            font=('Inter', 12, 'bold'),
-            bg=self.accent_color,
+        # Cancel button (if not on last screen)
+        if next_text != "Finish":
+            tk.Button(
+                self.button_frame,
+                text="Cancel",
+                font=('Inter', 11),
+                bg='#e5e7eb',
+                fg=self.text_color,
+                activebackground='#d1d5db',
+                cursor='hand2',
+                padx=20,
+                pady=8,
+                bd=0,
+                command=self.root.quit
+            ).place(x=140 if back_text else 40, y=30)
+        
+        # Next/Install button
+        btn_color = self.accent_color if next_text in ["Continue →", "Install Klaus", "Open Browser"] else self.accent_color
+        tk.Button(
+            self.button_frame,
+            text=next_text,
+            font=('Inter', 11, 'bold'),
+            bg=btn_color,
             fg='white',
             activebackground="#6d28d9",
             activeforeground='white',
             cursor='hand2',
-            padx=30,
-            pady=10,
+            padx=25,
+            pady=8,
             bd=0,
-            command=self.start_installation
-        )
-        self.install_btn.pack(side='right')
+            command=next_cmd or self.go_next
+        ).place(x=580, y=30, anchor='ne')
+    
+    def go_next(self):
+        """Go to next step."""
+        if self.validate_step():
+            steps = [self.show_welcome, self.show_setup_mode, self.show_provider,
+                    self.show_api_key, self.show_agent_config, self.show_user_profile,
+                    self.show_summary, self.show_installing, self.show_complete]
+            
+            self.current_step += 1
+            if self.current_step < len(steps):
+                self.clear_frame()
+                steps[self.current_step]()
+    
+    def go_back(self):
+        """Go to previous step."""
+        steps = [self.show_welcome, self.show_setup_mode, self.show_provider,
+                self.show_api_key, self.show_agent_config, self.show_user_profile,
+                self.show_summary, self.show_installing, self.show_complete]
         
-        self.cancel_btn = tk.Button(
-            button_frame,
-            text="Cancel",
+        self.current_step -= 1
+        if self.current_step >= 0:
+            self.clear_frame()
+            steps[self.current_step]()
+    
+    def validate_step(self):
+        """Validate current step."""
+        if self.current_step == 3:  # API Key
+            provider = self.config['provider'].get()
+            keys = {
+                'kimi': self.config['kimi_key'],
+                'anthropic': self.config['anthropic_key'],
+                'google': self.config['google_key'],
+                'openrouter': self.config['openrouter_key'],
+            }
+            if provider in keys and not keys[provider].get().strip():
+                messagebox.showerror("API Key Required", f"Please enter your {provider.capitalize()} API key.")
+                return False
+        return True
+    
+    # ========== STEP 1: WELCOME ==========
+    def show_welcome(self):
+        """Welcome screen."""
+        self.current_step = 0
+        self.clear_frame()
+        
+        # Title without create_header to have custom layout
+        tk.Label(
+            self.main_frame,
+            text="🧙 Klaus Installer",
+            font=('Inter', 24, 'bold'),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(20, 5))
+        
+        tk.Label(
+            self.main_frame,
+            text='"Wake up, time to install!"',
             font=('Inter', 12),
-            bg='#e5e7eb',
-            fg=self.text_color,
-            activebackground='#d1d5db',
-            cursor='hand2',
-            padx=20,
-            pady=10,
-            bd=0,
-            command=self.root.quit
-        )
-        self.cancel_btn.pack(side='right', padx=(0, 10))
-    
-    def create_directory_section(self, parent):
-        """Create installation directory section."""
-        frame = tk.LabelFrame(
-            parent,
-            text=" Installation Directory ",
-            font=('Inter', 11, 'bold'),
             bg=self.bg_color,
-            fg=self.text_color,
-            padx=15,
-            pady=15
+            fg='#6b7280'
+        ).pack(anchor='w', padx=40)
+        
+        ttk.Separator(self.main_frame, orient='horizontal').pack(
+            fill='x', padx=40, pady=15
         )
-        frame.pack(fill='x', pady=(0, 15))
         
-        dir_frame = tk.Frame(frame, bg=self.bg_color)
-        dir_frame.pack(fill='x')
-        
-        tk.Entry(
-            dir_frame,
-            textvariable=self.install_dir,
+        # Description
+        tk.Label(
+            self.main_frame,
+            text="This wizard will configure Klaus with your preferences.",
             font=('Inter', 11),
-            bg='white',
-            fg=self.text_color,
-            relief='solid',
-            bd=1
-        ).pack(side='left', fill='x', expand=True, padx=(0, 10))
-        
-        tk.Button(
-            dir_frame,
-            text="Browse",
-            font=('Inter', 10),
-            bg='white',
-            fg=self.text_color,
-            relief='solid',
-            bd=1,
-            cursor='hand2',
-            command=self.browse_directory
-        ).pack(side='right')
-    
-    def create_mode_section(self, parent):
-        """Create setup mode section."""
-        frame = tk.LabelFrame(
-            parent,
-            text=" Setup Mode ",
-            font=('Inter', 11, 'bold'),
             bg=self.bg_color,
-            fg=self.text_color,
-            padx=15,
-            pady=15
-        )
-        frame.pack(fill='x', pady=(0, 15))
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(10, 5))
+        
+        tk.Label(
+            self.main_frame,
+            text="You'll need:",
+            font=('Inter', 11),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(10, 5))
+        
+        # Requirements
+        reqs = [
+            "• Docker & Docker Compose installed",
+            "• At least one AI provider API key"
+        ]
+        for req in reqs:
+            tk.Label(
+                self.main_frame,
+                text=req,
+                font=('Inter', 11),
+                bg=self.bg_color,
+                fg=self.text_color
+            ).pack(anchor='w', padx=60, pady=2)
+        
+        self.create_buttons(None, "Continue")
+    
+    # ========== STEP 2: SETUP MODE ==========
+    def show_setup_mode(self):
+        """Setup mode selection."""
+        self.clear_frame()
+        self.create_header("Setup Mode")
         
         modes = [
-            ("full", "Full Setup", "Web UI + Telegram + All Features"),
-            ("minimal", "Minimal", "Web UI only, no extra features"),
-            ("dev", "Development", "Source code with hot reload")
+            ('web+ide', 'Web + IDE (Recommended)', 'Full experience with browser UI and VS Code integration'),
+            ('ide-only', 'IDE Only', 'Chat directly in VS Code, no browser needed'),
+            ('web-only', 'Web Only', 'Browser-based workflow')
         ]
         
-        for value, title, desc in modes:
-            mode_frame = tk.Frame(frame, bg=self.bg_color)
-            mode_frame.pack(fill='x', pady=5)
+        for value, label, desc in modes:
+            frame = tk.Frame(self.main_frame, bg=self.bg_color)
+            frame.pack(fill='x', padx=40, pady=10)
             
             tk.Radiobutton(
-                mode_frame,
-                text=title,
-                variable=self.setup_mode,
+                frame,
+                text=label,
+                variable=self.config['setup_mode'],
                 value=value,
-                font=('Inter', 11, 'bold'),
+                font=('Inter', 12, 'bold'),
                 bg=self.bg_color,
                 fg=self.text_color,
-                selectcolor=self.accent_color
+                selectcolor=self.bg_color
             ).pack(anchor='w')
             
             tk.Label(
-                mode_frame,
+                frame,
                 text=desc,
                 font=('Inter', 10),
                 bg=self.bg_color,
                 fg='#6b7280'
             ).pack(anchor='w', padx=(25, 0))
+        
+        self.create_buttons("← Back", "Continue →")
     
-    def create_api_keys_section(self, parent):
-        """Create API keys section."""
-        frame = tk.LabelFrame(
-            parent,
-            text=" API Keys (at least one required) ",
+    # ========== STEP 3: PROVIDER ==========
+    def show_provider(self):
+        """AI provider selection."""
+        self.clear_frame()
+        self.create_header("Choose Your AI Provider")
+        
+        providers = [
+            ('kimi', 'Kimi (Recommended)', 'Moonshot AI - Fast and reliable'),
+            ('anthropic', 'Anthropic', 'Claude models - Great for coding'),
+            ('google', 'Google', 'Gemini via AI Studio'),
+            ('openrouter', 'OpenRouter', 'Access multiple models'),
+            ('custom', 'Custom (Ollama)', 'Local models - runs on your machine')
+        ]
+        
+        for value, label, desc in providers:
+            frame = tk.Frame(self.main_frame, bg=self.bg_color)
+            frame.pack(fill='x', padx=40, pady=8)
+            
+            tk.Radiobutton(
+                frame,
+                text=label,
+                variable=self.config['provider'],
+                value=value,
+                font=('Inter', 12, 'bold'),
+                bg=self.bg_color,
+                fg=self.text_color,
+                selectcolor=self.bg_color
+            ).pack(anchor='w')
+            
+            tk.Label(
+                frame,
+                text=desc,
+                font=('Inter', 10),
+                bg=self.bg_color,
+                fg='#6b7280'
+            ).pack(anchor='w', padx=(25, 0))
+        
+        self.create_buttons("← Back", "Continue →")
+    
+    # ========== STEP 4: API KEY ==========
+    def show_api_key(self):
+        """API key input."""
+        self.clear_frame()
+        
+        provider = self.config['provider'].get()
+        labels = {
+            'kimi': ('Kimi Configuration', 'https://platform.moonshot.cn'),
+            'anthropic': ('Anthropic Configuration', 'https://console.anthropic.com'),
+            'google': ('Google Configuration', 'https://aistudio.google.com'),
+            'openrouter': ('OpenRouter Configuration', 'https://openrouter.ai'),
+        }
+        
+        if provider == 'custom':
+            self.create_header("Custom Provider (Ollama)")
+            
+            tk.Label(
+                self.main_frame,
+                text="Base URL:",
+                font=('Inter', 11, 'bold'),
+                bg=self.bg_color,
+                fg=self.text_color
+            ).pack(anchor='w', padx=40, pady=(10, 5))
+            
+            tk.Entry(
+                self.main_frame,
+                textvariable=self.config['custom_base_url'],
+                font=('Inter', 11),
+                bg='white',
+                relief='solid',
+                bd=1
+            ).pack(fill='x', padx=40, pady=(0, 15))
+            
+            tk.Label(
+                self.main_frame,
+                text="Model Name:",
+                font=('Inter', 11, 'bold'),
+                bg=self.bg_color,
+                fg=self.text_color
+            ).pack(anchor='w', padx=40, pady=(10, 5))
+            
+            tk.Entry(
+                self.main_frame,
+                textvariable=self.config['custom_model'],
+                font=('Inter', 11),
+                bg='white',
+                relief='solid',
+                bd=1
+            ).pack(fill='x', padx=40, pady=(0, 15))
+            
+            tk.Label(
+                self.main_frame,
+                text="💡 Examples: llama3.2, deepseek-r1:14b, mistral",
+                font=('Inter', 10),
+                bg=self.bg_color,
+                fg='#6b7280'
+            ).pack(anchor='w', padx=40)
+            
+        else:
+            title, url = labels.get(provider, ('Configuration', ''))
+            self.create_header(title)
+            
+            tk.Label(
+                self.main_frame,
+                text="API Key:",
+                font=('Inter', 11, 'bold'),
+                bg=self.bg_color,
+                fg=self.text_color
+            ).pack(anchor='w', padx=40, pady=(10, 5))
+            
+            # API Key entry - simple and functional
+            self.api_entry = tk.Entry(
+                self.main_frame,
+                textvariable=self.config[f'{provider}_key'],
+                font=('Inter', 12),
+                bg='white',
+                relief='solid',
+                bd=2,
+                show='*'
+            )
+            self.api_entry.place(x=40, y=200, width=620, height=35)
+            self.api_entry.focus_set()
+            
+            tk.Label(
+                self.main_frame,
+                text=f"💡 Get your key at: {url}",
+                font=('Inter', 10),
+                bg=self.bg_color,
+                fg='#6b7280'
+            ).pack(anchor='w', padx=40)
+        
+        self.create_buttons("← Back", "Continue →")
+    
+    # ========== STEP 5: AGENT CONFIG ==========
+    def show_agent_config(self):
+        """Agent configuration."""
+        self.clear_frame()
+        self.create_header("Agent Configuration")
+        
+        # Agent Name
+        tk.Label(
+            self.main_frame,
+            text="Agent Name:",
+            font=('Inter', 11, 'bold'),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(10, 5))
+        
+        tk.Entry(
+            self.main_frame,
+            textvariable=self.config['agent_name'],
+            font=('Inter', 11),
+            bg='white',
+            relief='solid',
+            bd=1
+        ).pack(fill='x', padx=40, pady=(0, 20))
+        
+        # Persona
+        tk.Label(
+            self.main_frame,
+            text="Persona / Template:",
+            font=('Inter', 11, 'bold'),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(10, 5))
+        
+        personas = ['architect', 'developer', 'finance', 'general', 'legal', 'marketing', 'ui']
+        combo = ttk.Combobox(
+            self.main_frame,
+            textvariable=self.config['agent_persona'],
+            values=personas,
+            state='readonly',
+            font=('Inter', 11)
+        )
+        combo.pack(fill='x', padx=40, pady=(0, 10))
+        
+        # Persona descriptions
+        descriptions = {
+            'architect': 'Solutions Architect',
+            'developer': 'Software Developer',
+            'finance': 'Financial Analyst',
+            'general': 'General Assistant',
+            'legal': 'Legal Assistant',
+            'marketing': 'Marketing Specialist',
+            'ui': 'UI/UX Designer'
+        }
+        
+        for key, desc in descriptions.items():
+            tk.Label(
+                self.main_frame,
+                text=f"  • {key:<12} - {desc}",
+                font=('Inter', 10),
+                bg=self.bg_color,
+                fg='#6b7280'
+            ).pack(anchor='w', padx=40)
+        
+        self.create_buttons("← Back", "Continue →")
+    
+    # ========== STEP 6: USER PROFILE ==========
+    def show_user_profile(self):
+        """User profile configuration."""
+        self.clear_frame()
+        self.create_header("Your Profile")
+        
+        # Name
+        tk.Label(
+            self.main_frame,
+            text="Your Name:",
+            font=('Inter', 11, 'bold'),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(10, 5))
+        
+        tk.Entry(
+            self.main_frame,
+            textvariable=self.config['user_name'],
+            font=('Inter', 11),
+            bg='white',
+            relief='solid',
+            bd=1
+        ).pack(fill='x', padx=40, pady=(0, 15))
+        
+        # Role
+        tk.Label(
+            self.main_frame,
+            text="Your Role:",
+            font=('Inter', 11, 'bold'),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(10, 5))
+        
+        tk.Entry(
+            self.main_frame,
+            textvariable=self.config['user_role'],
+            font=('Inter', 11),
+            bg='white',
+            relief='solid',
+            bd=1
+        ).pack(fill='x', padx=40, pady=(0, 5))
+        
+        tk.Label(
+            self.main_frame,
+            text="💡 e.g., Developer, Team Lead, Student, etc.",
+            font=('Inter', 10),
+            bg=self.bg_color,
+            fg='#6b7280'
+        ).pack(anchor='w', padx=40, pady=(0, 15))
+        
+        # Tone
+        tk.Label(
+            self.main_frame,
+            text="Tone of Voice:",
+            font=('Inter', 11, 'bold'),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(10, 5))
+        
+        tones = ['professional', 'casual', 'enthusiastic', 'direct']
+        ttk.Combobox(
+            self.main_frame,
+            textvariable=self.config['user_tone'],
+            values=tones,
+            state='readonly',
+            font=('Inter', 11)
+        ).pack(fill='x', padx=40, pady=(0, 15))
+        
+        # Detail Level
+        tk.Label(
+            self.main_frame,
+            text="Detail Level:",
+            font=('Inter', 11, 'bold'),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(10, 5))
+        
+        details = ['concise', 'balanced', 'detailed', 'exhaustive']
+        ttk.Combobox(
+            self.main_frame,
+            textvariable=self.config['user_detail'],
+            values=details,
+            state='readonly',
+            font=('Inter', 11)
+        ).pack(fill='x', padx=40, pady=(0, 5))
+        
+        self.create_buttons("← Back", "Continue →")
+    
+    # ========== STEP 7: SUMMARY ==========
+    def show_summary(self):
+        """Installation summary."""
+        self.clear_frame()
+        self.create_header("Ready to Install")
+        
+        # Summary frame
+        summary = tk.LabelFrame(
+            self.main_frame,
+            text=" Configuration ",
             font=('Inter', 11, 'bold'),
             bg=self.bg_color,
             fg=self.text_color,
             padx=15,
-            pady=15
-        )
-        frame.pack(fill='x', pady=(0, 15))
-        
-        # Kimi (recommended)
-        kimi_frame = tk.Frame(frame, bg=self.bg_color)
-        kimi_frame.pack(fill='x', pady=5)
-        
-        tk.Label(
-            kimi_frame,
-            text="Kimi API Key (Recommended):",
-            font=('Inter', 10, 'bold'),
-            bg=self.bg_color,
-            fg=self.text_color
-        ).pack(anchor='w')
-        
-        kimi_entry = tk.Entry(
-            kimi_frame,
-            textvariable=self.kimi_key,
-            font=('Inter', 11),
-            bg='white',
-            fg=self.text_color,
-            relief='solid',
-            bd=1,
-            show='•'
-        )
-        kimi_entry.pack(fill='x', pady=(5, 0))
-        
-        # Optional: Show/hide keys
-        self.show_keys_var = tk.BooleanVar(value=False)
-        
-        # Other providers (collapsible)
-        other_frame = tk.LabelFrame(
-            frame,
-            text=" Other Providers (Optional) ",
-            font=('Inter', 10),
-            bg=self.bg_color,
-            fg='#6b7280',
-            padx=10,
             pady=10
         )
-        other_frame.pack(fill='x', pady=(10, 0))
+        summary.pack(fill='x', padx=40, pady=10)
         
-        # Anthropic
+        items = [
+            ("Setup Mode", self.config['setup_mode'].get()),
+            ("Provider", self.config['provider'].get()),
+            ("Agent Name", self.config['agent_name'].get()),
+            ("Persona", self.config['agent_persona'].get()),
+            ("User", f"{self.config['user_name'].get() or 'Not set'} ({self.config['user_role'].get() or 'Not set'})"),
+        ]
+        
+        for label, value in items:
+            row = tk.Frame(summary, bg=self.bg_color)
+            row.pack(fill='x', pady=2)
+            
+            tk.Label(
+                row,
+                text=f"{label}:",
+                font=('Inter', 10, 'bold'),
+                bg=self.bg_color,
+                fg=self.text_color,
+                width=12,
+                anchor='w'
+            ).pack(side='left')
+            
+            tk.Label(
+                row,
+                text=value,
+                font=('Inter', 10),
+                bg=self.bg_color,
+                fg='#6b7280'
+            ).pack(side='left')
+        
+        # What will happen
         tk.Label(
-            other_frame,
-            text="Anthropic (Claude):",
-            font=('Inter', 10),
+            self.main_frame,
+            text="This will:",
+            font=('Inter', 11, 'bold'),
             bg=self.bg_color,
             fg=self.text_color
-        ).pack(anchor='w')
+        ).pack(anchor='w', padx=40, pady=(20, 10))
         
-        tk.Entry(
-            other_frame,
-            textvariable=self.anthropic_key,
-            font=('Inter', 11),
-            bg='white',
-            fg=self.text_color,
-            relief='solid',
-            bd=1,
-            show='•'
-        ).pack(fill='x', pady=(5, 10))
+        actions = [
+            "✓ Create workspace/SOUL.md and workspace/init.yaml",
+            "✓ Create .env with your API keys",
+            "✓ Build and start Docker containers",
+            "✓ Open http://localhost:2049 in your browser"
+        ]
         
-        # OpenAI
-        tk.Label(
-            other_frame,
-            text="OpenAI (GPT):",
-            font=('Inter', 10),
-            bg=self.bg_color,
-            fg=self.text_color
-        ).pack(anchor='w')
+        for action in actions:
+            tk.Label(
+                self.main_frame,
+                text=action,
+                font=('Inter', 10),
+                bg=self.bg_color,
+                fg=self.text_color
+            ).pack(anchor='w', padx=60, pady=2)
         
-        tk.Entry(
-            other_frame,
-            textvariable=self.openai_key,
-            font=('Inter', 11),
-            bg='white',
-            fg=self.text_color,
-            relief='solid',
-            bd=1,
-            show='•'
-        ).pack(fill='x', pady=(5, 0))
+        self.create_buttons("← Back", "Install Klaus", self.start_installation)
     
-    def browse_directory(self):
-        """Open directory browser."""
-        directory = filedialog.askdirectory(
-            initialdir=self.install_dir.get(),
-            title="Select Installation Directory"
+    # ========== STEP 8: INSTALLING ==========
+    def show_installing(self):
+        """Installation progress."""
+        self.clear_frame()
+        self.create_header("Installing...")
+        
+        # Quote
+        tk.Label(
+            self.main_frame,
+            text='"I\'ve seen things you people wouldn\'t believe..."',
+            font=('Inter', 12, 'italic'),
+            bg=self.bg_color,
+            fg='#6b7280'
+        ).pack(pady=10)
+        
+        # Progress bar
+        self.progress_bar = ttk.Progressbar(
+            self.main_frame,
+            mode='determinate',
+            length=620
         )
-        if directory:
-            self.install_dir.set(directory)
-    
-    def validate_inputs(self):
-        """Validate user inputs."""
-        # Check install directory
-        install_path = Path(self.install_dir.get())
-        if not install_path.parent.exists():
-            messagebox.showerror(
-                "Invalid Directory",
-                f"Parent directory does not exist: {install_path.parent}"
+        self.progress_bar.pack(padx=40, pady=10)
+        
+        # Status
+        self.status_label = tk.Label(
+            self.main_frame,
+            text="Starting installation...",
+            font=('Inter', 10),
+            bg=self.bg_color,
+            fg='#6b7280'
+        )
+        self.status_label.pack()
+        
+        # Steps
+        self.steps_frame = tk.Frame(self.main_frame, bg=self.bg_color)
+        self.steps_frame.pack(fill='x', padx=40, pady=15)
+        
+        self.step_labels = []
+        steps_text = [
+            "[ ] Creating configuration files",
+            "[ ] Validating Docker installation",
+            "[ ] Pulling base images",
+            "[ ] Building containers",
+            "[ ] Starting services",
+            "[ ] Opening browser..."
+        ]
+        
+        for step in steps_text:
+            lbl = tk.Label(
+                self.steps_frame,
+                text=step,
+                font=('Inter', 10),
+                bg=self.bg_color,
+                fg='#9ca3af'
             )
-            return False
+            lbl.pack(anchor='w', pady=1)
+            self.step_labels.append(lbl)
         
-        # Check at least one API key
-        if not any([
-            self.kimi_key.get(),
-            self.anthropic_key.get(),
-            self.openai_key.get()
-        ]):
-            messagebox.showerror(
-                "API Key Required",
-                "Please provide at least one API key (Kimi recommended)."
-            )
-            return False
+        # Clear buttons during install
+        for widget in self.button_frame.winfo_children():
+            widget.destroy()
         
-        return True
-    
-    def start_installation(self):
-        """Start the installation process."""
-        if not self.validate_inputs():
-            return
-        
-        # Disable buttons
-        self.install_btn.config(state='disabled')
-        self.cancel_btn.config(state='disabled')
-        
-        # Show progress
-        self.progress_frame.pack(fill='x', pady=(20, 0))
-        
-        # Run installation in thread
+        # Start installation
         thread = threading.Thread(target=self.run_installation)
         thread.daemon = True
         thread.start()
     
+    def update_step(self, idx, status):
+        """Update step status."""
+        symbols = {'pending': '[ ]', 'active': '[→]', 'done': '[✓]', 'error': '[✗]'}
+        colors = {'pending': '#9ca3af', 'active': '#7c3aed', 'done': '#10b981', 'error': '#ef4444'}
+        
+        text = self.step_labels[idx].cget('text')[4:]  # Remove symbol
+        self.step_labels[idx].config(
+            text=f"{symbols.get(status, '[ ]')} {text}",
+            fg=colors.get(status, '#9ca3af')
+        )
+    
     def run_installation(self):
-        """Run the installation steps."""
+        """Run installation steps."""
         try:
             steps = [
-                ("Checking prerequisites...", 10, self.check_prerequisites),
-                ("Creating directories...", 25, self.create_directories),
-                ("Setting up configuration...", 40, self.setup_configuration),
-                ("Pulling Docker images...", 60, self.pull_docker_images),
-                ("Building containers...", 80, self.build_containers),
-                ("Finalizing setup...", 100, self.finalize_setup)
+                ("Creating configuration files...", 15, self.create_config_files),
+                ("Validating Docker...", 30, self.check_docker),
+                ("Pulling Docker images...", 50, self.pull_images),
+                ("Building containers...", 70, self.build_containers),
+                ("Starting services...", 85, self.start_services),
+                ("Finalizing...", 100, self.finalize_setup)
             ]
             
-            for status, progress, step_func in steps:
-                self.update_progress(status, progress)
-                if not step_func():
-                    self.installation_failed()
+            for i, (status, progress, func) in enumerate(steps):
+                self.root.after(0, lambda idx=i: self.update_step(idx, 'active'))
+                self.root.after(0, lambda s=status, p=progress: self.update_progress(s, p))
+                
+                if not func():
+                    self.root.after(0, lambda idx=i: self.update_step(idx, 'error'))
                     return
+                
+                self.root.after(0, lambda idx=i: self.update_step(idx, 'done'))
             
-            self.installation_success()
+            self.root.after(0, self.show_complete)
             
         except Exception as e:
-            self.show_error(f"Installation failed: {str(e)}")
-            self.installation_failed()
+            print(f"Install error: {e}")
     
     def update_progress(self, status, progress):
-        """Update progress bar and status."""
-        self.root.after(0, lambda: [
-            self.status_label.config(text=status),
-            self.progress_bar.config(value=progress)
-        ])
+        """Update progress."""
+        self.status_label.config(text=status)
+        self.progress_bar.config(value=progress)
     
-    def check_prerequisites(self):
-        """Check that prerequisites are installed."""
-        self.update_progress("Checking Docker...", 5)
-        
-        # Check Docker
-        if not shutil.which("docker"):
-            self.show_error("Docker is not installed. Please install Docker first.")
-            return False
-        
-        self.update_progress("Checking Docker Compose...", 8)
-        
-        # Check Docker Compose
-        result = subprocess.run(
-            ["docker", "compose", "version"],
-            capture_output=True,
-            text=True
-        )
-        if result.returncode != 0:
-            self.show_error("Docker Compose is not available.")
-            return False
-        
-        return True
-    
-    def create_directories(self):
-        """Create installation directories."""
-        install_path = Path(self.install_dir.get())
-        
+    def create_config_files(self):
+        """Create configuration files."""
         try:
-            install_path.mkdir(parents=True, exist_ok=True)
+            repo_root = Path(__file__).parent.parent
+            workspace_dir = repo_root / "workspace"
+            workspace_dir.mkdir(exist_ok=True)
             
-            # Create workspace subdirectories
-            workspace = install_path / "workspace"
-            for subdir in ["memory", "cognitive_memory", "semantic_memory", 
-                          "projects", "uploads", "web_ui_data"]:
-                (workspace / subdir).mkdir(parents=True, exist_ok=True)
+            provider = self.config['provider'].get()
             
-            return True
-        except Exception as e:
-            self.show_error(f"Failed to create directories: {e}")
-            return False
-    
-    def setup_configuration(self):
-        """Setup configuration files."""
-        install_path = Path(self.install_dir.get())
-        
-        try:
-            # Create .env file
+            # .env
             env_content = f"""# Klaus Configuration
-# Generated by Installer
+KIMI_API_KEY={self.config['kimi_key'].get()}
+ANTHROPIC_API_KEY={self.config['anthropic_key'].get()}
+GOOGLE_API_KEY={self.config['google_key'].get()}
+OPENROUTER_API_KEY={self.config['openrouter_key'].get()}
+CUSTOM_BASE_URL={self.config['custom_base_url'].get()}
+CUSTOM_MODEL={self.config['custom_model'].get()}
 
-# API Keys
-KIMI_API_KEY={self.kimi_key.get()}
-ANTHROPIC_API_KEY={self.anthropic_key.get()}
-OPENAI_API_KEY={self.openai_key.get()}
-
-# Ports
-KIMI_AGENT_PORT=7070
-WEB_UI_PORT=7072
-
-# Configuration
-KLAUS_MODE={self.setup_mode.get()}
+KIMI_AGENT_PORT=2019
+WEB_UI_PORT=2049
+KLAUS_MODE={self.config['setup_mode'].get()}
 """
+            (workspace_dir / ".env").write_text(env_content)
+            (repo_root / ".env").write_text(env_content)
             
-            env_file = install_path / ".env"
-            env_file.write_text(env_content)
-            
-            # Create init.yaml if not exists
-            init_yaml = install_path / "init.yaml"
-            if not init_yaml.exists():
-                init_content = """agent:
-  name: Klaus
-  template: architect
+            # init.yaml
+            init_content = f"""agent:
+  name: {self.config['agent_name'].get() or 'Klaus'}
+  template: {self.config['agent_persona'].get()}
   personality:
-    language: en
-    style: balanced
-    tone: direct
+    style: {self.config['user_detail'].get()}
+    tone: {self.config['user_tone'].get()}
+
+user:
+  name: {self.config['user_name'].get() or 'User'}
+  role: {self.config['user_role'].get() or 'Developer'}
 
 mode:
   primary: hybrid
@@ -536,134 +823,211 @@ mode:
     enabled: false
 
 provider:
-  name: kimi
-  model: kimi-k2-0711
+  name: {provider}
   parameters:
     temperature: 0.7
     max_tokens: 4096
 
 defaults:
-  provider: kimi
-  model: kimi-k2-0711
+  provider: {provider}
 """
-                init_yaml.write_text(init_content)
+            (workspace_dir / "init.yaml").write_text(init_content)
+            
+            # SOUL.md
+            soul_content = f"""# {self.config['agent_name'].get() or 'Klaus'} - Agent Profile
+
+## User Profile
+**Name:** {self.config['user_name'].get() or 'User'}
+**Role:** {self.config['user_role'].get() or 'Developer'}
+**Preferences:**
+- **Tone:** {self.config['user_tone'].get()}
+- **Detail Level:** {self.config['user_detail'].get()}
+
+## Agent Configuration
+**Name:** {self.config['agent_name'].get() or 'Klaus'}
+**Persona:** {self.config['agent_persona'].get()}
+**Provider:** {provider}
+"""
+            (workspace_dir / "SOUL.md").write_text(soul_content)
             
             return True
         except Exception as e:
-            self.show_error(f"Failed to setup configuration: {e}")
+            print(f"Config error: {e}")
             return False
     
-    def pull_docker_images(self):
-        """Pull required Docker images."""
-        self.update_progress("Pulling base images...", 55)
-        
+    def check_docker(self):
+        """Check Docker."""
+        if not shutil.which("docker"):
+            return False
+        result = subprocess.run(["docker", "compose", "version"], capture_output=True)
+        return result.returncode == 0
+    
+    def pull_images(self):
+        """Pull images."""
         try:
-            # Pull Python image
-            result = subprocess.run(
-                ["docker", "pull", "python:3.11-slim"],
-                capture_output=True,
-                text=True
-            )
-            
+            result = subprocess.run(["docker", "pull", "python:3.11-slim"], capture_output=True)
             return result.returncode == 0
-        except Exception as e:
-            self.show_error(f"Failed to pull Docker images: {e}")
+        except:
             return False
     
     def build_containers(self):
-        """Build Docker containers."""
-        install_path = Path(self.install_dir.get())
-        
+        """Build containers."""
         try:
-            # Note: This would need the actual source code
-            # For now, just simulate the build
-            self.update_progress("Building Web UI container...", 70)
-            # subprocess.run(["docker", "compose", "build"], cwd=install_path)
-            
-            self.update_progress("Building Kimi Agent container...", 75)
-            
-            return True
+            repo_root = Path(__file__).parent.parent
+            result = subprocess.run(
+                ["docker", "compose", "-f", "docker/docker-compose.yml", "build"],
+                cwd=repo_root,
+                capture_output=True
+            )
+            return result.returncode == 0
         except Exception as e:
-            self.show_error(f"Failed to build containers: {e}")
+            print(f"Build error: {e}")
+            return False
+    
+    def start_services(self):
+        """Start services."""
+        try:
+            repo_root = Path(__file__).parent.parent
+            setup_mode = self.config['setup_mode'].get()
+            
+            # Determine profile based on mode
+            if setup_mode in ['web+ide', 'web-only']:
+                profile = "web"
+            else:
+                profile = "web"  # IDE-only still uses web for now
+            
+            result = subprocess.run(
+                ["docker", "compose", "-f", "docker/docker-compose.yml", "--profile", profile, "up", "-d"],
+                cwd=repo_root,
+                capture_output=True
+            )
+            import time
+            time.sleep(5)
+            return result.returncode == 0
+        except Exception as e:
+            print(f"Start error: {e}")
             return False
     
     def finalize_setup(self):
-        """Finalize the installation."""
-        install_path = Path(self.install_dir.get())
+        """Finalize."""
+        return True
+    
+    # ========== STEP 9: COMPLETE ==========
+    def show_complete(self):
+        """Installation complete."""
+        self.current_step = 8
+        self.clear_frame()
+        self.create_header("Installation Complete! 🎉")
         
-        try:
-            # Create start script
-            if platform.system() == "Windows":
-                start_script = install_path / "start.bat"
-                start_content = """@echo off
-echo Starting Klaus...
-docker compose up -d
-echo Klaus is starting...
-echo Web UI: http://localhost:7072
-pause
-"""
-            else:
-                start_script = install_path / "start.sh"
-                start_content = """#!/bin/bash
-echo "Starting Klaus..."
-docker compose up -d
-echo "Klaus started!"
-echo "Web UI: http://localhost:7072"
-echo "API: http://localhost:7070"
-"""
-                start_script.chmod(0o755)
+        # Quote
+        tk.Label(
+            self.main_frame,
+            text='"Like tears in rain... time to code."',
+            font=('Inter', 12, 'italic'),
+            bg=self.bg_color,
+            fg='#6b7280'
+        ).pack(pady=10)
+        
+        # URL
+        tk.Label(
+            self.main_frame,
+            text="Klaus is running at:",
+            font=('Inter', 11),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(20, 5))
+        
+        url_frame = tk.Frame(self.main_frame, bg='#e0e7ff', padx=15, pady=10)
+        url_frame.pack(anchor='w', padx=40)
+        
+        tk.Label(
+            url_frame,
+            text="🌐 http://localhost:2049",
+            font=('Inter', 12, 'bold'),
+            bg='#e0e7ff',
+            fg='#7c3aed'
+        ).pack()
+        
+        # Commands
+        tk.Label(
+            self.main_frame,
+            text="Your configuration:",
+            font=('Inter', 11, 'bold'),
+            bg=self.bg_color,
+            fg=self.text_color
+        ).pack(anchor='w', padx=40, pady=(20, 10))
+        
+        commands = [
+            ("Config files", "workspace/"),
+            ("Logs", "docker logs -f KLAUS_MAIN_web"),
+            ("Stop", "docker compose -f docker/docker-compose.yml down")
+        ]
+        
+        for label, cmd in commands:
+            row = tk.Frame(self.main_frame, bg=self.bg_color)
+            row.pack(anchor='w', padx=60, pady=2)
             
-            start_script.write_text(start_content)
+            tk.Label(
+                row,
+                text=f"• {label}:",
+                font=('Inter', 10),
+                bg=self.bg_color,
+                fg=self.text_color
+            ).pack(side='left')
             
-            return True
-        except Exception as e:
-            self.show_error(f"Failed to finalize setup: {e}")
-            return False
-    
-    def installation_success(self):
-        """Handle successful installation."""
-        self.root.after(0, lambda: [
-            self.progress_bar.config(value=100),
-            self.status_label.config(text="Installation complete!", fg='#10b981'),
-            messagebox.showinfo(
-                "Installation Complete",
-                f"Klaus has been installed to:\n{self.install_dir.get()}\n\n"
-                "To start Klaus, run:\n"
-                f"  cd {self.install_dir.get()}\n"
-                "  ./start.sh (or start.bat on Windows)\n\n"
-                "Then open http://localhost:7072 in your browser."
-            ),
-            self.root.quit()
-        ])
-    
-    def installation_failed(self):
-        """Handle failed installation."""
-        self.root.after(0, lambda: [
-            self.status_label.config(text="Installation failed", fg='#ef4444'),
-            self.install_btn.config(state='normal'),
-            self.cancel_btn.config(state='normal')
-        ])
-    
-    def show_error(self, message):
-        """Show error message."""
-        self.root.after(0, lambda: messagebox.showerror("Error", message))
+            tk.Label(
+                row,
+                text=cmd,
+                font=('Inter', 10),
+                bg=self.bg_color,
+                fg='#6b7280'
+            ).pack(side='left', padx=(5, 0))
+        
+        # Buttons
+        for widget in self.button_frame.winfo_children():
+            widget.destroy()
+        
+        tk.Button(
+            self.button_frame,
+            text="Open Browser",
+            font=('Inter', 11, 'bold'),
+            bg=self.accent_color,
+            fg='white',
+            activebackground="#6d28d9",
+            cursor='hand2',
+            padx=20,
+            pady=8,
+            bd=0,
+            command=lambda: webbrowser.open("http://localhost:2049")
+        ).place(x=40, y=30)
+        
+        tk.Button(
+            self.button_frame,
+            text="Finish",
+            font=('Inter', 11),
+            bg='#e5e7eb',
+            fg=self.text_color,
+            activebackground='#d1d5db',
+            cursor='hand2',
+            padx=20,
+            pady=8,
+            bd=0,
+            command=self.root.quit
+        ).place(x=580, y=30, anchor='ne')
     
     def run(self):
-        """Run the installer."""
+        """Run installer."""
         self.root.mainloop()
 
 
 def main():
-    """Main entry point."""
-    # Check if tkinter is available
+    """Main entry."""
     try:
         import tkinter
     except ImportError:
-        print("Error: tkinter is not installed.")
-        print("Please install tkinter for your system:")
-        print("  macOS: brew install python-tk")
-        print("  Ubuntu/Debian: sudo apt-get install python3-tk")
-        print("  Windows: tkinter is included with Python")
+        print("Error: tkinter not installed.")
+        print("  macOS: brew install python-tk@3.11")
+        print("  Linux: sudo apt-get install python3-tk")
         sys.exit(1)
     
     installer = KlausInstaller()

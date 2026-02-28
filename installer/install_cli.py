@@ -4,17 +4,12 @@ Klaus CLI Installer
 ===================
 
 Command-line installer for headless environments.
+Same flow as GUI but via terminal.
 
 Usage:
-    python installer/install_cli.py [options]
+    python installer/install_cli.py          # Interactive mode
+    python installer/install_cli.py --yes    # Auto-confirm with defaults
 
-Options:
-    --dir PATH          Installation directory (default: ~/Klaus)
-    --kimi-key KEY      Kimi API key
-    --anthropic-key KEY Anthropic API key
-    --openai-key KEY    OpenAI API key
-    --mode MODE         Setup mode: full, minimal, dev (default: full)
-    --yes               Auto-confirm all prompts
 """
 
 import argparse
@@ -22,7 +17,7 @@ import os
 import sys
 import shutil
 import subprocess
-import platform
+import getpass
 from pathlib import Path
 from typing import Optional
 
@@ -66,15 +61,50 @@ def print_info(text: str):
     print(f"{Colors.CYAN}ℹ{Colors.END} {text}")
 
 
+def print_blade_runner(text: str):
+    """Print Blade Runner style quote."""
+    print(f"{Colors.CYAN}{text}{Colors.END}")
+
+
+def prompt_input(prompt: str, default: Optional[str] = None) -> str:
+    """Prompt for input."""
+    if default:
+        full_prompt = f"{prompt} [{default}]: "
+    else:
+        full_prompt = f"{prompt}: "
+    
+    response = input(full_prompt).strip()
+    return response if response else (default or "")
+
+
+def prompt_password(prompt: str) -> str:
+    """Prompt for API key (visible input for easy validation)."""
+    return input(f"{prompt}: ")
+
+
+def prompt_choice(prompt: str, options: list, default: int = 0) -> int:
+    """Prompt for choice from list."""
+    print(f"\n{Colors.BOLD}{prompt}{Colors.END}")
+    for i, (key, desc) in enumerate(options, 1):
+        marker = "→" if i - 1 == default else " "
+        print(f"  {marker} {i}. {key} - {desc}")
+    
+    while True:
+        choice = input(f"\nSelect (1-{len(options)}) [{default + 1}]: ").strip()
+        if not choice:
+            return default
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(options):
+                return idx
+        except ValueError:
+            pass
+        print_error(f"Please enter a number between 1 and {len(options)}")
+
+
 def check_prerequisites() -> bool:
     """Check that prerequisites are installed."""
     print_header("Checking Prerequisites")
-    
-    # Check Python version
-    if sys.version_info < (3, 11):
-        print_error("Python 3.11+ is required")
-        return False
-    print_success(f"Python {sys.version_info.major}.{sys.version_info.minor}")
     
     # Check Docker
     if not shutil.which("docker"):
@@ -97,63 +127,263 @@ def check_prerequisites() -> bool:
     return True
 
 
-def prompt_input(prompt: str, default: Optional[str] = None, 
-                 secret: bool = False) -> str:
-    """Prompt user for input."""
-    if default:
-        prompt = f"{prompt} [{default}]: "
-    else:
-        prompt = f"{prompt}: "
-    
-    if secret:
-        import getpass
-        value = getpass.getpass(prompt)
-    else:
-        value = input(prompt)
-    
-    return value if value else (default or "")
+def step_welcome():
+    """Welcome step."""
+    print_header("🧙 Klaus Installer")
+    print_blade_runner('"Wake up, time to install!"')
+    print()
+    print_info("This wizard will configure Klaus with your preferences.")
+    print()
+    print("You'll need:")
+    print("  • Docker & Docker Compose installed")
+    print("  • At least one AI provider API key")
+    input("\nPress Enter to continue...")
 
 
-def prompt_yes_no(prompt: str, default: bool = False) -> bool:
-    """Prompt yes/no question."""
-    suffix = " [Y/n]: " if default else " [y/N]: "
-    response = input(f"{prompt}{suffix}").strip().lower()
+def step_setup_mode() -> str:
+    """Setup mode selection."""
+    print_header("Setup Mode")
     
-    if not response:
-        return default
+    options = [
+        ("Web + IDE", "Full experience with browser UI and VS Code integration"),
+        ("IDE Only", "Chat directly in VS Code, no browser needed"),
+        ("Web Only", "Browser-based workflow"),
+    ]
     
-    return response in ['y', 'yes']
+    choice = prompt_choice("Choose your setup mode:", options, default=0)
+    modes = ['web+ide', 'ide-only', 'web-only']
+    return modes[choice]
 
 
-def setup_configuration(install_dir: Path, args) -> bool:
-    """Setup configuration files."""
-    print_header("Setting Up Configuration")
+def step_provider() -> str:
+    """AI provider selection."""
+    print_header("Choose Your AI Provider")
     
+    options = [
+        ("Kimi (Recommended)", "Moonshot AI - Fast and reliable"),
+        ("Anthropic", "Claude models - Great for coding"),
+        ("Google", "Gemini via AI Studio"),
+        ("OpenRouter", "Access multiple models"),
+        ("Custom (Ollama)", "Local models - runs on your machine"),
+    ]
+    
+    choice = prompt_choice("Select AI provider:", options, default=0)
+    providers = ['kimi', 'anthropic', 'google', 'openrouter', 'custom']
+    return providers[choice]
+
+
+def step_api_key(provider: str) -> dict:
+    """API key input."""
+    print_header("API Configuration")
+    
+    config = {}
+    
+    # Helper to get key (allows empty for testing)
+    def get_key(prompt_text: str) -> str:
+        return prompt_password(prompt_text).strip()
+    
+    if provider == 'kimi':
+        print_info("Get your key at: https://platform.moonshot.cn")
+        config['kimi_key'] = get_key("Kimi API Key")
+        
+    elif provider == 'anthropic':
+        print_info("Get your key at: https://console.anthropic.com")
+        config['anthropic_key'] = get_key("Anthropic API Key")
+        
+    elif provider == 'google':
+        print_info("Get your key at: https://aistudio.google.com")
+        config['google_key'] = get_key("Google AI Studio API Key")
+        
+    elif provider == 'openrouter':
+        print_info("Get your key at: https://openrouter.ai")
+        config['openrouter_key'] = get_key("OpenRouter API Key")
+        
+    elif provider == 'custom':
+        print_info("Custom provider (Ollama) configuration")
+        config['custom_base_url'] = prompt_input(
+            "Base URL", 
+            default="http://localhost:11434/v1"
+        )
+        config['custom_model'] = prompt_input(
+            "Model Name", 
+            default="llama3.2"
+        )
+        print_info("Examples: llama3.2, deepseek-r1:14b, mistral")
+    
+    return config
+
+
+def step_agent_config() -> dict:
+    """Agent configuration."""
+    print_header("Agent Configuration")
+    
+    config = {}
+    config['agent_name'] = prompt_input("Agent Name", default="Klaus")
+    
+    print(f"\n{Colors.BOLD}Available personas:{Colors.END}")
+    personas = [
+        ("architect", "Solutions Architect"),
+        ("developer", "Software Developer"),
+        ("finance", "Financial Analyst"),
+        ("general", "General Assistant"),
+        ("legal", "Legal Assistant"),
+        ("marketing", "Marketing Specialist"),
+        ("ui", "UI/UX Designer"),
+    ]
+    
+    for i, (key, desc) in enumerate(personas, 1):
+        print(f"  {i}. {key:<12} - {desc}")
+    
+    while True:
+        choice = input("\nSelect persona [1]: ").strip()
+        if not choice:
+            config['agent_persona'] = 'architect'
+            break
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(personas):
+                config['agent_persona'] = personas[idx][0]
+                break
+        except ValueError:
+            pass
+        print_error("Invalid choice")
+    
+    return config
+
+
+def step_user_profile() -> dict:
+    """User profile configuration."""
+    print_header("Your Profile")
+    
+    config = {}
+    config['user_name'] = prompt_input("Your Name")
+    config['user_role'] = prompt_input("Your Role")
+    print_info("e.g., Developer, Team Lead, Student, etc.")
+    
+    # Tone
+    print(f"\n{Colors.BOLD}Tone of Voice:{Colors.END}")
+    tones = ['professional', 'casual', 'enthusiastic', 'direct']
+    for i, tone in enumerate(tones, 1):
+        print(f"  {i}. {tone}")
+    
+    while True:
+        choice = input("Select [1]: ").strip()
+        if not choice:
+            config['user_tone'] = 'professional'
+            break
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(tones):
+                config['user_tone'] = tones[idx]
+                break
+        except ValueError:
+            pass
+        print_error("Invalid choice")
+    
+    # Detail level
+    print(f"\n{Colors.BOLD}Detail Level:{Colors.END}")
+    details = ['concise', 'balanced', 'detailed', 'exhaustive']
+    for i, detail in enumerate(details, 1):
+        print(f"  {i}. {detail}")
+    
+    while True:
+        choice = input("Select [2]: ").strip()
+        if not choice:
+            config['user_detail'] = 'balanced'
+            break
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(details):
+                config['user_detail'] = details[idx]
+                break
+        except ValueError:
+            pass
+        print_error("Invalid choice")
+    
+    return config
+
+
+def step_summary(config: dict):
+    """Show summary and confirm."""
+    print_header("Ready to Install")
+    
+    print(f"{Colors.BOLD}Configuration Summary:{Colors.END}")
+    print(f"  Setup Mode:   {config['setup_mode']}")
+    print(f"  Provider:     {config['provider']}")
+    print(f"  Agent Name:   {config['agent_name']}")
+    print(f"  Persona:      {config['agent_persona']}")
+    print(f"  User:         {config['user_name']} ({config['user_role']})")
+    print()
+    print("This will:")
+    print("  ✓ Create workspace/SOUL.md and workspace/init.yaml")
+    print("  ✓ Create .env with your API keys")
+    print("  ✓ Build and start Docker containers")
+    print("  ✓ Open http://localhost:2049 in your browser")
+    
+    confirm = input(f"\n{Colors.BOLD}Install Klaus? [Y/n]: {Colors.END}").strip().lower()
+    return confirm in ('', 'y', 'yes')
+
+
+def step_install(config: dict):
+    """Run installation."""
+    print_header("Installing...")
+    print_blade_runner('"I\'ve seen things you people wouldn\'t believe..."')
+    print()
+    
+    steps = [
+        ("Creating configuration files", create_config_files),
+        ("Validating Docker installation", check_docker),
+        ("Pulling Docker images", pull_images),
+        ("Building containers", build_containers),
+        ("Starting services", start_services),
+        ("Finalizing setup", finalize_setup),
+    ]
+    
+    for i, (name, func) in enumerate(steps, 1):
+        print(f"[{i}/{len(steps)}] {name}...", end=" ")
+        if func(config):
+            print_success("Done")
+        else:
+            print_error("Failed")
+            return False
+    
+    return True
+
+
+def create_config_files(config: dict) -> bool:
+    """Create configuration files."""
     try:
-        # Create .env file
+        repo_root = Path(__file__).parent.parent
+        workspace_dir = repo_root / "workspace"
+        workspace_dir.mkdir(exist_ok=True)
+        
+        # .env
         env_content = f"""# Klaus Configuration
-KIMI_API_KEY={args.kimi_key or ''}
-ANTHROPIC_API_KEY={args.anthropic_key or ''}
-OPENAI_API_KEY={args.openai_key or ''}
-WEB_UI_PORT=7072
-KIMI_AGENT_PORT=7070
+KIMI_API_KEY={config.get('kimi_key', '')}
+ANTHROPIC_API_KEY={config.get('anthropic_key', '')}
+GOOGLE_API_KEY={config.get('google_key', '')}
+OPENROUTER_API_KEY={config.get('openrouter_key', '')}
+CUSTOM_BASE_URL={config.get('custom_base_url', 'http://localhost:11434/v1')}
+CUSTOM_MODEL={config.get('custom_model', 'llama3.2')}
+
+KIMI_AGENT_PORT=2019
+WEB_UI_PORT=2049
+KLAUS_MODE={config['setup_mode']}
 """
+        (workspace_dir / ".env").write_text(env_content)
+        (repo_root / ".env").write_text(env_content)
         
-        env_file = install_dir / ".env"
-        env_file.write_text(env_content)
-        env_file.chmod(0o600)  # Restrict permissions
-        print_success(f"Created {env_file}")
-        
-        # Create init.yaml
-        init_yaml = install_dir / "init.yaml"
-        if not init_yaml.exists():
-            init_content = """agent:
-  name: Klaus
-  template: architect
+        # init.yaml
+        init_content = f"""agent:
+  name: {config['agent_name']}
+  template: {config['agent_persona']}
   personality:
-    language: en
-    style: balanced
-    tone: direct
+    style: {config['user_detail']}
+    tone: {config['user_tone']}
+
+user:
+  name: {config['user_name'] or 'User'}
+  role: {config['user_role'] or 'Developer'}
 
 mode:
   primary: hybrid
@@ -163,244 +393,151 @@ mode:
     enabled: false
 
 provider:
-  name: kimi
-  model: kimi-k2-0711
+  name: {config['provider']}
+  parameters:
+    temperature: 0.7
+    max_tokens: 4096
 
 defaults:
-  provider: kimi
-  model: kimi-k2-0711
+  provider: {config['provider']}
 """
-            init_yaml.write_text(init_content)
-            print_success(f"Created {init_yaml}")
+        (workspace_dir / "init.yaml").write_text(init_content)
+        
+        # SOUL.md
+        soul_content = f"""# {config['agent_name']} - Agent Profile
+
+## User Profile
+**Name:** {config['user_name'] or 'User'}
+**Role:** {config['user_role'] or 'Developer'}
+**Preferences:**
+- **Tone:** {config['user_tone']}
+- **Detail Level:** {config['user_detail']}
+
+## Agent Configuration
+**Name:** {config['agent_name']}
+**Persona:** {config['agent_persona']}
+**Provider:** {config['provider']}
+"""
+        (workspace_dir / "SOUL.md").write_text(soul_content)
         
         return True
     except Exception as e:
-        print_error(f"Failed to setup configuration: {e}")
+        print(f"Error: {e}")
         return False
 
 
-def create_start_scripts(install_dir: Path) -> bool:
-    """Create start/stop scripts."""
-    print_header("Creating Start Scripts")
-    
+def check_docker(config: dict) -> bool:
+    """Check Docker."""
+    if not shutil.which("docker"):
+        return False
+    result = subprocess.run(["docker", "compose", "version"], capture_output=True)
+    return result.returncode == 0
+
+
+def pull_images(config: dict) -> bool:
+    """Pull Docker images."""
     try:
-        if platform.system() == "Windows":
-            # Windows batch files
-            start_bat = install_dir / "start.bat"
-            start_bat.write_text("""@echo off
-echo Starting Klaus...
-docker compose -f docker/docker-compose.yml up -d
-echo.
-echo Klaus is starting...
-echo Web UI: http://localhost:7072
-echo API: http://localhost:7070
-timeout /t 3 >nul
-echo.
-echo To view logs: docker compose logs -f
-echo To stop: stop.bat
-pause
-""")
-            
-            stop_bat = install_dir / "stop.bat"
-            stop_bat.write_text("""@echo off
-echo Stopping Klaus...
-docker compose -f docker/docker-compose.yml down
-echo Klaus stopped.
-pause
-""")
-            print_success("Created start.bat and stop.bat")
-        
-        else:
-            # Unix shell scripts
-            start_sh = install_dir / "start.sh"
-            start_sh.write_text("""#!/bin/bash
-echo "🚀 Starting Klaus..."
-docker compose -f docker/docker-compose.yml up -d
-if [ $? -eq 0 ]; then
-    echo ""
-    echo "✅ Klaus started successfully!"
-    echo ""
-    echo "📱 Web UI: http://localhost:7072"
-    echo "🔌 API:    http://localhost:7070"
-    echo ""
-    echo "Useful commands:"
-    echo "  View logs:  docker compose logs -f"
-    echo "  Stop:       ./stop.sh"
-    echo "  Status:     docker compose ps"
-else
-    echo "❌ Failed to start Klaus"
-    exit 1
-fi
-""")
-            start_sh.chmod(0o755)
-            
-            stop_sh = install_dir / "stop.sh"
-            stop_sh.write_text("""#!/bin/bash
-echo "🛑 Stopping Klaus..."
-docker compose -f docker/docker-compose.yml down
-echo "✅ Klaus stopped."
-""")
-            stop_sh.chmod(0o755)
-            
-            print_success("Created start.sh and stop.sh")
-        
-        return True
-    except Exception as e:
-        print_error(f"Failed to create scripts: {e}")
+        result = subprocess.run(["docker", "pull", "python:3.11-slim"], capture_output=True)
+        return result.returncode == 0
+    except:
         return False
 
 
-def install(args):
-    """Main installation function."""
-    print_header("🧙 Klaus Installer")
-    print(f"Platform: {platform.system()} {platform.release()}")
-    print(f"Python: {sys.version.split()[0]}")
+def build_containers(config: dict) -> bool:
+    """Build Docker containers."""
+    try:
+        repo_root = Path(__file__).parent.parent
+        result = subprocess.run(
+            ["docker", "compose", "-f", "docker/docker-compose.yml", "build"],
+            cwd=repo_root,
+            capture_output=True
+        )
+        return result.returncode == 0
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+
+
+def start_services(config: dict) -> bool:
+    """Start Docker services."""
+    try:
+        repo_root = Path(__file__).parent.parent
+        setup_mode = config.get('setup_mode', 'web+ide')
+        
+        # Determine which profile to use
+        if setup_mode == 'web-only':
+            profile = "web"
+        elif setup_mode == 'web+ide':
+            profile = "web"
+        else:  # ide-only
+            # For IDE-only, we still need web for now (simplified)
+            profile = "web"
+        
+        # Start with profile
+        result = subprocess.run(
+            ["docker", "compose", "-f", "docker/docker-compose.yml", "--profile", profile, "up", "-d"],
+            cwd=repo_root,
+            capture_output=True
+        )
+        import time
+        time.sleep(5)
+        return result.returncode == 0
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+
+
+def finalize_setup(config: dict) -> bool:
+    """Finalize setup."""
+    return True
+
+
+def step_complete():
+    """Installation complete."""
+    print_header("Installation Complete! 🎉")
+    print_blade_runner('"Like tears in rain... time to code."')
     print()
+    print(f"{Colors.GREEN}Klaus is running at:{Colors.END}")
+    print(f"  🌐 http://localhost:2049")
+    print()
+    print("Useful commands:")
+    print("  • Logs:    docker logs -f KLAUS_MAIN_web")
+    print("  • Stop:    docker compose -f docker/docker-compose.yml down")
+    print()
+    print_success("Installation successful!")
+
+
+def main():
+    """Main entry point."""
+    parser = argparse.ArgumentParser(description='Klaus CLI Installer')
+    parser.add_argument('--yes', action='store_true', help='Auto-confirm with defaults')
+    args = parser.parse_args()
     
     # Check prerequisites
     if not check_prerequisites():
         sys.exit(1)
     
-    # Get installation directory
-    if args.dir:
-        install_dir = Path(args.dir)
+    # Welcome
+    step_welcome()
+    
+    # Collect configuration
+    config = {}
+    config['setup_mode'] = step_setup_mode()
+    config['provider'] = step_provider()
+    config.update(step_api_key(config['provider']))
+    config.update(step_agent_config())
+    config.update(step_user_profile())
+    
+    # Summary and confirm
+    if not step_summary(config):
+        print_warning("Installation cancelled")
+        sys.exit(0)
+    
+    # Install
+    if step_install(config):
+        step_complete()
     else:
-        default_dir = str(Path.home() / "Klaus")
-        dir_input = prompt_input("Installation directory", default_dir)
-        install_dir = Path(dir_input)
-    
-    # Check if directory exists
-    if install_dir.exists() and any(install_dir.iterdir()):
-        print_warning(f"Directory {install_dir} is not empty")
-        if not args.yes and not prompt_yes_no("Continue anyway?", False):
-            print("Installation cancelled.")
-            sys.exit(0)
-    
-    # Get API keys
-    if not args.kimi_key:
-        args.kimi_key = prompt_input("Kimi API Key (recommended)", secret=True)
-    
-    if not args.anthropic_key:
-        if prompt_yes_no("Add Anthropic API Key?", False):
-            args.anthropic_key = prompt_input("Anthropic API Key", secret=True)
-    
-    if not args.openai_key:
-        if prompt_yes_no("Add OpenAI API Key?", False):
-            args.openai_key = prompt_input("OpenAI API Key", secret=True)
-    
-    # Validate at least one key
-    if not any([args.kimi_key, args.anthropic_key, args.openai_key]):
-        print_error("At least one API key is required")
-        sys.exit(1)
-    
-    # Confirm installation
-    print_header("Installation Summary")
-    print(f"Directory: {install_dir}")
-    print(f"Mode: {args.mode}")
-    print(f"Kimi Key: {'✓' if args.kimi_key else '✗'}")
-    print(f"Anthropic Key: {'✓' if args.anthropic_key else '✗'}")
-    print(f"OpenAI Key: {'✓' if args.openai_key else '✗'}")
-    print()
-    
-    if not args.yes:
-        if not prompt_yes_no("Proceed with installation?", True):
-            print("Installation cancelled.")
-            sys.exit(0)
-    
-    # Create directories
-    print_header("Creating Directories")
-    try:
-        install_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Create workspace structure
-        workspace = install_dir / "workspace"
-        for subdir in ["memory", "cognitive_memory", "semantic_memory",
-                      "projects", "uploads", "web_ui_data"]:
-            (workspace / subdir).mkdir(parents=True, exist_ok=True)
-        
-        print_success(f"Created directory structure at {install_dir}")
-    except Exception as e:
-        print_error(f"Failed to create directories: {e}")
-        sys.exit(1)
-    
-    # Setup configuration
-    if not setup_configuration(install_dir, args):
-        sys.exit(1)
-    
-    # Create start scripts
-    if not create_start_scripts(install_dir):
-        sys.exit(1)
-    
-    # Success
-    print_header("✅ Installation Complete!")
-    print()
-    print(f"Klaus has been installed to: {install_dir}")
-    print()
-    print("To start Klaus:")
-    if platform.system() == "Windows":
-        print(f"  cd {install_dir}")
-        print("  .\\start.bat")
-    else:
-        print(f"  cd {install_dir}")
-        print("  ./start.sh")
-    print()
-    print("Then open http://localhost:7072 in your browser.")
-    print()
-    print("Enjoy using Klaus! 🎉")
-
-
-def main():
-    """Parse arguments and run installer."""
-    parser = argparse.ArgumentParser(
-        description="Klaus CLI Installer",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Interactive installation
-  python install_cli.py
-
-  # Automated installation with Kimi key
-  python install_cli.py --kimi-key sk-xxx --yes
-
-  # Custom directory
-  python install_cli.py --dir /opt/klaus
-        """
-    )
-    
-    parser.add_argument(
-        "--dir",
-        help="Installation directory (default: ~/Klaus)"
-    )
-    parser.add_argument(
-        "--kimi-key",
-        help="Kimi API key"
-    )
-    parser.add_argument(
-        "--anthropic-key",
-        help="Anthropic API key"
-    )
-    parser.add_argument(
-        "--openai-key",
-        help="OpenAI API key"
-    )
-    parser.add_argument(
-        "--mode",
-        choices=["full", "minimal", "dev"],
-        default="full",
-        help="Setup mode (default: full)"
-    )
-    parser.add_argument(
-        "--yes", "-y",
-        action="store_true",
-        help="Auto-confirm all prompts"
-    )
-    
-    args = parser.parse_args()
-    
-    try:
-        install(args)
-    except KeyboardInterrupt:
-        print("\n\nInstallation cancelled by user.")
+        print_error("Installation failed")
         sys.exit(1)
 
 

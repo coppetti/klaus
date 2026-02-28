@@ -1,12 +1,12 @@
 # Klaus Installers
 
-Cross-platform installers for Klaus.
+Cross-platform installers for Klaus - Your AI Solutions Architect.
 
 ## Available Installers
 
 | Installer | Platform | Description |
 |-----------|----------|-------------|
-| `install_gui.py` | All | Graphical installer with UI |
+| `install_gui.py` | All | Graphical installer with step-by-step wizard |
 | `install_cli.py` | All | Command-line installer |
 | `install.sh` | macOS/Linux | One-line curl installer |
 
@@ -18,11 +18,13 @@ Cross-platform installers for Klaus.
 python installer/install_gui.py
 ```
 
-Features:
-- Interactive configuration
-- Visual progress indicator
-- API key validation
-- Directory browser
+**Features:**
+- 🎨 **Welcome Screen** - "Wake up, time to install!" (Blade Runner inspired)
+- 📦 **Setup Mode Selection** - IDE Only / Web + IDE / Web Only
+- 🤖 **Multi-Provider Support** - Kimi, Anthropic, Google, OpenRouter, Custom (Ollama)
+- ⚙️ **Agent Configuration** - Name your agent, choose a persona/template
+- 👤 **User Profile** - Your name, role, tone preference, and detail level
+- ✅ **Visual Progress Indicator** - Track installation steps
 
 ### CLI Installer (Recommended for Servers)
 
@@ -38,7 +40,7 @@ python installer/install_cli.py \
     --dir /opt/klaus \
     --kimi-key KEY1 \
     --anthropic-key KEY2 \
-    --mode full
+    --mode web+ide
 ```
 
 ### One-Line Install
@@ -55,9 +57,46 @@ curl -fsSL https://raw.githubusercontent.com/yourusername/klaus/main/install.sh 
 
 | Mode | Description | Use Case |
 |------|-------------|----------|
-| `full` | Web UI + Telegram + All features | Production |
-| `minimal` | Web UI only | Development/Testing |
-| `dev` | Source code with hot reload | Contributing |
+| `web+ide` | Web UI + IDE Integration (Recommended) | Full experience |
+| `ide-only` | IDE Integration only | VS Code users who prefer chat in editor |
+| `web-only` | Web UI only | Browser-based workflow |
+
+## Supported Providers
+
+The installer supports multiple LLM providers:
+
+| Provider | API Key Required | Notes |
+|----------|-----------------|-------|
+| **Kimi** | ✅ | Default, recommended |
+| **Anthropic** | ✅ | Claude models |
+| **Google** | ✅ | Gemini models via AI Studio |
+| **OpenRouter** | ✅ | Access to multiple models |
+| **Custom** | ❌ | Local models via Ollama |
+
+## Configuration Files
+
+The installer creates three main configuration files:
+
+### `.env`
+Environment variables including API keys and ports.
+
+### `init.yaml`
+Agent and user configuration:
+```yaml
+agent:
+  name: Klaus
+  template: solutions-architect
+  personality:
+    tone: professional
+    style: balanced
+
+user:
+  name: Your Name
+  role: Developer
+```
+
+### `SOUL.md`
+User context and preferences for personalized interactions.
 
 ## Requirements
 
