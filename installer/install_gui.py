@@ -959,7 +959,7 @@ defaults:
         
         commands = [
             ("Config files", "workspace/"),
-            ("Logs", "docker logs -f KLAUS_MAIN_web"),
+            ("Logs", "docker logs -f Klaus_Spinner"),
             ("Stop", "docker compose -f docker/docker-compose.yml down")
         ]
         

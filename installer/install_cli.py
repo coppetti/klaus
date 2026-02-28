@@ -501,7 +501,7 @@ def step_complete():
     print(f"  🌐 http://localhost:2049")
     print()
     print("Useful commands:")
-    print("  • Logs:    docker logs -f KLAUS_MAIN_web")
+    print("  • Logs:    docker logs -f Klaus_Spinner")
     print("  • Stop:    docker compose -f docker/docker-compose.yml down")
     print()
     print_success("Installation successful!")

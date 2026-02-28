@@ -195,9 +195,9 @@ memory.recall(MemoryQuery(query_type="semantic", text="backend"))
 - **Release:** 2013 (Kimi), 2077 (Web UI) - Easter eggs
 
 ### Containers
-- `KLAUS_MAIN_kimi` - LLM API handler
-- `Klaus_MAIN_web` - Web UI + Graph lock
-- `KLAUS_MAIN_telegram` - Telegram bot
+- `Klaus_Nexus_1` - LLM API handler
+- `Klaus_Spinner` - Web UI + Graph lock
+- `Klaus_Telegaaf` - Telegram bot
 
 ### Kuzu Graph Lock Issue
 - Only ONE container can hold graph lock

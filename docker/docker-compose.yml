@@ -13,7 +13,7 @@ services:
     build:
       context: ./kimi-agent-patch
       dockerfile: Dockerfile
-    container_name: KLAUS_MAIN_kimi
+    container_name: Klaus_Nexus_1
     ports:
       - "12019:8080"
     volumes:
@@ -54,7 +54,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: KLAUS_MAIN_telegram
+    container_name: Klaus_Telegaaf
     profiles:
       - telegram
 
@@ -75,7 +75,7 @@ services:
 
     environment:
       # Kimi Agent URL (internal docker network)
-      - KIMI_AGENT_URL=http://KLAUS_MAIN_kimi:8080
+      - KIMI_AGENT_URL=http://Klaus_Nexus_1:8080
 
       # Optional: Override config
       - AGENT_MODE=telegram
@@ -94,7 +94,7 @@ services:
     build:
       context: ./web-ui
       dockerfile: Dockerfile
-    container_name: KLAUS_MAIN_web
+    container_name: Klaus_Spinner
     ports:
       - "12049:8082"
     volumes:
@@ -107,13 +107,13 @@ services:
       - ../templates:/app/templates:ro
       # Mount static files (themes.css) for live updates
       - ./web-ui/static:/app/static:ro
-      # ⚠️ Docker socket: allows web UI to restart ONLY KLAUS_MAIN_telegram container
+      # ⚠️ Docker socket: allows web UI to restart ONLY Klaus_Telegaaf container
       # Risk accepted: local network + Google OAuth via ngrok (single user, personal project)
       - /var/run/docker.sock:/var/run/docker.sock:ro
     env_file:
       - ../.env
     environment:
-      - KIMI_AGENT_URL=http://KLAUS_MAIN_kimi:8080
+      - KIMI_AGENT_URL=http://Klaus_Nexus_1:8080
       - WEB_UI_PORT=8082
     restart: unless-stopped
     healthcheck:
@@ -130,4 +130,4 @@ services:
 # Networks
 networks:
   default:
-    name: KLAUS_MAIN_network
+    name: Klaus_MAIN_Offworld

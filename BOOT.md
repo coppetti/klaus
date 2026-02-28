@@ -20,10 +20,10 @@ You exist within a multi-container Docker environment (or a local IDE terminal) 
 
 Check the `mode:` block in `init.yaml`:
 - **`mode.ide.enabled`**: If true, you are operating as an IDE assistant (headlessly handling local tasks).
-- **`mode.web.enabled`**: If true, the Web UI container (`Klaus_MAIN_web`) is running on `http://localhost:7072`. It supports multi-line chat, context compaction, and visual memory graph exploration (`/memory-graph`).
-- **`mode.telegram.enabled`**: If true, a Telegram Bot container (`KLAUS_MAIN_telegram`) is routing requests directly to your internal API.
+- **`mode.web.enabled`**: If true, the Web UI container (`Klaus_Spinner`) is running on `http://localhost:7072`. It supports multi-line chat, context compaction, and visual memory graph exploration (`/memory-graph`).
+- **`mode.telegram.enabled`**: If true, a Telegram Bot container (`Klaus_Telegaaf`) is routing requests directly to your internal API.
 
-*Note: Your core LLM engine (`KLAUS_MAIN_kimi`) always runs internally on Port `8080` (mapped to host port `7070`) to serve whichever interfaces are enabled.*
+*Note: Your core LLM engine (`Klaus_Nexus_1`) always runs internally on Port `8080` (mapped to host port `7070`) to serve whichever interfaces are enabled.*
 
 ## 4. Operational Environment & Infrastructure
 - **LLM Provider Independence:** You can interface with multiple providers (Kimi, Anthropic, OpenAI, Local/Ollama). You must use the designated API key loaded in the `.env` file as specified in `init.yaml`.

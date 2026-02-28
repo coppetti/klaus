@@ -9121,23 +9121,23 @@ async def launch_telegram_bot():
 # Restart Telegram Container API
 @app.post("/api/settings/telegram/restart")
 async def restart_telegram_container():
-    """Restart ONLY the KLAUS_MAIN_telegram Docker container via socket."""
+    """Restart ONLY the Klaus_Telegaaf Docker container via socket."""
     try:
         import docker as docker_sdk
         client = docker_sdk.from_env()
-        container = client.containers.get("KLAUS_MAIN_telegram")
+        container = client.containers.get("Klaus_Telegaaf")
         container.restart(timeout=10)
         return {"status": "ok", "message": "Telegram bot restarted successfully"}
     except Exception as e:
         if "404" in str(e) or "No such container" in str(e):
-            return {"status": "error", "error": "Container Klaus_MAIN_telegram not found. Create it first: docker compose --profile telegram up -d telegram-bot"}
+            return {"status": "error", "error": "Container Klaus_Telegaaf not found. Create it first: docker compose --profile telegram up -d telegram-bot"}
         return {"status": "error", "error": str(e)}
 
 
 # Stop Telegram Container API
 @app.post("/api/settings/telegram/stop")
 async def stop_telegram_container():
-    """Disable Telegram in init.yaml and stop the KLAUS_MAIN_telegram container."""
+    """Disable Telegram in init.yaml and stop the Klaus_Telegaaf container."""
     try:
         # Update init.yaml: set telegram enabled = false
         init_path = Path("init.yaml")
@@ -9169,7 +9169,7 @@ async def stop_telegram_container():
         import docker as docker_sdk
         client = docker_sdk.from_env()
         try:
-            container = client.containers.get("KLAUS_MAIN_telegram")
+            container = client.containers.get("Klaus_Telegaaf")
             container.stop(timeout=10)
         except Exception:
             pass  # Container may already be stopped
