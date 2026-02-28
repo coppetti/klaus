@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile
     container_name: KLAUS_MAIN_kimi
     ports:
-      - "2019:8080"
+      - "12019:8080"
     volumes:
       # Sync memory with host
       - ../workspace/memory:/app/memory:rw
@@ -90,7 +90,7 @@ services:
       dockerfile: Dockerfile
     container_name: KLAUS_MAIN_web
     ports:
-      - "2049:8082"
+      - "12049:8082"
     volumes:
       # Mount workspace for data persistence (sessions, settings)
       - ../workspace:/app/workspace:rw
@@ -99,6 +99,8 @@ services:
       - ../core:/app/core:ro
       # Mount templates for agent selection
       - ../templates:/app/templates:ro
+      # Mount static files (themes.css) for live updates
+      - ./web-ui/static:/app/static:ro
     env_file:
       - ../.env
     environment:
