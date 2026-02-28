@@ -12,7 +12,7 @@ from .base import BaseProvider, Message, GenerationConfig, ProviderType
 class AnthropicProvider(BaseProvider):
     """Anthropic Claude provider."""
     
-    def __init__(self, api_key: str, model: str = "claude-3-5-sonnet-20241022", config: Dict = None):
+    def __init__(self, api_key: str, model: str = "claude-sonnet-4-6", config: Dict = None):
         super().__init__(api_key, model, config)
         self.provider_type = ProviderType.ANTHROPIC
         self.base_url = "https://api.anthropic.com/v1"
@@ -66,6 +66,7 @@ class AnthropicProvider(BaseProvider):
                 json=payload,
                 timeout=120.0
             ) as response:
+                response.raise_for_status()
                 async for line in response.aiter_lines():
                     if line.startswith("data: "):
                         data = line[6:]
@@ -103,17 +104,17 @@ class AnthropicProvider(BaseProvider):
     def get_model_info(self) -> Dict[str, Any]:
         """Get model information."""
         models = {
-            "claude-3-opus-20240229": {
+            "claude-haiku-4-5-20251001": {
                 "max_tokens": 200000,
-                "description": "Most powerful Claude model"
+                "description": "Fastest Claude model (Haiku 4.5)"
             },
-            "claude-3-5-sonnet-20241022": {
+            "claude-sonnet-4-6": {
                 "max_tokens": 200000,
-                "description": "Balanced performance and speed"
+                "description": "Balanced performance and speed (Sonnet 4.6)"
             },
-            "claude-3-haiku-20240307": {
+            "claude-opus-4-6": {
                 "max_tokens": 200000,
-                "description": "Fastest Claude model"
-            }
+                "description": "Most powerful Claude model (Opus 4.6)"
+            },
         }
         return models.get(self.model, {"max_tokens": 200000})
