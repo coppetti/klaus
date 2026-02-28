@@ -12,7 +12,7 @@ from .base import BaseProvider, Message, GenerationConfig, ProviderType
 class GeminiProvider(BaseProvider):
     """Google Gemini provider."""
     
-    def __init__(self, api_key: str, model: str = "gemini-1.5-pro", config: Dict = None):
+    def __init__(self, api_key: str, model: str = "gemini-2.5-flash", config: Dict = None):
         super().__init__(api_key, model, config)
         self.provider_type = ProviderType.GEMINI
         self.base_url = "https://generativelanguage.googleapis.com/v1beta"
@@ -109,15 +109,30 @@ class GeminiProvider(BaseProvider):
         return len(text) // 4
     
     def get_model_info(self) -> Dict[str, Any]:
-        """Get model information."""
+        """Get model information.
+
+        To add new models in the future: add entry to the dict below.
+        Reference: https://ai.google.dev/gemini-api/docs/models
+        Last updated: 2026-02-28
+        """
         models = {
-            "gemini-1.5-pro": {
-                "max_tokens": 2000000,
+            # Gemini 2.5 (latest, as of 2026-02)
+            "gemini-2.5-flash": {
+                "max_tokens": 1048576,
+                "description": "Fast and capable, recommended default"
+            },
+            "gemini-2.5-pro": {
+                "max_tokens": 2097152,
                 "description": "Most capable Gemini model"
             },
-            "gemini-1.5-flash": {
-                "max_tokens": 1000000,
-                "description": "Fast Gemini model"
-            }
+            # Gemini 2.0
+            "gemini-2.0-flash": {
+                "max_tokens": 1048576,
+                "description": "Fast multimodal model"
+            },
+            "gemini-2.0-flash-lite": {
+                "max_tokens": 1048576,
+                "description": "Lightweight, lowest latency"
+            },
         }
-        return models.get(self.model, {"max_tokens": 2000000})
+        return models.get(self.model, {"max_tokens": 1048576})

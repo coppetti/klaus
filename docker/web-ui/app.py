@@ -5231,6 +5231,19 @@ def load_settings() -> Settings:
                 # Also fallback for LLM provider if missing
                 if not s.provider and config.get("provider", {}).get("name"):
                     s.provider = config["provider"]["name"]
+
+                # Fallback for ngrok
+                ng = config.get("mode", {}).get("ngrok", {})
+                if not s.ngrok_authtoken:
+                    s.ngrok_authtoken = ng.get("authtoken", "")
+                if not s.ngrok_domain:
+                    s.ngrok_domain = ng.get("domain", "")
+                if not s.ngrok_oauth_provider:
+                    s.ngrok_oauth_provider = ng.get("oauth_provider", "")
+                if not s.ngrok_oauth_allow_emails:
+                    s.ngrok_oauth_allow_emails = ng.get("oauth_allow_emails", "")
+                if not s.ngrok_enabled and ng.get("enabled"):
+                    s.ngrok_enabled = True
                 break
     except Exception as e:
         print(f"Note: Could not fallback to init.yaml: {e}")
@@ -5269,6 +5282,18 @@ def update_init_yaml_settings(settings: Settings):
                     config["mode"]["telegram"]["allowed_chat_ids"] = settings.telegram_chat_ids
                     config["mode"]["telegram"]["user_id"] = settings.telegram_chat_ids[0] if settings.telegram_chat_ids else "" # For compatibility
                 
+                # Update Ngrok
+                if "ngrok" not in config["mode"]: config["mode"]["ngrok"] = {}
+                config["mode"]["ngrok"]["enabled"] = settings.ngrok_enabled
+                if settings.ngrok_authtoken:
+                    config["mode"]["ngrok"]["authtoken"] = settings.ngrok_authtoken
+                if settings.ngrok_domain:
+                    config["mode"]["ngrok"]["domain"] = settings.ngrok_domain
+                if settings.ngrok_oauth_provider:
+                    config["mode"]["ngrok"]["oauth_provider"] = settings.ngrok_oauth_provider
+                if settings.ngrok_oauth_allow_emails:
+                    config["mode"]["ngrok"]["oauth_allow_emails"] = settings.ngrok_oauth_allow_emails
+
                 # Save back — use custom dumper to quote strings with ':' (e.g. Telegram token)
                 class _SafeTokenDumper(yaml.SafeDumper):
                     pass

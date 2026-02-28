@@ -14,7 +14,7 @@ duckduckgo-search>=3.9.0  # Web search without API key
 
 # LLM Provider SDKs (required for multi-provider support)
 anthropic>=0.8.0  # Anthropic SDK (used by Kimi provider)
-google-generativeai>=0.8.0  # Google Gemini SDK
+google-genai>=1.0.0  # Google Gemini SDK (new, GA since May 2025)
 
 # Hybrid Memory (optional but recommended)
 kuzu>=0.4.0                    # Graph database for semantic relationships
