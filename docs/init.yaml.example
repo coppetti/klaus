@@ -1,20 +1,17 @@
-# IDE Agent Wizard - Configuration Example
-# =========================================
-# Copy this file to init.yaml and fill in your values
-# DO NOT commit init.yaml to git (it's in .gitignore)
-# 
-# Setup modes:
-#   - IDE Only: Web UI and Telegram disabled
-#   - WEB Only: web.enabled=true, others may vary
-#   - IDE + WEB: Both IDE and Web UI enabled
-#   - Full: IDE + Web UI + Telegram (configure Telegram via Web UI)
+# Klaus — Configuration Example
+# =============================
+# Copy this file to init.yaml in the project root.
+# DO NOT commit init.yaml to git — it contains API keys.
+#
+# The setup wizard (./setup.sh) generates this automatically.
+# Edit manually only if you know what you're doing.
 
 agent:
-  name: "Your Agent Name"
-  template: "general"  # Options: general, architect, developer, finance, legal, marketing, ui
+  name: "Klaus"
+  template: "general"  # general, architect, developer, finance, legal, marketing, ui
   personality:
-    tone: "professional"  # professional, casual, enthusiastic, direct
-    style: "balanced"     # balanced, brief, detailed
+    tone: "professional"
+    style: "balanced"
     language: "en"
 
 user:
@@ -25,37 +22,39 @@ user:
     communication: "concise"  # concise, detailed, bullet_points
     code_style: "clean"
 
+defaults:
+  provider: "anthropic"  # kimi, anthropic, openai, google, openrouter, custom
+  model: "claude-sonnet-4-6"
+
 mode:
-  primary: "ide"  # Options: ide, hybrid
+  primary: "hybrid"  # ide, hybrid
   ide:
+    enabled: true
+  web:
     enabled: true
   telegram:
     enabled: false
-    # NOTE: Bot token and Chat ID are configured via Web UI (Settings → Telegram Bot)
-    # Or set via environment variables: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_IDS
-  web:
-    enabled: false  # Set to true for Web UI mode
-    port: 8082
+    # Configure via Web UI → Settings → Telegram Bot
+    # Or set env vars: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_IDS
+  # ngrok:
+  #   auth_token: ""
+  #   domain: ""
 
 provider:
-  name: "kimi"  # kimi, anthropic, openai, google, openrouter, custom
-  api_key: ""   # Set via environment variable in .env file
-  model:
-    kimi: "moonshot-v1-8k"
+  api_key: ""  # Or use .env file (recommended)
   parameters:
     temperature: 0.7
     max_tokens: 4096
-    top_p: 0.9
 
 memory:
   enabled: true
-  backend: "hybrid"  # sqlite, hybrid (sqlite + graph)
+  backend: "hybrid"
   sqlite:
     path: "./workspace/memory/agent_memory.db"
 
-# Workspace folders (auto-created):
-# - workspace/SOUL.md       : Agent identity and personality
-# - workspace/USER.md       : Your profile and preferences  
-# - workspace/memory/       : SQLite database + Kuzu Graph for persistent memory
-# - workspace/projects/     : Your projects (accessible in IDE and Web UI)
-# - workspace/uploads/      : File uploads (via Web UI)
+# Workspace (auto-created by setup):
+# - workspace/SOUL.md       → Agent identity
+# - workspace/USER.md       → User profile
+# - workspace/memory/       → SQLite + cognitive graph
+# - workspace/projects/     → User projects
+# - workspace/uploads/      → File uploads (Web UI)

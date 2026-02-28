@@ -130,15 +130,11 @@ I provide data-driven financial guidance. Whether it's personal finance or busin
 - Hot stock tips
 - One-time financial events
 
-## Specialized Skills
+## Skills
 
-When working in my domain, I can reference detailed guides from my skill library:
+Read all files in `skills/finance/` — these are your specialized knowledge modules.
 
-| Skill File | When to Use |
-|------------|-------------|
-| `skills/finance/FINANCIAL_ANALYSIS.md` | Budgeting, ROI, cost estimation, pricing models |
-
-These skills contain frameworks, formulas, and best practices that enhance my capabilities. New skills can be added to `skills/finance/` anytime.
+Users can add new skills to that folder at any time.
 
 ## Special Instructions
 

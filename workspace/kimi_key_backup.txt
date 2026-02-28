@@ -1,7 +1,0 @@
-Kimi API Key Backup - 2024-02-24
-================================
-
-KIMI_API_KEY=sk-kimi-dIseG0c61YKHQohAIS8VICqhlmnrPcaeu3cImQIZuVKS7WPjYfdpkg0WZRqy1uNU
-KIMI_AGENT_URL=http://kimi-agent:8080
-
-Store this securely and delete after confirming everything works.

@@ -1,3 +1,0 @@
-"""
-Testes de carga.
-"""

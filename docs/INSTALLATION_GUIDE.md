@@ -1,406 +1,132 @@
 # Installation Guide
 
-Complete installation guide for Klaus on all platforms.
-
-## Table of Contents
-
-- [System Requirements](#system-requirements)
-- [Quick Install (Recommended)](#quick-install-recommended)
-- [Platform-Specific Guides](#platform-specific-guides)
-  - [macOS](#macos)
-  - [Linux](#linux)
-  - [Windows](#windows)
-- [Manual Installation](#manual-installation)
-- [Post-Installation](#post-installation)
-- [Troubleshooting](#troubleshooting)
-
 ---
 
-## System Requirements
-
-### Minimum Requirements
+## Requirements
 
 | Component | Requirement |
 |-----------|-------------|
-| **OS** | macOS 11+, Ubuntu 20.04+, Windows 10+ |
-| **RAM** | 4 GB (8 GB recommended) |
-| **Disk** | 5 GB free space |
+| **Python** | 3.11+ |
 | **Docker** | 20.10+ with Docker Compose |
-| **Network** | Internet connection for API calls |
-
-### Required Software
-
-Before installing Klaus, ensure you have:
-
-1. **Docker Desktop** (macOS/Windows) or **Docker Engine** (Linux)
-   - [Download Docker](https://docs.docker.com/get-docker/)
-
-2. **API Key** from at least one provider:
-   - [Kimi](https://platform.moonshot.cn) (Recommended)
-   - [Anthropic](https://console.anthropic.com)
-   - [OpenAI](https://platform.openai.com)
+| **OS** | macOS 11+, Ubuntu 20.04+, Windows 10+ (WSL2) |
+| **API Key** | At least one LLM provider |
 
 ---
 
-## Quick Install (Recommended)
-
-### Option 1: GUI Installer (Interactive)
+## Install
 
 ```bash
-# Download the installer
-git clone https://github.com/yourusername/klaus.git
+git clone https://github.com/coppetti/klaus.git
 cd klaus
-
-# Run GUI installer
-python installer/install_gui.py
-```
-
-### Option 2: CLI Installer (Automated)
-
-```bash
-# Download and install with one command
-curl -fsSL https://raw.githubusercontent.com/yourusername/klaus/main/install.sh | bash
-
-# Or with specific options
-python installer/install_cli.py --kimi-key YOUR_KEY --yes
-```
-
----
-
-## Platform-Specific Guides
-
-### macOS
-
-#### Prerequisites
-
-```bash
-# Install Homebrew (if not installed)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install Docker Desktop
-brew install --cask docker
-
-# Or download from: https://docs.docker.com/desktop/install/mac-install/
-```
-
-#### Installation
-
-**Method 1: Using GUI Installer**
-
-```bash
-git clone https://github.com/yourusername/klaus.git
-cd klaus
-python3 installer/install_gui.py
-```
-
-**Method 2: Using CLI**
-
-```bash
-git clone https://github.com/yourusername/klaus.git
-cd klaus
-python3 installer/install_cli.py
-```
-
-**Method 3: Manual Installation**
-
-```bash
-# 1. Clone repository
-git clone https://github.com/yourusername/klaus.git ~/Klaus
-cd ~/Klaus
-
-# 2. Configure environment
-cp .env.example .env
-# Edit .env with your API keys
-
-# 3. Run setup
 ./setup.sh
-
-# 4. Start Klaus
-./scripts/start-services.sh
 ```
 
-#### Access Klaus
+The setup wizard will:
+1. Check dependencies (Python, Docker)
+2. Ask for your LLM provider and API key
+3. Create agent identity (`workspace/SOUL.md`)
+4. Build and start containers
 
-- Web UI: http://localhost:7072
-- API: http://localhost:7070
+After setup, open `http://localhost:12049`.
 
 ---
 
-### Linux (Ubuntu/Debian)
+## Ports
 
-#### Prerequisites
+| Service | Port |
+|---------|------|
+| Agent (Klaus_Nexus_1) | 12019 |
+| Web UI (Klaus_Spinner) | 12049 |
 
-```bash
-# Update system
-sudo apt-get update
+---
 
-# Install Docker
-sudo apt-get install -y docker.io docker-compose-plugin
+## Providers
 
-# Add user to docker group
-sudo usermod -aG docker $USER
-newgrp docker
+You need at least one API key:
 
-# Verify installation
-docker compose version
-```
+| Provider | Get your key |
+|----------|-------------|
+| Anthropic | [console.anthropic.com](https://console.anthropic.com) |
+| OpenAI | [platform.openai.com](https://platform.openai.com) |
+| Google | [aistudio.google.com](https://aistudio.google.com) |
+| Kimi | [platform.moonshot.cn](https://platform.moonshot.cn) |
+| OpenRouter | [openrouter.ai](https://openrouter.ai) |
+| Ollama | Local — no key needed |
 
-#### Installation
+Switch providers anytime in Settings.
 
-**Method 1: One-Line Install**
+---
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/yourusername/klaus/main/install.sh | bash
-```
-
-**Method 2: Manual Install**
-
-```bash
-# Clone repository
-git clone https://github.com/yourusername/klaus.git ~/Klaus
-cd ~/Klaus
-
-# Setup
-./setup.sh
-
-# Start
-./start.sh
-```
-
-#### Systemd Service (Optional)
+## Commands
 
 ```bash
-# Create systemd service
-sudo cp scripts/klaus.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable klaus
-sudo systemctl start klaus
-
-# Check status
-sudo systemctl status klaus
+./setup.sh                        # Install
+./reset.sh                        # Factory reset (erases everything)
+bash scripts/start-services.sh    # Start
+bash scripts/stop-services.sh     # Stop
 ```
 
 ---
 
-### Windows
+## Telegram (optional)
 
-#### Prerequisites
-
-1. Install **Docker Desktop for Windows**
-   - Download: https://docs.docker.com/desktop/install/windows-install/
-   - Enable WSL 2 backend during installation
-
-2. Install **Python 3.11+**
-   - Download: https://www.python.org/downloads/windows/
-   - Check "Add Python to PATH" during installation
-
-3. Install **Git for Windows**
-   - Download: https://git-scm.com/download/win
-
-#### Installation
-
-**Using PowerShell (Administrator)**
-
-```powershell
-# Clone repository
-git clone https://github.com/yourusername/klaus.git C:\Klaus
-cd C:\Klaus
-
-# Run installer
-python installer\install_gui.py
-```
-
-**Manual Installation**
-
-```powershell
-# 1. Clone
-git clone https://github.com/yourusername/klaus.git C:\Klaus
-cd C:\Klaus
-
-# 2. Configure
-copy .env.example .env
-# Edit .env with Notepad or VS Code
-
-# 3. Start
-.\start.bat
-```
-
-#### Windows-Specific Notes
-
-- Use PowerShell or Command Prompt as Administrator
-- If Docker Desktop shows WSL 2 error, follow: https://docs.microsoft.com/windows/wsl/install
-- Windows Firewall may prompt - allow Docker and Python
+After setup:
+1. Open `http://localhost:12049` → Settings → Telegram Bot
+2. Enter bot token (from [@BotFather](https://t.me/botfather))
+3. Enter chat ID
+4. Save and start
 
 ---
 
-## Manual Installation
-
-If you prefer full control over the installation:
-
-### Step 1: Get the Code
+## Verify
 
 ```bash
-git clone https://github.com/yourusername/klaus.git
-cd klaus
-```
+# Check containers
+docker ps | grep Klaus
 
-### Step 2: Configure Environment
-
-```bash
-# Copy example configuration
-cp .env.example .env
-
-# Edit .env with your favorite editor
-nano .env        # Linux/macOS
-notepad .env     # Windows
-```
-
-**Minimum required in `.env`:**
-```bash
-KIMI_API_KEY=sk-your-key-here
-```
-
-### Step 3: Build Containers
-
-```bash
-docker compose -f docker/docker-compose.yml build
-```
-
-### Step 4: Initialize
-
-```bash
-# Initialize workspace and memory databases
-python scripts/initialize.py
-```
-
-### Step 5: Start Services
-
-```bash
-docker compose -f docker/docker-compose.yml up -d
-```
-
----
-
-## Post-Installation
-
-### Verify Installation
-
-```bash
-# Check container status
-docker compose ps
-
-# Check health
-curl http://localhost:7072/health
-
-# View logs
-docker compose logs -f web-ui
-```
-
-### First-Time Setup
-
-1. Open http://localhost:7072
-2. Create your first session
-3. Configure Telegram Bot (optional):
-   - Go to Settings → Telegram
-   - Add your bot token
-   - Configure allowed chat IDs
-
-### Update Klaus
-
-```bash
-# Pull latest changes
-git pull origin main
-
-# Rebuild containers
-docker compose -f docker/docker-compose.yml up -d --build
+# Expected:
+# Klaus_Nexus_1    ... 0.0.0.0:12019->8080/tcp
+# Klaus_Spinner    ... 0.0.0.0:12049->8082/tcp
 ```
 
 ---
 
 ## Troubleshooting
 
-### Common Issues
-
-#### Port Already in Use
-
+**Port in use:**
 ```bash
-# Check what's using port 7072
-lsof -i :7072      # macOS/Linux
-netstat -ano | findstr :7072  # Windows
-
-# Change ports in .env
-WEB_UI_PORT=8082
-KIMI_AGENT_PORT=8080
+lsof -i :12049    # macOS/Linux
+# Kill the process or change ports
 ```
 
-#### Permission Denied (Linux/macOS)
-
+**Docker not running:**
 ```bash
-# Fix script permissions
-chmod +x setup.sh start.sh scripts/*.sh
-
-# Fix Docker permissions
-sudo usermod -aG docker $USER
-# Log out and back in
+open -a Docker    # macOS
+sudo systemctl start docker    # Linux
 ```
 
-#### Docker Not Running
-
+**Permission denied:**
 ```bash
-# macOS
-open -a Docker
-
-# Linux
-sudo systemctl start docker
-
-# Windows
-# Start Docker Desktop from Start Menu
+chmod +x setup.sh reset.sh scripts/*.sh
 ```
 
-#### Memory/Performance Issues
+**API key error (401):**
+Check Settings → Provider in the Web UI. Make sure your key is valid and the correct provider is selected.
 
+**Factory reset:**
 ```bash
-# Check Docker resource allocation
-# Docker Desktop → Settings → Resources
-
-# Recommended minimums:
-# - CPUs: 2
-# - Memory: 4 GB
-# - Swap: 1 GB
+./reset.sh
 ```
-
-### Getting Help
-
-If you encounter issues:
-
-1. Check logs: `docker compose logs`
-2. Run diagnostics: `./scripts/health_check.sh`
-3. Create an issue: https://github.com/yourusername/klaus/issues
+This erases all data, memory, and configuration. Start fresh with `./setup.sh`.
 
 ---
 
-## Uninstallation
-
-To completely remove Klaus:
+## Uninstall
 
 ```bash
-# Stop services
-docker compose down
-
-# Remove containers and volumes
-docker compose down -v
-
-# Remove installation directory
-rm -rf ~/Klaus    # Linux/macOS
-rmdir /s /q C:\Klaus  # Windows
+bash scripts/stop-services.sh
+docker rmi klaus-kimi-agent klaus-web-ui klaus-telegram-bot 2>/dev/null
+cd .. && rm -rf klaus
 ```
 
-**Note:** This will delete all conversations and memory data. Back up `workspace/` first if needed.
-
----
-
-## Next Steps
-
-- Read the [Quick Start Guide](QUICKSTART.md)
-- Learn about [Memory Architecture](MEMORY_ARCHITECTURE.md)
-- Configure [Telegram Bot](TELEGRAM_SETUP.md)
+Back up `workspace/` first if you want to keep your data.
