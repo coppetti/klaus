@@ -55,6 +55,8 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     container_name: KLAUS_MAIN_telegram
+    profiles:
+      - telegram
 
     volumes:
       # Mount workspace for file access

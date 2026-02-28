@@ -1238,7 +1238,7 @@ async def get_chat_page():
                             <label class="text-xs text-gray-500 block mb-1">Model</label>
                             <select id="settings-model" class="w-full text-sm border border-gray-200 rounded px-2 py-1.5">
                                 <option value="kimi-k2-0711" selected>Kimi K2 (Default)</option>
-                                <option value="kimi-k1-5">Kimi K1.5</option>
+                                <option value="kimi-latest">Kimi Latest</option>
                             </select>
                         </div>
                         
@@ -2993,7 +2993,7 @@ async def get_chat_page():
         const settingsProviderModels = {{
             kimi: [
                 {{value: 'kimi-k2-0711', label: 'Kimi K2 (Default)'}},
-                {{value: 'kimi-k1-5', label: 'Kimi K1.5'}},
+                {{value: 'kimi-latest', label: 'Kimi Latest'}},
             ],
             anthropic: [
                 {{value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku (Available)'}},
@@ -3188,8 +3188,9 @@ async def get_chat_page():
             const btn = document.querySelector('button[onclick="saveTelegramSettings()"]');
             const token = document.getElementById('settings-telegram-token').value;
             const chatIds = document.getElementById('settings-telegram-chats').value;
-            
-            if (!token || !chatIds) {{
+            const tokenSaved = document.getElementById('settings-telegram-token').placeholder.includes('saved');
+
+            if ((!token && !tokenSaved) || !chatIds) {{
                 showToast('Please fill in both Bot Token and Chat ID', 'error');
                 return;
             }}
@@ -9126,7 +9127,7 @@ async def restart_telegram_container():
         return {"status": "ok", "message": "Telegram bot restarted successfully"}
     except Exception as e:
         if "404" in str(e) or "No such container" in str(e):
-            return {"status": "error", "error": "Container KLAUS_MAIN_telegram not found. Is the bot running?"}
+            return {"status": "error", "error": "Container Klaus_MAIN_telegram not found. Create it first: docker compose --profile telegram up -d telegram-bot"}
         return {"status": "error", "error": str(e)}
 
 
