@@ -5,32 +5,28 @@ agent:
     style: balanced
     tone: direct
   template: architect
+defaults:
+  model: gemini-2.5-flash
+  provider: google
 mode:
   ide:
     enabled: true
   primary: hybrid
   telegram:
-    token: "8552605246:AAGjWqeIsNhvRbhAiS1_hCN4z3S4uZaXDCY"
-    bot_token: "8552605246:AAGjWqeIsNhvRbhAiS1_hCN4z3S4uZaXDCY"
-    enabled: true
-    user_id: "6564821315"
     allowed_chat_ids:
-      - "6564821315"
-    webhook_url: ""
+    - '6564821315'
+    bot_token: '8552605246:AAGjWqeIsNhvRbhAiS1_hCN4z3S4uZaXDCY'
+    enabled: true
+    token: '8552605246:AAGjWqeIsNhvRbhAiS1_hCN4z3S4uZaXDCY'
+    user_id: '6564821315'
+    webhook_url: ''
 provider:
-  api_key: ""
-  model:
-    kimi: kimi-k2-5
+  api_key: sk-kimi-xM2j0W6GFp6lmuPfCaVC5Blql4lSyixXgbOGEshM2GdhexHRNOZQ3gqOUVCXVcj2
   name: kimi
   parameters:
     max_tokens: 4096
     temperature: 0.7
     top_p: 0.9
-
-# Unified defaults for all interfaces
-defaults:
-  provider: "kimi"
-  model: "kimi-k2-0711"
 user:
   experience_level: expert
   name: Matheus

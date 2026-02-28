@@ -17,9 +17,13 @@ services:
     ports:
       - "12019:8080"
     volumes:
+      # Mount init.yaml so llm_router reads live config (provider/model changes)
+      - ../init.yaml:/app/init.yaml:ro
       # Sync memory with host
       - ../workspace/memory:/app/memory:rw
       - ../workspace:/app/workspace:ro
+      # Mount app.py so changes reflect on restart (no rebuild needed)
+      - ./kimi-agent-patch/app.py:/app/kimi-agent/app.py:ro
       # Mount core modules for shared logic
       - ../core:/app/core:ro
       # Mount projects folder (read-write for IDE access)
